@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Linkedin, Mail, Laptop, GraduationCap, BookOpen, FileText, Link as LinkIcon } from 'lucide-react'
+import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 
@@ -40,12 +40,8 @@ const subjects = [
   { id: 9, name: "אינפי 1", driveLink: "https://drive.google.com/drive/folders/1ViNjQEhT571efRNEpvS51xH0FZz8ABJa?usp=drive_link" },
 ]
 
-const tutors = [
-  { name: "אורי גבע", subjects: ["מבוא למערכות מחשב"], contact: "0542244171", link: "https://api.whatsapp.com/send?phone=972542244171" },
-]
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const filteredSubjects = subjects.filter(subject => subject.name.includes(searchTerm));
 
   return (
