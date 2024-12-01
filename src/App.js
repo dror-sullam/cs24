@@ -133,10 +133,11 @@ const App = () => {
         {/* Missing Tests Banner */}
         <Card className="mb-8 bg-blue-50 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-3xl flex items-center gap-2 justify-center text-blue-950">
-              <FileText className="h-8 w-8 text-blue-600" />
-              חוסרים
-            </CardTitle>
+          <CardTitle className="text-3xl flex items-center gap-2 justify-center text-blue-950">
+            <FileText className="h-8 w-8 text-blue-600" aria-hidden="true" />
+            <span>חוסרים</span>
+          </CardTitle>
+
             <CardDescription className="text-center text-lg text-blue-800">
               יש לך מבחנים שאינם נמצאים במאגר? נשמח שתשלח לנו אותם
             </CardDescription>
