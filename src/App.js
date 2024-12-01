@@ -42,7 +42,6 @@ const subjects = [
 
 
 const App = () => {
-  const filteredSubjects = subjects.filter(subject => subject.name.includes(searchTerm));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
