@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
@@ -108,7 +107,7 @@ const App = () => {
         {/* Courses Grid */}
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mb-4">
 
-          {filteredSubjects.map((subject) => (
+          {subjects.map((subject) => (
             <Card key={subject.id} className="bg-white hover:bg-blue-50 transition-all duration-300 border-blue-200">
               <div className="p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
