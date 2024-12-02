@@ -22,6 +22,11 @@ const helpfulLinks = [
     title: "הדרייב של ליז",
     description: "מומלץ להעזר בה, המון המון שיטות וחומרים",
     url: "https://drive.google.com/drive/folders/1amxc9ZpT5xzNFdFeYSndfhn32GlebnvG"
+  },
+  {
+    title: "הדרייב של אלעד עטייא",
+    description: "למי שרוצה לעשות ארגזים בהייטקס",
+    url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
   }
 ]
 
