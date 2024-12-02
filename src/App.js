@@ -10,7 +10,7 @@ const helpfulLinks = [
   },
   {
     title: "cs20",
-    description: "דרייב מיושן יותר של מבחנים",
+    description: "דרייב ישן יותר של מבחנים",
     url: "https://drive.google.com/drive/u/1/folders/1Mmh1MW_zwNyqhNDB1gtkeklA4w_kHV5V"
   },
   {
