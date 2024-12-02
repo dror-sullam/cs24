@@ -1,4 +1,4 @@
-import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon } from 'lucide-react'
+import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon, GraduationCap } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 
@@ -27,7 +27,21 @@ const helpfulLinks = [
     title: "הדרייב של אלעד עטייא",
     description: "למי שרוצה לעשות ארגזים בהייטקס",
     url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
+  },
+  {
+  title: "הדרייב של דוד עזרן",
+  description: "דרייב עם קורסים של שנה ב בלבד",
+  url: "https://drive.google.com/drive/folders/1qvJJWikw7Z9DN1dwkV2I94daLqudayU5?usp=drive_link"
   }
+]
+
+const tutors = [
+  
+    {name: "דוד עזרן ", subjects: ["תכנות מונחה עצמים", "סדנה מתקדמת בתכנות", "מבני נתונים", "מבוא למדעי המחשב"] , contact: "0508121999"},
+    {name: "עידן מרמור" , subjects: ["1 אלגוריתמים", "מבני נתונים", "מבוא למדעי המחשב", "2 אלגוריתמים"] , contact:"0537204416"},
+    {name: "אורי גבע" , subjects: ["מבוא למערכות מחשב"], contact: "0542244171"}
+
+  
 ]
 
 
@@ -75,65 +89,106 @@ const App = () => {
           </div>
         </Card>
 
-        {/* Links Section */}
-        <Card className="mb-4 bg-white border-blue-200">
-          <div className="p-6 bg-blue-100">
-            <div className="flex items-center gap-2 mb-4">
-              <LinkIcon className="h-6 w-6 text-blue-600" />
-              <h2 className="text-2xl font-semibold text-blue-950">קישורים שיכולים לעזור</h2>
-            </div>
-            <div className="grid gap-3">
-              {helpfulLinks.map((link, index) => (
-                <Card key={index} className="bg-white hover:bg-blue-50 transition-all duration-300 border-blue-200">
-                  <div className="p-4 flex justify-between items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="bg-blue-100 p-1.5 rounded-md">
-                        <LinkIcon className="h-5 w-5 text-blue-800 shrink-0" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-blue-900">{link.title}</h3>
-                        <p className="text-sm text-blue-700" dir="rtl">{link.description}</p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="shrink-0 bg-blue-800 hover:bg-blue-700 text-white"
-                      onClick={() => window.open(link.url, '_blank')}
-                    >
-                      פתח
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+        
+       
+       {/* Links Section */}
+<Card className="mb-4 bg-white border-blue-200">
+  <div className="p-6 bg-blue-100">
+    <div className="flex items-center gap-2 mb-4">
+      <LinkIcon className="h-6 w-6 text-blue-600" />
+      <h2 className="text-2xl font-semibold text-blue-950">קישורים שיכולים לעזור</h2>
+    </div>
+    <div className="grid gap-3">
+      {helpfulLinks.map((link, index) => (
+        <a
+          key={index}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block bg-white hover:bg-blue-50 transition-all duration-300 border-blue-200 rounded-lg p-4 shadow-md hover:shadow-lg"
+        >
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="bg-blue-100 p-1.5 rounded-md">
+                <LinkIcon className="h-5 w-5 text-blue-800 shrink-0" />
+              </div>
+              <div>
+                <h3 className="font-medium text-blue-900">{link.title}</h3>
+                <p className="text-sm text-blue-700" dir="rtl">{link.description}</p>
+              </div>
             </div>
           </div>
-        </Card>
+        </a>
+      ))}
+    </div>
+  </div>
+</Card>
+
 
         {/* Courses Grid */}
-        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mb-4">
-
-          {subjects.map((subject) => (
-            <Card key={subject.id} className="bg-white hover:bg-blue-50 transition-all duration-300 border-blue-200">
-              <div className="p-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-1.5 rounded-md">
-                    <BookOpen className="h-5 w-5 text-blue-800 shrink-0" />
-                  </div>
-                  <h3 className="text-lg font-medium text-blue-900">{subject.name}</h3>
-                </div>
-                <Button
-                  size="sm"
-                  className="shrink-0 bg-blue-800 hover:bg-blue-700 text-white"
-                  onClick={() => window.open(subject.driveLink, '_blank')}
-                >
-                  פתח
-                </Button>
-              </div>
-            </Card>
-          ))}
+<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mb-4">
+  {subjects.map((subject) => (
+    <a
+      key={subject.id}
+      href={subject.driveLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block bg-white hover:bg-blue-50 transition-all duration-300 border border-blue-200 rounded-lg shadow-md hover:shadow-lg"
+    >
+      <div className="p-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="bg-blue-100 p-1.5 rounded-md">
+            <BookOpen className="h-5 w-5 text-blue-800 shrink-0" />
+          </div>
+          <h3 className="text-lg font-medium text-blue-900">{subject.name}</h3>
         </div>
+      </div>
+    </a>
+  ))}
+</div>
+
 
    
+
+           {/* Tutors Section */}
+        <Card className="mb-8 bg-white border-sky-200">
+          <CardHeader>
+            <CardTitle className="text-3xl flex items-center gap-2 text-sky-950">
+              <GraduationCap className="h-8 w-8 text-sky-600" />
+              מורים פרטיים מומלצים
+            </CardTitle>
+            <CardDescription className="text-lg text-sky-700">
+            מורים פרטיים מנוסים לקורסים השונים
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {tutors.map((tutor, index) => (
+        <Card key={index} className="bg-sky-50 hover:shadow-md transition-shadow border-sky-100 flex flex-col justify-between">
+          <CardHeader className="p-4">
+            <CardTitle className="text-xl text-sky-900">{tutor.name}</CardTitle>
+            <CardDescription className="text-base text-sky-700">
+              {tutor.subjects.join(", ")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="mt-auto p-4 pt-0">
+              <Button
+                variant="outline"
+                className="w-full text-lg border-sky-300 text-sky-700 hover:bg-sky-100"
+                onClick={() => {
+                const formattedNumber = `972${tutor.contact.slice(1)}`;
+                window.open(`https://api.whatsapp.com/send?phone=${formattedNumber}`, "_blank");
+              }}>
+
+                {tutor.contact}
+              </Button>
+            </CardContent>
+          </Card>
+          ))}
+        </div>
+        </CardContent>
+      </Card>
+
 
         {/* Missing Tests Banner */}
         <Card className="mb-8 bg-blue-50 border-blue-200">
