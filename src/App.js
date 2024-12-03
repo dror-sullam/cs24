@@ -38,7 +38,7 @@ const helpfulLinks = [
 const tutors = [
   
     {name: "דוד עזרן ", subjects: ["תכנות מונחה עצמים", "סדנה מתקדמת בתכנות", "מבני נתונים", "מבוא למדעי המחשב"] , contact: "0508121999"},
-    {name: "עידן מרמור" , subjects: ["1 אלגוריתמים", "מבני נתונים", "מבוא למדעי המחשב", "2 אלגוריתמים"] , contact:"0537204416"},
+    {name: "עידן מרמור" , subjects: ["אלגוריתמים 1", "מבני נתונים", "מבוא למדעי המחשב", "אלגוריתמים 2" ] , contact:"0537204416"},
     {name: "אורי גבע" , subjects: ["מבוא למערכות מחשב"], contact: "0542244171"}
 
   
@@ -167,7 +167,7 @@ const App = () => {
         <Card key={index} className="bg-sky-50 hover:shadow-md transition-shadow border-sky-100 flex flex-col justify-between">
           <CardHeader className="p-4">
             <CardTitle className="text-xl text-sky-900">{tutor.name}</CardTitle>
-            <CardDescription className="text-base text-sky-700">
+            <CardDescription className="text-base text-sky-700" dir="rtl">
               {tutor.subjects.join(", ")}
             </CardDescription>
           </CardHeader>
