@@ -39,7 +39,9 @@ const tutors = [
   
     {name: "דוד עזרן ", subjects: ["תכנות מונחה עצמים", "סדנה מתקדמת בתכנות", "מבני נתונים", "מבוא למדעי המחשב"] , contact: "0508121999"},
     {name: "עידן מרמור" , subjects: ["אלגוריתמים 1", "מבני נתונים", "מבוא למדעי המחשב", "אלגוריתמים 2" ] , contact:"0537204416"},
-    {name: "אורי גבע" , subjects: ["מבוא למערכות מחשב"], contact: "0542244171"}
+    {name: "אורי גבע" , subjects: ["מבוא למערכות מחשב"], contact: "0542244171"},
+    {name: "טל זכריה" , subjects: ["מבוא למדעי המחשב","סדנה מתקדמת בתכנות", "אוטומטים ושפות פורמליות", "חישוביות וסיבוכיות"], contact: "0542075966"}
+
 
   
 ]
@@ -151,18 +153,18 @@ const App = () => {
    
 
            {/* Tutors Section */}
-        <Card className="mb-8 bg-white border-sky-200">
-          <CardHeader>
-            <CardTitle className="text-3xl flex items-center gap-2 text-sky-950">
-              <GraduationCap className="h-8 w-8 text-sky-600" />
-              מורים פרטיים מומלצים
-            </CardTitle>
-            <CardDescription className="text-lg text-sky-700">
-            מורים פרטיים מנוסים לקורסים השונים
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+           <Card className="mb-8 bg-white border-sky-200">
+  <CardHeader>
+    <CardTitle className="text-3xl flex items-center gap-2 text-sky-950">
+      <GraduationCap className="h-8 w-8 text-sky-600" />
+      מורים פרטיים מומלצים
+    </CardTitle>
+    <CardDescription className="text-lg text-sky-700">
+      מורים פרטיים מנוסים לקורסים השונים
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="grid gap-4 grid-cols-2">
       {tutors.map((tutor, index) => (
         <Card key={index} className="bg-sky-50 hover:shadow-md transition-shadow border-sky-100 flex flex-col justify-between">
           <CardHeader className="p-4">
@@ -172,22 +174,23 @@ const App = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="mt-auto p-4 pt-0">
-              <Button
-                variant="outline"
-                className="w-full text-lg border-sky-300 text-sky-700 hover:bg-sky-100"
-                onClick={() => {
+            <Button
+              variant="outline"
+              className="w-full text-lg border-sky-300 text-sky-700 hover:bg-sky-100"
+              onClick={() => {
                 const formattedNumber = `972${tutor.contact.slice(1)}`;
                 window.open(`https://api.whatsapp.com/send?phone=${formattedNumber}`, "_blank");
-              }}>
+              }}
+            >
+              {tutor.contact}
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </CardContent>
+</Card>
 
-                {tutor.contact}
-              </Button>
-            </CardContent>
-          </Card>
-          ))}
-        </div>
-        </CardContent>
-      </Card>
 
 
         {/* Missing Tests Banner */}
