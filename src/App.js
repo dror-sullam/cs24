@@ -164,9 +164,12 @@ const App = () => {
     </CardDescription>
   </CardHeader>
   <CardContent>
-    <div className="grid gap-4 grid-cols-2">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
       {tutors.map((tutor, index) => (
-        <Card key={index} className="bg-sky-50 hover:shadow-md transition-shadow border-sky-100 flex flex-col justify-between">
+        <Card
+          key={index}
+          className="bg-sky-50 hover:shadow-md transition-shadow border-sky-100 flex flex-col justify-between"
+        >
           <CardHeader className="p-4">
             <CardTitle className="text-xl text-sky-900">{tutor.name}</CardTitle>
             <CardDescription className="text-base text-sky-700" dir="rtl">
