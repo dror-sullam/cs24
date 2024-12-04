@@ -15,7 +15,7 @@ const helpfulLinks = [
   },
   {
     title: "חומרים בטלגרם",
-    description: "ניתן למצוא חומרים בלינק ועוד על ידי חיפוש שם המשתמש הבא בטלגרם:  @Hithelpbot",
+    description: "ניתן למצוא חומרים בלינק ועוד על ידי חיפוש שם המשתמש הבא בטלגרם:  @Hithelpbot(יוצר האתר לא קשור לניהול הטלגרם)",
     url: "https://t.me/+1afwRPetXHA0NGFk"
   },
   {
