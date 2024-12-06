@@ -13,11 +13,11 @@ const helpfulLinks = [
     description: "דרייב ישן יותר של מבחנים",
     url: "https://drive.google.com/drive/u/1/folders/1Mmh1MW_zwNyqhNDB1gtkeklA4w_kHV5V"
   },
-  {
-    title: "חומרים בטלגרם",
-    description: "ניתן למצוא חומרים בלינק ועוד על ידי חיפוש שם המשתמש הבא בטלגרם:  @Hithelpbot(יוצר האתר לא קשור לניהול הטלגרם)",
-    url: "https://t.me/+1afwRPetXHA0NGFk"
-  },
+  //{
+    //title: "חומרים בטלגרם",
+    //description: "ניתן למצוא חומרים בלינק ועוד על ידי חיפוש שם המשתמש הבא בטלגרם:  @Hithelpbot(יוצר האתר לא קשור לניהול הטלגרם)",
+    //url: "https://t.me/+1afwRPetXHA0NGFk"
+  //},
   {
     title: "הדרייב של ליז",
     description: "מומלץ להעזר בה, המון המון שיטות וחומרים",
