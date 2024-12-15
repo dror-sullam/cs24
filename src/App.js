@@ -66,12 +66,46 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <main className="container mx-auto px-4 py-8">
-        <div className="flex flex-col items-center mb-4">
-          <h1 className="text-5xl font-bold mb-4 text-center text-blue-950">CS24</h1>
-          <p className="text-xl text-blue-950 text-center">
-            ברוכים הבאים למאגר המידע המקיף ביותר שהיה במכון הטכנולוגי חולון
-          </p>
-        </div>
+      <div className="flex flex-col items-center mb-4">
+  <h1 className="text-5xl font-bold mb-4 text-center text-blue-950">CS24</h1>
+  <p className="text-xl text-blue-950 text-center">
+    ברוכים הבאים למאגר המידע המקיף ביותר שהיה במכון הטכנולוגי חולון
+  </p>
+  <div className="text-center mt-4 p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
+    <p className="text-blue-900 font-semibold mb-2">
+      מנוי שנתי לפלטפורמת דני באומן
+    </p>
+    <div className="flex justify-center space-x-4 mb-2">
+      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+        משרתי מילואים: *49₪*
+      </span>
+      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+        שאר הסטודנטים: *149₪*
+      </span>
+    </div>
+    <div className="flex flex-col items-center space-y-2">
+      <a 
+        href="https://bit.ly/hitbaumannidf" 
+        className="text-blue-700 hover:text-blue-900 underline"
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        הרשמה למשרתי מילואים
+      </a>
+      <div className="text-blue-900">
+        שאר הסטודנטים: השתמשו בקוד קופון <span className="font-bold">Hit2025</span> + 6 ספרות אחרונות של ת.ז
+        <a 
+          href="https://baumann.co.il/#choose-university" 
+          className="block text-blue-700 hover:text-blue-900 underline mt-1"
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          הרשמה לשאר הסטודנטים
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Laptop Section */}
         <Card className="bg-gradient-to-r from-blue-700 via-blue-800 to-blue-700 shadow-xl hover:shadow-2xl transition-all border-2 border-blue-600 mb-4">
