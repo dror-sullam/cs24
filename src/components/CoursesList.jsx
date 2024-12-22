@@ -15,16 +15,16 @@ const yearOneCourses = [
 
 const yearTwoCourses = [
   { id: 10, name: "רשתות תקשורת מחשבים", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
-  { id: 11, name: "מבוא למדעי הנתונים", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
-  { id: 12, name: "הסתברות", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
-  { id: 13, name: "אלגוריתמים 1", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
-  { id: 14, name: "אלגברה 2", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
-  { id: 15, name: "אינפי 2", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
-  { id: 16, name: "למידת מכונה", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
-  { id: 17, name: "הנדסת תוכנה", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
-  { id: 18, name: "מערכות בסיסי נתונים", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
-  { id: 19, name: "מערכות הפעלה", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
-  { id: 20, name: "אלגוריתמים 2", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
+  { id: 11, name: "מבוא למדעי הנתונים", driveLink: "https://drive.google.com/drive/folders/158eBODzY05k568sBR9dpMLbClGOL9ApT?usp=share_link" },
+  { id: 12, name: "הסתברות", driveLink: "https://drive.google.com/drive/folders/1Nnnun-DJtFXBgrmQtLjhAe0ymLMVfE00?usp=sharing" },
+  { id: 13, name: "אלגוריתמים 1", driveLink: "https://drive.google.com/drive/folders/17RoVASkatTiZ7zi3ndTO-2re2k7jgbWX?usp=share_link" },
+  { id: 14, name: "אלגברה 2", driveLink: "https://drive.google.com/drive/folders/18gC5jhaB0QOFBMdQTNsja2kD1re-0CV7?usp=share_link" },
+  { id: 15, name: "אינפי 2", driveLink: "https://drive.google.com/drive/folders/10r1SxcljTerC4JjeStG_WDpAa71FrNIE?usp=share_link" },
+  { id: 16, name: "למידת מכונה", driveLink: "https://drive.google.com/drive/folders/1tK0A1K4iTJAAdDdmvurhi8LT8ulFGZkn?usp=share_link" },
+  { id: 17, name: "הנדסת תוכנה", driveLink: "https://drive.google.com/drive/folders/10b0Jv8IdFOqGftwe0dtJ7K4lCrS_FRTF?usp=share_link" },
+  { id: 18, name: "מערכות בסיסי נתונים", driveLink: "https://drive.google.com/drive/folders/1af6AZiAjVhAz--66Rix01xGk5ItTDKVW?usp=share_link" },
+  { id: 19, name: "מערכות הפעלה", driveLink: "https://drive.google.com/drive/folders/1qnu2ZhfhX2wYc-mCwQCAaVFx9zvbXP9O?usp=share_link" },
+  { id: 20, name: "אלגוריתמים 2", driveLink: "https://drive.google.com/drive/folders/1ME21TQUflIfQR93COVr0BKGtHHy5hpy2?usp=share_link" },
 ];
 
 const YearSection = ({ title, courses }) => {
