@@ -50,7 +50,7 @@ const SubscriptionCard = () => {
                     <Tag className="h-4 w-4" />
                     <span>קוד קופון: </span>
                     <code className="bg-blue-100 px-2 py-1 rounded font-mono">Hit2025</code>
-                    <span>+ 6 ספרות ת.ז</span>
+                    <span>+ 6 ספרות ת.ז אחרונות</span>
                   </div>
                 </div>
               </div>
