@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link as LinkIcon, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './ui/card'
+import { Card} from './ui/card'
 
 const HelpfulLinksSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,11 +30,6 @@ const HelpfulLinksSection = () => {
       title: "הדרייב של אלעד עטייא",
       description: "למי שרוצה לעשות ארגזים בהייטקס",
       url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
-    },
-    {
-    title: "הדרייב של דוד עזרן",
-    description: "דרייב עם קורסים של שנה ב בלבד",
-    url: "https://drive.google.com/drive/folders/1qvJJWikw7Z9DN1dwkV2I94daLqudayU5?usp=drive_link"
     }
   ]
   

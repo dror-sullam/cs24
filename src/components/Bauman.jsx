@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Shield, Users, Tag } from 'lucide-react';
+import { Shield, Users, Tag } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 
 const SubscriptionCard = () => {

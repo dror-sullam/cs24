@@ -1,38 +1,11 @@
-import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon, GraduationCap, Tag, Users, Shield   } from 'lucide-react'
+import {Mail, Laptop, FileText,  GraduationCap} from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 import CourseList from './components/CoursesList'
 import HelpfulLinksSection from './components/HelpfulLinks'
 import SubscriptionCard from './components/Bauman'
 
-const helpfulLinks = [
-  { 
-    title: "דרייב האגודה",
-    description: "מערכת הקורסים של המכון",
-    url: "https://drive.google.com/drive/folders/1ITwPTm_Jv3w-nVT7PpE2HViDn56W_VWN"
-  },
-  {
-    title: "cs20",
-    description: "דרייב ישן יותר של מבחנים",
-    url: "https://drive.google.com/drive/u/1/folders/1Mmh1MW_zwNyqhNDB1gtkeklA4w_kHV5V"
-  },
-  //{
-    //title: "חומרים בטלגרם",
-    //description: "ניתן למצוא חומרים בלינק ועוד על ידי חיפוש שם המשתמש הבא בטלגרם:  @Hithelpbot(יוצר האתר לא קשור לניהול הטלגרם)",
-    //url: "https://t.me/+1afwRPetXHA0NGFk"
-  //},
-  {
-    title: "הדרייב של ליז",
-    description: "מומלץ להעזר בה, המון המון שיטות וחומרים",
-    url: "https://drive.google.com/drive/folders/1amxc9ZpT5xzNFdFeYSndfhn32GlebnvG"
-  },
-  {
-    title: "הדרייב של אלעד עטייא",
-    description: "למי שרוצה לעשות ארגזים בהייטקס",
-    url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
-  }
 
-]
 
 const tutors = [
   
