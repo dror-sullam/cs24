@@ -1,6 +1,9 @@
-import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon, GraduationCap } from 'lucide-react'
+import {Mail, Laptop, BookOpen, FileText, Link as LinkIcon, GraduationCap, Tag, Users, Shield   } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
+import CourseList from './components/CoursesList'
+import HelpfulLinksSection from './components/HelpfulLinks'
+import SubscriptionCard from './components/Bauman'
 
 const helpfulLinks = [
   { 
@@ -27,12 +30,8 @@ const helpfulLinks = [
     title: "הדרייב של אלעד עטייא",
     description: "למי שרוצה לעשות ארגזים בהייטקס",
     url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
-  },
-  {
-  title: "הדרייב של דוד עזרן",
-  description: "דרייב עם קורסים של שנה ב בלבד",
-  url: "https://drive.google.com/drive/folders/1qvJJWikw7Z9DN1dwkV2I94daLqudayU5?usp=drive_link"
   }
+
 ]
 
 const tutors = [
@@ -45,22 +44,10 @@ const tutors = [
     {name: "ניר" , subjects: ["מבוא למדעי המחשב", "סדנה מתקדמת בתכנות","מבני נתונים","אלגו 1 + 2", "הסתברות","אינפי 2","ליניארית 2","בדידה 1+2","מונחה עצמים","בסיסי נתונים"], contact: "0503280807"}
 
 
-  
 ]
 
 
 
-const subjects = [
-  { id: 1, name: "תכנות מונחה עצמים", driveLink: "https://drive.google.com/drive/folders/1DfI4EwDUx4pNjWIeQz0SU_TITPy4PBMn?usp=drive_link" },
-  { id: 2, name: "סדנה מתקדמת בתכנות", driveLink: "https://drive.google.com/drive/folders/1gW2LE8jD_Yhb9BNzdS583aonXdSGpOk_?usp=drive_link" },
-  { id: 3, name: "מבני נתונים", driveLink: "https://drive.google.com/drive/folders/17Sv6VSK3HgaofeZ7Tl-FB3SbzLeoeCuU?usp=drive_link" },
-  { id: 4, name: "מבוא למערכות מחשב", driveLink: "https://drive.google.com/drive/folders/19tlwYTe4Zllp8onApPhIi_4LKA72g1rp?usp=drive_link" },
-  { id: 5, name: "מבוא למדעי המחשב", driveLink: "https://drive.google.com/drive/folders/1Cy-yEGmXx4u0PA2ejUZxQ33-pBzBQ6xn?usp=drive_link" },
-  { id: 6, name: "בדידה 2", driveLink: "https://drive.google.com/drive/folders/1NquaLProAL_ewrNRx9ZJy13ysWBpQyLH?usp=drive_link" },
-  { id: 7, name: "בדידה 1", driveLink: "https://drive.google.com/drive/folders/1XdBYqhLtbtflQU3fp-XlmEL9ajt9Hh1g?usp=drive_link" },
-  { id: 8, name: "אלגברה לינארית 1", driveLink: "https://drive.google.com/drive/folders/1jP8H6qmem2HtKChLG7mUg6lQ0C1hcojW?usp=drive_link" },
-  { id: 9, name: "אינפי 1", driveLink: "https://drive.google.com/drive/folders/1ViNjQEhT571efRNEpvS51xH0FZz8ABJa?usp=drive_link" },
-]
 
 
 const App = () => {
@@ -73,40 +60,7 @@ const App = () => {
   <p className="text-xl text-blue-950 text-center">
     ברוכים הבאים למאגר המידע המקיף ביותר שהיה במכון הטכנולוגי חולון
   </p>
-  <div className="text-center mt-4 p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
-    <p className="text-blue-900 font-semibold mb-2">
-      מנוי שנתי לפלטפורמת דני באומן
-    </p>
-    <div className="flex justify-center space-x-4 mb-2">
-      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-        משרתי מילואים: *49₪*
-      </span>
-      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-        שאר הסטודנטים: *149₪*
-      </span>
-    </div>
-    <div className="flex flex-col items-center space-y-2">
-      <a 
-        href="https://bit.ly/hitbaumannidf" 
-        className="text-blue-700 hover:text-blue-900 underline"
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
-        הרשמה למשרתי מילואים
-      </a>
-      <div className="text-blue-900">
-        שאר הסטודנטים: השתמשו בקוד קופון <span className="font-bold">Hit2025</span> + 6 ספרות אחרונות של ת.ז
-        <a 
-          href="https://baumann.co.il/#choose-university" 
-          className="block text-blue-700 hover:text-blue-900 underline mt-1"
-          target="_blank" 
-          rel="noopener noreferrer"
-        >
-          הרשמה לשאר הסטודנטים
-        </a>
-      </div>
-    </div>
-  </div>
+  <SubscriptionCard />
 </div>
 
         {/* Laptop Section */}
@@ -130,60 +84,13 @@ const App = () => {
         
        
        {/* Links Section */}
-<Card className="mb-4 bg-white border-blue-200">
-  <div className="p-6 bg-blue-100">
-    <div className="flex items-center gap-2 mb-4">
-      <LinkIcon className="h-6 w-6 text-blue-600" />
-      <h2 className="text-2xl font-semibold text-blue-950">קישורים שיכולים לעזור</h2>
-    </div>
-    <div className="grid gap-3">
-      {helpfulLinks.map((link, index) => (
-        <a
-          key={index}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block bg-white hover:bg-blue-50 transition-all duration-300 border-blue-200 rounded-lg p-4 shadow-md hover:shadow-lg"
-        >
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-100 p-1.5 rounded-md">
-                <LinkIcon className="h-5 w-5 text-blue-800 shrink-0" />
-              </div>
-              <div>
-                <h3 className="font-medium text-blue-900">{link.title}</h3>
-                <p className="text-sm text-blue-700" dir="rtl">{link.description}</p>
-              </div>
-            </div>
-          </div>
-        </a>
-      ))}
-    </div>
-  </div>
-</Card>
+       <HelpfulLinksSection/>
+
 
 
         {/* Courses Grid */}
-<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mb-4">
-  {subjects.map((subject) => (
-    <a
-      key={subject.id}
-      href={subject.driveLink}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block bg-white hover:bg-blue-50 transition-all duration-300 border border-blue-200 rounded-lg shadow-md hover:shadow-lg"
-    >
-      <div className="p-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-100 p-1.5 rounded-md">
-            <BookOpen className="h-5 w-5 text-blue-800 shrink-0" />
-          </div>
-          <h3 className="text-lg font-medium text-blue-900">{subject.name}</h3>
-        </div>
-      </div>
-    </a>
-  ))}
-</div>
+        <CourseList />
+
 
 
    
