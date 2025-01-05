@@ -1,4 +1,4 @@
-import {Mail, Laptop, FileText,  GraduationCap} from 'lucide-react'
+import {Mail, Laptop, FileText,  GraduationCap, Linkedin} from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 import CourseList from './components/CoursesList'
@@ -33,6 +33,18 @@ const App = () => {
   <p className="text-xl text-blue-950 text-center">
     ברוכים הבאים למאגר המידע המקיף ביותר שהיה במכון הטכנולוגי חולון
   </p>
+  <div className="flex items-center gap-3 group cursor-pointer">
+            <h2 className="text-xl text-blue-950">פותח ע״י דניאל זיו</h2>
+            <a 
+              href="https://www.linkedin.com/in/yourprofile" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center transition-transform duration-300 hover:scale-110"
+              title="בואו נתחבר"
+            >
+              <Linkedin strokeWidth={1} className="h-6 w-6" color="#0077B5"  />
+            </a>
+          </div>
   <SubscriptionCard />
 </div>
 
