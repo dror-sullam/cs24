@@ -55,7 +55,7 @@ const App = () => {
               <div className="bg-white/20 p-2 rounded-full hidden sm:block">
                 <Laptop className="h-7 w-7 text-white animate-pulse" />
               </div>
-              <h3 className="text-2xl font-bold text-white drop-shadow-md">מחפשים מחשב נייד?</h3>
+              <h3 className="text-2xl font-bold text-white drop-shadow-md">לא יודעים איזה מחשב נייד לקנות?</h3>
             </div>
             <Button
               className="w-full sm:w-auto bg-white hover:bg-blue-50 text-lg font-bold text-blue-800 px-8 py-3 shadow-lg hover:scale-105 transition-transform"
