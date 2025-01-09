@@ -11,6 +11,11 @@ const HelpfulLinksSection = () => {
       description: "מערכת הקורסים של המכון",
       url: "https://drive.google.com/drive/folders/1ITwPTm_Jv3w-nVT7PpE2HViDn56W_VWN"
     },
+    { 
+      title: "האתר של קנציפר",
+      description: "כל החומר של הסתברות מהאתר הרשמי של ראש הקורס",
+      url: "https://eugenekanzieper.faculty.hit.ac.il/probability.html"
+    },
     {
       title: "cs20",
       description: "דרייב ישן יותר של מבחנים",
