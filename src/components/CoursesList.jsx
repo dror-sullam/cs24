@@ -27,6 +27,12 @@ const yearTwoCourses = [
   { id: 20, name: "אלגוריתמים 2", driveLink: "https://drive.google.com/drive/folders/1ME21TQUflIfQR93COVr0BKGtHHy5hpy2?usp=share_link" },
 ];
 
+
+const yearThreeCourses = [
+  
+  { id: 21, name: "אוטומטים ושפות פורמליות", driveLink: "https://drive.google.com/drive/folders/1HHv_5NGFKITUMbLM8INccG3jzz2cCmFS?usp=sharing" }
+];
+
 const YearSection = ({ title, courses }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -71,6 +77,7 @@ const CoursesList = () => {
     <div className="mb-8">
       <YearSection title="שנה א׳" courses={yearOneCourses} />
       <YearSection title="שנה ב׳" courses={yearTwoCourses} />
+      <YearSection title="שנה ג׳" courses={yearThreeCourses} />
     </div>
   );
 };
