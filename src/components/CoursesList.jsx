@@ -30,7 +30,8 @@ const yearTwoCourses = [
 
 const yearThreeCourses = [
   
-  { id: 21, name: "אוטומטים ושפות פורמליות", driveLink: "https://drive.google.com/drive/folders/1HHv_5NGFKITUMbLM8INccG3jzz2cCmFS?usp=sharing" }
+  { id: 21, name: "אוטומטים ושפות פורמליות", driveLink: "https://drive.google.com/drive/folders/1HHv_5NGFKITUMbLM8INccG3jzz2cCmFS?usp=sharing" },
+  { id: 22, name: "חישוביות וסיבוכיות", driveLink: "https://drive.google.com/drive/folders/1wPppIA0y7hFRf3CxEs0YBsEo5a_qCwdI?usp=share_link" }
 ];
 
 const YearSection = ({ title, courses }) => {
