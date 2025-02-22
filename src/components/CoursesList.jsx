@@ -34,6 +34,12 @@ const yearThreeCourses = [
   { id: 22, name: "חישוביות וסיבוכיות", driveLink: "https://drive.google.com/drive/folders/1wPppIA0y7hFRf3CxEs0YBsEo5a_qCwdI?usp=share_link" }
 ];
 
+const choosingCourses = [
+  
+  { id: 23, name: "בלוקציין", driveLink: "https://drive.google.com/drive/folders/1rrR0a1k89Yu9jBdo08WMwiHLlJrui9Vn?usp=share_link" },
+  { id: 24, name: "מבוא למערכות מידע גיאוגרפי GIS", driveLink: "https://drive.google.com/drive/folders/1tyinoo_MKNvX0n3sryv3dpFHDMNmSWRa?usp=share_link" }
+];
+
 const YearSection = ({ title, courses }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,6 +85,7 @@ const CoursesList = () => {
       <YearSection title="שנה א׳" courses={yearOneCourses} />
       <YearSection title="שנה ב׳" courses={yearTwoCourses} />
       <YearSection title="שנה ג׳" courses={yearThreeCourses} />
+      <YearSection title="קורסי בחירה" courses={choosingCourses} />
     </div>
   );
 };
