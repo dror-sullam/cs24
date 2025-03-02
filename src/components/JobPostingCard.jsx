@@ -106,10 +106,31 @@ function formatDate(dateStr) {
             method="POST"
             data-netlify="true"
             onSubmit={(e) => {
-              e.preventDefault(); // Prevent default submission
-              handleSubscribe(); // Your email validation logic
+              e.preventDefault();
+              if (email && !emailError) {
+                // Use Netlify's form submission approach
+                const formData = new FormData();
+                formData.append("form-name", "subscribe");
+                formData.append("email", email);
+                
+                fetch("/", {
+                  method: "POST",
+                  body: formData
+                })
+                  .then(() => {
+                    setSubscribeSuccess(true);
+                    setTimeout(() => {
+                      setShowSubscribeModal(false);
+                      setSubscribeSuccess(false);
+                      setEmail("");
+                    }, 2000);
+                  })
+                  .catch(error => console.error("Form submission error:", error));
+              } else {
+                handleSubscribe(); // Just for validation
+              }
             }}
-          >
+>
           {/* Hidden input for Netlify */}
           <input type="hidden" name="form-name" value="subscribe" />
           
