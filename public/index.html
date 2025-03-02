@@ -21,8 +21,10 @@
       gtag('config', 'G-DB25K0TT5H');
     </script>
     
-    <form name="subscribe" netlify hidden>
+    <form name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="subscribe" />
       <input type="email" name="email" />
+      <button type="submit">Submit</button>
     </form>
         <!--
       manifest.json provides metadata used when your web app is installed on a

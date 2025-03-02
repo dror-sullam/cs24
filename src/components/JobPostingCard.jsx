@@ -20,6 +20,40 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const dateBg = courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100';
   const dateText = courseType === 'cs' ? 'text-blue-800' : 'text-purple-800';
   
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setEmailError('נא להזין כתובת אימייל תקינה.');
+      return;
+    }
+    setEmailError('');
+
+    const formData = new FormData();
+    formData.append('form-name', 'subscribe');
+    formData.append('email', email);
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        setSubscribeSuccess(true);
+        setTimeout(() => {
+          setShowSubscribeModal(false);
+          setSubscribeSuccess(false);
+          setEmail('');
+        }, 2000);
+      } else {
+        console.error('Form submission failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
   
 
   const handleSubscribe = () => {
@@ -102,59 +136,29 @@ function formatDate(dateStr) {
         <p className="text-green-600 text-center text-lg">הרשמה בוצעה בהצלחה!</p>
       ) : (
         <form
-            name="subscribe"
-            method="POST"
-            data-netlify="true"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (email && !emailError) {
-                // Use Netlify's form submission approach
-                const formData = new FormData();
-                formData.append("form-name", "subscribe");
-                formData.append("email", email);
-                
-                fetch("/", {
-                  method: "POST",
-                  body: formData
-                })
-                  .then(() => {
-                    setSubscribeSuccess(true);
-                    setTimeout(() => {
-                      setShowSubscribeModal(false);
-                      setSubscribeSuccess(false);
-                      setEmail("");
-                    }, 2000);
-                  })
-                  .catch(error => console.error("Form submission error:", error));
-              } else {
-                handleSubscribe(); // Just for validation
-              }
-            }}
->
-          {/* Hidden input for Netlify */}
-          <input type="hidden" name="form-name" value="subscribe" />
-          
-          <input
-            type="email"
-            name="email"
-            className={`w-full p-2 border rounded mb-2 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="האימייל שלך"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          
-          {emailError && <p className="text-red-500 text-sm mb-2 text-center">{emailError}</p>}
-          
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowSubscribeModal(false)}>
-              ביטול
-            </Button>
-            <Button type="submit">
-              אישור
-            </Button>
-          </div>
-        </form>
+        name="subscribe"
+        method="POST"
+        data-netlify="true"
+        onSubmit={handleSubmit}
+      >
+        <input type="hidden" name="form-name" value="subscribe" />
+        <input
+          type="email"
+          name="email"
+          className={`w-full p-2 border rounded mb-2 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
+          placeholder="האימייל שלך"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        {emailError && <p className="text-red-500 text-sm mb-2 text-center">{emailError}</p>}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setShowSubscribeModal(false)}>
+            ביטול
+          </Button>
+          <Button type="submit">אישור</Button>
+        </div>
+      </form>
       )}
     </div>
   </div>
