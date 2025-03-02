@@ -102,14 +102,14 @@ function formatDate(dateStr) {
         <p className="text-green-600 text-center text-lg">הרשמה בוצעה בהצלחה!</p>
       ) : (
         <form
-          name="subscribe"
-          method="POST"
-          netlify
-          onSubmit={(e) => {
-            
-            handleSubscribe(); // Your email validation logic here
-          }}
-        >
+            name="subscribe"
+            method="POST"
+            data-netlify="true"
+            onSubmit={(e) => {
+              e.preventDefault(); // Prevent default submission
+              handleSubscribe(); // Your email validation logic
+            }}
+          >
           {/* Hidden input for Netlify */}
           <input type="hidden" name="form-name" value="subscribe" />
           
