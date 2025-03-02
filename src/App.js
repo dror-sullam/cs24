@@ -3,7 +3,6 @@ import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 import CourseList from './components/CoursesList'
 import HelpfulLinksSection from './components/HelpfulLinks'
-import SubscriptionCard from './components/Bauman'
 import { useState } from 'react'
 import JobPostingsCard from './components/JobPostingCard'
 
