@@ -104,7 +104,7 @@ function formatDate(dateStr) {
         <form
           name="subscribe"
           method="POST"
-          data-netlify="true"
+          netlify
           onSubmit={(e) => {
             e.preventDefault();
             handleSubscribe(); // Your email validation logic here
