@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
-import { Briefcase, RefreshCw, Send, Bell } from 'lucide-react';
+import { Briefcase, RefreshCw, Bell } from 'lucide-react';
 
 const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [jobs, setJobs] = useState([]);
@@ -13,9 +13,7 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
 
 
   // Theme variables based on course type
-  const theme = courseType === 'cs' ? 'blue' : 'dark-purple';
   const textColor = courseType === 'cs' ? 'text-blue-950' : 'text-purple-950';
-  const subtitleColor = courseType === 'cs' ? 'text-blue-700' : 'text-purple-700';
   const buttonBg = courseType === 'cs' ? 'bg-blue-700 hover:bg-blue-800' : 'bg-purple-800 hover:bg-purple-900';
   const cardBorder = courseType === 'cs' ? 'border-blue-200' : 'border-purple-200';
   const jobItemBg = courseType === 'cs' ? 'bg-blue-50' : 'bg-purple-50';
@@ -72,7 +70,7 @@ function formatDate(dateStr) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
   
   useEffect(() => {
     fetchJobs();
