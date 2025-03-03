@@ -253,7 +253,7 @@ const CoursesList = ({ electricalEngineering = false, selectedTag }) => {
           <YearSection title="שנה ב׳" courses={eeYearTwoCourses} selectedTag={selectedTag} courseType={courseType} />
           <YearSection title="שנה ג׳" courses={eeYearThreeCourses} selectedTag={selectedTag} courseType={courseType} />
           <YearSection title="שנה ד׳" courses={eeYearFourCourses} selectedTag={selectedTag} courseType={courseType} />
-          <YearSection title="קורסי בחירה" courses={choosingCourses} selectedTag={selectedTag} courseType={courseType} />
+          <YearSection title="רב תחומי" courses={choosingCourses} selectedTag={selectedTag} courseType={courseType} />
         </>
       ) : (
         // Computer Science courses
@@ -261,7 +261,7 @@ const CoursesList = ({ electricalEngineering = false, selectedTag }) => {
           <YearSection title="שנה א׳" courses={yearOneCourses} selectedTag={selectedTag} courseType={courseType} />
           <YearSection title="שנה ב׳" courses={yearTwoCourses} selectedTag={selectedTag} courseType={courseType} />
           <YearSection title="שנה ג׳" courses={yearThreeCourses} selectedTag={selectedTag} courseType={courseType} />
-          <YearSection title="קורסי בחירה" courses={choosingCourses} selectedTag={selectedTag} courseType={courseType} />
+          <YearSection title="רב תחומי" courses={choosingCourses} selectedTag={selectedTag} courseType={courseType} />
         </>
       )}
     </div>

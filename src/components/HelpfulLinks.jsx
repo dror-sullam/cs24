@@ -75,7 +75,7 @@ const HelpfulLinksSection = ({ courseType }) => {
     {
       title: "הדרייב המטורף של יצחקי",
       description: "דרייב מוכר ומומלץ",
-      url: "https://drive.google.com/drive/folders/1amxc9ZpT5xzNFdFeYSndfhn32GlebnvG"
+      url: "https://drive.google.com/drive/folders/1k1v7NmfMWPUfA39JKskv0ID6X9udL7xT"
     },
   ]
   

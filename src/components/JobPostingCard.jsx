@@ -113,11 +113,11 @@ function formatDate(dateStr) {
     
     <Card className={`mb-1 bg-white relative ${cardBorder}`}>
       {/* Bell bubble (instead of "Junior" + Send) */}
-    <div
-      className="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-md border border-gray-200 cursor-pointer"
+      <div
+    className={`absolute -top-4 -right-4 ${buttonBg} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
       onClick={() => setShowSubscribeModal(true)}
-    >
-      <Bell className={`h-5 w-5 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} />
+   >
+      <Bell className="h-5 w-5 text-white" />
     </div>
 
 
@@ -156,8 +156,8 @@ function formatDate(dateStr) {
           <Button variant="outline" onClick={() => setShowSubscribeModal(false)}>
             ביטול
           </Button>
-          <Button type="submit">אישור</Button>
-        </div>
+          <Button variant="inline" type="submit" className={`${buttonBg} text-white`}>אישור</Button>
+          </div>
       </form>
       )}
     </div>
