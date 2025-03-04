@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Briefcase, RefreshCw, Bell } from 'lucide-react';
+import { motion, useAnimation } from 'framer-motion';
+
 
 const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [jobs, setJobs] = useState([]);
@@ -10,6 +12,8 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("")
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
+  const controls = useAnimation();
+
 
 
   // Theme variables based on course type
@@ -85,6 +89,21 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
+useEffect(() => {
+  async function sequence() {
+    // Jump: mimic Tailwind's animate-bounce (a quick upward movement)
+    await controls.start({
+      y: [-20, 0],
+      transition: { duration: 0.5, ease: "easeOut" }
+    });
+    // Swing: continuously rotate the bell
+    controls.start({
+      rotate: [0, 15, -10, 5, -5, 0],
+      transition: { duration: 1.5, ease: "easeInOut", repeat: Infinity }
+    });
+  }
+  sequence();
+}, [controls]);
 
 
   const fetchJobs = async () => {
@@ -113,12 +132,16 @@ function formatDate(dateStr) {
     
     <Card className={`mb-1 bg-white relative ${cardBorder}`}>
       {/* Bell bubble (instead of "Junior" + Send) */}
-      <div
-    className={`absolute -top-4 -right-4 ${buttonBg} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
-      onClick={() => setShowSubscribeModal(true)}
-   >
-      <Bell className="h-5 w-5 text-white" />
-    </div>
+      <motion.div
+  initial={{ rotate: 0, y: 0 }}
+  animate={controls}
+  className={`absolute -top-4 -right-4 ${buttonBg} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
+  onClick={() => setShowSubscribeModal(true)}
+>
+  <Bell className="h-5 w-5 text-white" />
+</motion.div>
+
+
 
 
     {showSubscribeModal && (
