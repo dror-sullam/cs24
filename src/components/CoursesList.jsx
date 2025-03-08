@@ -245,7 +245,7 @@ const CoursesList = ({ electricalEngineering = false, selectedTag }) => {
   const courseType = electricalEngineering ? 'ee' : 'cs';
   
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       {electricalEngineering ? (
         // Electrical Engineering courses
         <>

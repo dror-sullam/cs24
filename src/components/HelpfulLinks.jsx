@@ -3,15 +3,8 @@ import { Link as LinkIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card} from './ui/card'
 
 const HelpfulLinksSection = ({ courseType }) => {
-  const [isOpen, setIsOpen] = useState(window.innerWidth >= 1024);
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsOpen(window.innerWidth >= 1024);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
   
   const csHelpfulLinks = [
     { 
@@ -83,8 +76,8 @@ const HelpfulLinksSection = ({ courseType }) => {
   const helpfulLinks = courseType === 'cs' ? csHelpfulLinks : eeHelpfulLinks;
 
   return (
-    <Card className={`mb-4 bg-white ${courseType === 'cs' ? 'border-blue-200' : 'border-purple-200'}`}>
-      <div className={`p-3 ${courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100'}`}>
+    <Card className={`mb-2.5 bg-white ${courseType === 'cs' ? 'border-blue-200' : 'border-purple-200'}`}>
+      <div className={`p-6 ${courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100'}`}>
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className="w-full flex items-center justify-between gap-2"

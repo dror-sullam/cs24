@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
-import { Briefcase, RefreshCw, Bell } from 'lucide-react';
+import { Briefcase, RefreshCw, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
-
 
 const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("")
+  const [emailError, setEmailError] = useState("");
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
   const controls = useAnimation();
-
-
+  const isMounted = useRef(false);
 
   // Theme variables based on course type
   const textColor = courseType === 'cs' ? 'text-blue-950' : 'text-purple-950';
@@ -23,7 +22,9 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const jobItemBg = courseType === 'cs' ? 'bg-blue-50' : 'bg-purple-50';
   const dateBg = courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100';
   const dateText = courseType === 'cs' ? 'text-blue-800' : 'text-purple-800';
-  
+  const iconColor = courseType === 'cs' ? 'text-blue-600' : 'text-purple-600';
+
+  // Form submit function for subscribe modal
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,66 +59,46 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
       console.error('Error submitting form:', error);
     }
   };
-  
 
-  const handleSubscribe = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
-  
-    if (!emailRegex.test(email)) {
-      setEmailError("נא להזין כתובת אימייל תקינה.");
-      return;
-    }
-    setEmailError(""); // Clear errors if valid
-    console.log("Subscribed with email:", email); // Replace with actual API request
-    
-    // Set success state to show confirmation message
-    setSubscribeSuccess(true);
-    
-    // After 2 seconds, reset states and close the modal
-    setTimeout(() => {
-      setShowSubscribeModal(false);
-      setSubscribeSuccess(false);
-      setEmail("");
-    }, 2000);
-  };
-  
-// Helper function to format the date
-function formatDate(dateStr) {
-  // Split by "/" => ["3", "1", "25"]
-  const [month, day, year] = dateStr.split("/");
-  // Return it in day/month/year format => "1/3/25"
-  return `${day}/${month}/${year}`;
-}
-
-useEffect(() => {
-  async function sequence() {
-    // Jump: mimic Tailwind's animate-bounce (a quick upward movement)
-    await controls.start({
-      y: [-20, 0],
-      transition: { duration: 0.5, ease: "easeOut" }
-    });
-    // Swing: continuously rotate the bell
-    controls.start({
-      rotate: [0, 15, -10, 5, -5, 0],
-      transition: { duration: 1.5, ease: "easeInOut", repeat: Infinity }
-    });
+  // Helper function to format the date
+  function formatDate(dateStr) {
+    const [month, day, year] = dateStr.split("/");
+    return `${day}/${month}/${year}`;
   }
-  sequence();
-}, [controls]);
 
-
+  useEffect(() => {
+    isMounted.current = true;
+  
+    const sequence = async () => {
+      await controls.start({
+        y: [-20, 0],
+        transition: { duration: 0.5, ease: "easeOut" }
+      });
+      // Only start the next animation if the component is still mounted
+      if (isMounted.current) {
+        controls.start({
+          rotate: [0, 15, -10, 5, -5, 0],
+          transition: { duration: 1.5, ease: "easeInOut", repeat: Infinity }
+        });
+      }
+    };
+  
+    sequence();
+  
+    return () => {
+      isMounted.current = false;
+    };
+  }, [controls]);
+  
+  
+  // Fetch jobs from the API
   const fetchJobs = async () => {
     setIsLoading(true);
     try {
       const response = await fetch("https://my-public-jobs-json.s3.us-east-1.amazonaws.com/jobs.json");
       const data = await response.json();
-      console.log("Fetched jobs:");
-
-      console.log(data);
-      // Select the correct key based on course type.
-      // Adjust these keys if needed.
       const jobsData = courseType === 'cs' ? data["secretjuniordevelopers"] : data["-1002263628689"];
-      setJobs(jobsData || []);  // Fallback to empty array if key not found
+      setJobs(jobsData || []);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
@@ -128,127 +109,121 @@ useEffect(() => {
   useEffect(() => {
     fetchJobs();
   }, [courseType]);
+
   return (
-    
-    <Card className={`mb-1 bg-white relative ${cardBorder}`}>
-      {/* Bell bubble (instead of "Junior" + Send) */}
+    <Card className={`mb-4 bg-white relative ${cardBorder}`}>
+      {/* Bell bubble */}
       <motion.div
-  initial={{ rotate: 0, y: 0 }}
-  animate={controls}
-  className={`absolute -top-4 -right-4 ${buttonBg} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
-  onClick={() => setShowSubscribeModal(true)}
->
-  <Bell className="h-5 w-5 text-white" />
-</motion.div>
-
-
-
-
-    {showSubscribeModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white p-6 rounded-md shadow-lg w-160">
-      <h2 className="text-xl font-bold mb-2 text-center">הרשמה לקבלת משרות</h2>
-      <p className="mb-1 text-center">
-        אם מעניין אתכם שליחה אוטומטית של קו״ח, עדכונים בלייב על משרות ושיפור שלהם עם בינה מלאכותית
-      </p>
-      <p className="mb-4 text-center">
-        הזינו את המייל שלכם ואעדכן בפרטים בהמשך
-      </p>
-      
-      {subscribeSuccess ? (
-        <p className="text-green-600 text-center text-lg">הרשמה בוצעה בהצלחה!</p>
-      ) : (
-        <form
-        name="subscribe"
-        method="POST"
-        data-netlify="true"
-        onSubmit={handleSubmit}
+        initial={{ rotate: 0, y: 0 }}
+        animate={controls}
+        className={`absolute -top-4 -right-4 ${buttonBg} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
+        onClick={() => setShowSubscribeModal(true)}
       >
-        <input type="hidden" name="form-name" value="subscribe" />
-        <input
-          type="email"
-          name="email"
-          className={`w-full p-2 border rounded mb-2 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
-          placeholder="האימייל שלך"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        {emailError && <p className="text-red-500 text-sm mb-2 text-center">{emailError}</p>}
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setShowSubscribeModal(false)}>
-            ביטול
-          </Button>
-          <Button variant="inline" type="submit" className={`${buttonBg} text-white`}>אישור</Button>
+        <Bell className="h-5 w-5 text-white" />
+      </motion.div>
+
+      {/* Subscribe Modal */}
+      {showSubscribeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-md shadow-lg w-160">
+            <h2 className="text-xl font-bold mb-2 text-center">הרשמה לקבלת משרות</h2>
+            <p className="mb-1 text-center">
+              אם מעניין אתכם שליחה אוטומטית של קו״ח, עדכונים בלייב על משרות ושיפור שלהם עם בינה מלאכותית
+            </p>
+            <p className="mb-4 text-center">
+              הזינו את המייל שלכם ואעדכן בפרטים בהמשך
+            </p>
+            
+            {subscribeSuccess ? (
+              <p className="text-green-600 text-center text-lg">הרשמה בוצעה בהצלחה!</p>
+            ) : (
+              <form
+                name="subscribe"
+                method="POST"
+                data-netlify="true"
+                onSubmit={handleSubmit}
+              >
+                <input type="hidden" name="form-name" value="subscribe" />
+                <input
+                  type="email"
+                  name="email"
+                  className={`w-full p-2 border rounded mb-2 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="האימייל שלך"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                {emailError && <p className="text-red-500 text-sm mb-2 text-center">{emailError}</p>}
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowSubscribeModal(false)}>
+                    ביטול
+                  </Button>
+                  <Button variant="inline" type="submit" className={`${buttonBg} text-white`}>
+                    אישור
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
-      </form>
+        </div>
       )}
-    </div>
-  </div>
-)}
 
-
-
-      <CardHeader>
-        <div className="flex justify-between items-center">
-        <CardTitle className={`text-2xl flex items-center gap-2 ${textColor}`}>
-        <Briefcase className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} />
-        {courseType === 'cs' ? "משרות למדמ״ח" : "משרות לחשמל"}
-        </CardTitle>
-
-          <Button 
-            variant="outline"
-            size="sm"
-            className={`${courseType === 'cs' ? 'text-blue-600 border-blue-300 hover:bg-blue-50' : 'text-purple-600 border-purple-300 hover:bg-purple-50'}`}
-            onClick={fetchJobs}
-          >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            רענון
-          </Button>
+      {/* Card Header with Dropdown Toggle */}
+      <CardHeader className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+        <div className="flex justify-between items-center w-full">
+          <CardTitle className={`text-2xl flex items-center gap-2 ${textColor}`}>
+            <Briefcase className={`h-6 w-6 ${iconColor}`} />
+            {courseType === 'cs' ? "משרות למדמ״ח" : "משרות לחשמל"}
+          </CardTitle>
+          {/* Toggle icon changes based on dropdown state */}
+          {isOpen ? (
+            <ChevronUp className={`h-6 w-6 ${iconColor}`} />
+          ) : (
+            <ChevronDown className={`h-6 w-6 ${iconColor}`} />
+          )}
+         
         </div>
       </CardHeader>
-      
-      <CardContent>
-        {isLoading ? (
+
+      {/* Dropdown Content: Only show when open */}
+      {isOpen && (
+        <CardContent>
+          {isLoading ? (
             <div className="flex justify-center p-8">
-            <div className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${courseType === 'cs' ? 'border-blue-600' : 'border-purple-600'}`}></div>
+              <div className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${courseType === 'cs' ? 'border-blue-600' : 'border-purple-600'}`}></div>
             </div>
-            ) : (
+          ) : (
             <div className="h-80 overflow-y-auto pr-1 space-y-3">
-            {jobs.map(job => (
-            <div 
-                key={job.id} 
-                className={`rounded-lg ${jobItemBg} p-4 flex items-center justify-between gap-4`}
-            >
-            {/* Text Container */}
-                <div className="flex-1 min-w-0">
-            {/* Force wrapping */}
-                <h3 className={`font-medium ${textColor} break-words`}>
-                    {job.title}
-                </h3>
-            </div>
-
-            {/* Date + Button Container */}
-            <div className="flex items-center gap-2 shrink-0">
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${dateBg} ${dateText}`}>
-                  {formatDate(job.date)}
-                </span>
-                <Button
-                    className={`text-white ${buttonBg} text-sm`}
-                    onClick={() => window.open(job.url, '_blank')}
+              {jobs.map(job => (
+                <div 
+                  key={job.id || `job-${job.title}-${job.date}`}
+                  className={`rounded-lg ${jobItemBg} p-4 flex items-center justify-between gap-4`}
                 >
-                    להגשה
-                </Button>
+                  {/* Job Title */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-medium ${textColor} break-words`}>
+                      {job.title}
+                    </h3>
+                  </div>
+                  {/* Date and Action Button */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${dateBg} ${dateText}`}>
+                      {formatDate(job.date)}
+                    </span>
+                    <Button
+                      className={`text-white ${buttonBg} text-sm`}
+                      onClick={() => window.open(job.url, '_blank')}
+                    >
+                      להגשה
+                    </Button>
+                  </div>
                 </div>
+              ))}
             </div>
-        ))}
-
-          </div>
-        )}
-      </CardContent>
+          )}
+        </CardContent>
+      )}
     </Card>
-
-    
   );
 };
 

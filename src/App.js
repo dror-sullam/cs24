@@ -110,17 +110,14 @@ const App = () => {
 
 
           
-                {/* Responsive Layout Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-2">
-                  {/* Job Postings Card - Left Column (1/3 width on desktop) */}
-                  <div className="lg:col-span-1">
-                    <JobPostingsCard courseType={courseType} />
-                  </div>
+                <div className="grid grid-cols-1 gap-4 mb-2">
                   
-                  {/* Right Column Content (2/3 width on desktop) */}
+                  
                   <div className="lg:col-span-2">
+                    
                     {/* Laptop Section */}
-                    <Card className={`bg-gradient-to-r ${courseType === 'cs' ? 'from-blue-700 via-blue-800 to-blue-700' : 'from-purple-800 via-purple-950 to-purple-800'} shadow-xl hover:shadow-2xl transition-all border-2 ${buttonBorder} mb-2.5`}>          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-5">
+                    <Card className={`bg-gradient-to-r ${courseType === 'cs' ? 'from-blue-700 via-blue-800 to-blue-700' : 'from-purple-800 via-purple-950 to-purple-800'} shadow-xl hover:shadow-2xl transition-all border-2 ${buttonBorder} mb-4`}> 
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-5">
                         <div className="flex items-center gap-3">
                           <div className="bg-white/20 p-2 rounded-full hidden sm:block">
                             <Laptop className="h-7 w-7 text-white animate-pulse" />
@@ -144,7 +141,7 @@ const App = () => {
 
           {/* Choose EE Speciely if chose EE */}
           {courseType === 'ee' && (
-            <div className="mt-4 flex flex-col items-center mb-3">
+            <div className=" flex flex-col items-center mb-4">
               <h2 className="text-xl font-bold text-purple-950 mb-2">התמחות</h2>
               <div className="relative inline-block text-left">
                 <select
@@ -177,7 +174,9 @@ const App = () => {
 
 
 
-   
+                  <div className="lg:col-span-1">
+                    <JobPostingsCard courseType={courseType} />
+                  </div>
 
        {/* Tutors Section */}
       <Card className={`mb-8 bg-white ${courseType === 'cs' ? 'border-sky-200' : 'border-purple-200'}`}>
