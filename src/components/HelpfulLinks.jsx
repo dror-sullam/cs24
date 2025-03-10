@@ -43,7 +43,7 @@ const HelpfulLinksSection = ({ courseType }) => {
     { 
       title: "הדרייב של ברי",
       description: "אוסף חומרים של תואר ראשון + שני + אנגלית",
-      url: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב&sortField=LinkFilename&isAscending=true&ga=1"
+      url: "https://hitacil-my.sharepoint.com/:f:/g/personal/barucha_my_hit_ac_il/EqjpWXqEQuJDrM9DEFdaWJEBjRCI-d2RyvXBUvd63fpVyA?e=A0f7V2"
     },
     { 
       title: "המחברת של קטיה",
