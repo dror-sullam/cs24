@@ -1,9 +1,9 @@
-import {Mail, Laptop, FileText,  GraduationCap, Linkedin, ChevronDown} from 'lucide-react'
+import {Mail, Laptop, FileText,  GraduationCap, Linkedin, ChevronDown, Copy, Check} from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
 import CourseList from './components/CoursesList'
 import HelpfulLinksSection from './components/HelpfulLinks'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import JobPostingsCard from './components/JobPostingCard'
 
 
@@ -37,6 +37,8 @@ const App = () => {
   
           const [courseType, setCourseType] = useState('cs'); // 'cs' for Computer Science, 'ee' for Electrical Engineering
           const [selectedTag, setSelectedTag] = useState('אין');
+          const [isVisible, setIsVisible] = useState(false);
+          const [copySuccess, setCopySuccess] = useState(false);
           const theme = courseType === 'cs' ? 'blue' : 'dark-purple';
           const bgGradient = courseType === 'cs' ? 'from-blue-50 to-white' : 'from-purple-50 to-white';
           const textColor = courseType === 'cs' ? 'text-blue-950' : 'text-purple-950';
@@ -53,6 +55,51 @@ const App = () => {
             }
           };
 
+          useEffect(() => {
+            const observer = new IntersectionObserver(
+              ([entry]) => {
+                if (entry.isIntersecting) {
+                  setIsVisible(true);
+                }
+              },
+              {
+                threshold: 0.1
+              }
+            );
+
+            const missingSection = document.getElementById('missing-tests-section');
+            if (missingSection) {
+              observer.observe(missingSection);
+            }
+
+            return () => {
+              if (missingSection) {
+                observer.unobserve(missingSection);
+              }
+            };
+          }, []);
+
+          const copyToClipboard = async () => {
+            try {
+              await navigator.clipboard.writeText('cs24.hit@gmail.com');
+              setCopySuccess(true);
+              setTimeout(() => setCopySuccess(false), 2000);
+            } catch (err) {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = 'cs24.hit@gmail.com';
+              document.body.appendChild(textArea);
+              textArea.select();
+              try {
+                document.execCommand('copy');
+                setCopySuccess(true);
+                setTimeout(() => setCopySuccess(false), 2000);
+              } catch (err) {
+                console.error('Failed to copy text:', err);
+              }
+              document.body.removeChild(textArea);
+            }
+          };
 
           
           return (
@@ -107,14 +154,43 @@ const App = () => {
                     </Button>
                 </div>
               
-
-
-          
-                <div className="grid grid-cols-1 gap-4 mb-2">
+                {/* Top Mobile Section - Jobs and Laptop */}
+                <div className="block lg:hidden mb-4">
+                  {/* Job Postings Card */}
+                  <div className="mb-4">
+                    <JobPostingsCard courseType={courseType} />
+                  </div>
                   
+                  {/* Laptop Section */}
+                  <Card className={`bg-gradient-to-r ${courseType === 'cs' ? 'from-blue-700 via-blue-800 to-blue-700' : 'from-purple-800 via-purple-950 to-purple-800'} shadow-xl hover:shadow-2xl transition-all border-2 ${buttonBorder}`}>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white/20 p-2 rounded-full hidden sm:block">
+                          <Laptop className="h-7 w-7 text-white animate-pulse" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-md">
+                            לא יודעים איזה מחשב נייד לקנות?
+                        </h3>
+                      </div>
+                      <Button
+                        className={`w-full sm:w-auto bg-white hover:bg-blue-50 text-lg font-bold ${textColor} px-8 py-3 shadow-lg hover:scale-105 transition-transform`}
+                        onClick={() => window.open('https://toplaptop.net', '_blank')}
+                      >
+                        לחצו כאן!
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden lg:grid lg:grid-cols-3 gap-4 mb-2">
+                  {/* Job Postings Card - Left Column (1/3 width on desktop) */}
+                  <div className="lg:col-span-1">
+                    <JobPostingsCard courseType={courseType} />
+                  </div>
                   
+                  {/* Right Column Content (2/3 width on desktop) */}
                   <div className="lg:col-span-2">
-                    
                     {/* Laptop Section */}
                     <Card className={`bg-gradient-to-r ${courseType === 'cs' ? 'from-blue-700 via-blue-800 to-blue-700' : 'from-purple-800 via-purple-950 to-purple-800'} shadow-xl hover:shadow-2xl transition-all border-2 ${buttonBorder} mb-4`}> 
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-5">
@@ -135,15 +211,14 @@ const App = () => {
                       </div>
                     </Card>
 
-                    {/* Links Section */}
+                    {/* Links Section - Desktop */}
                     <HelpfulLinksSection courseType={courseType} />
                   </div>
                 </div>
 
-
-          {/* Choose EE Speciely if chose EE */}
+                {/* Choose EE Specialty if chose EE */}
           {courseType === 'ee' && (
-            <div className=" flex flex-col items-center mb-4">
+                  <div className="flex flex-col items-center mb-4">
               <h2 className="text-xl font-bold text-purple-950 mb-2">התמחות</h2>
               <div className="relative inline-block text-left">
                 <select
@@ -166,18 +241,16 @@ const App = () => {
             </div>
           )}
 
-
-        {/* Courses Grid - Conditionally render based on courseType */}
+                {/* Course List */}
         {courseType === 'cs' ? (
           <CourseList />
         ) : (
           <CourseList electricalEngineering={true} selectedTag={selectedTag} /> 
         )}
 
-
-
-                  <div className="lg:col-span-1">
-                    <JobPostingsCard courseType={courseType} />
+                {/* Links Section - Mobile (appears after course list) */}
+                <div className="block lg:hidden mt-4">
+                  <HelpfulLinksSection courseType={courseType} />
                   </div>
 
        {/* Tutors Section */}
@@ -236,7 +309,12 @@ const App = () => {
 
 
         {/* Missing Tests Banner */}
-        <Card className={`mb-8 bg-${courseType === 'cs' ? 'blue-50' : 'purple-50'} border-${courseType === 'cs' ? 'blue-200' : 'purple-200'}`}>
+                <Card 
+                  id="missing-tests-section"
+                  className={`mb-8 bg-${courseType === 'cs' ? 'blue-50' : 'purple-50'} border-${courseType === 'cs' ? 'blue-200' : 'purple-200'} ${
+                    isVisible ? 'animate-bounce-gentle shadow-glow' : ''
+                  }`}
+                >
           <CardHeader>
             <CardTitle className={`text-3xl flex items-center gap-2 justify-center ${courseType === 'cs' ? 'text-blue-950' : 'text-purple-950'}`}>
               <FileText className={`h-8 w-8 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} aria-hidden="true" />
@@ -246,17 +324,56 @@ const App = () => {
               יש לך מבחנים שאינם נמצאים במאגר? נשמח שתשלח לנו אותם
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center px-4 sm:px-6">
-            <Button
-              size="lg"
-              className={`text-base sm:text-lg w-full sm:w-auto break-words text-white ${courseType === 'cs' ? 'bg-blue-800 hover:bg-blue-900' : 'bg-purple-800 hover:bg-purple-900'}`}
-              onClick={() => window.location.href = 'mailto:cs24.hit@gmail.com'}
-            >
-              <Mail className="mr-2 h-5 w-5 shrink-0" />
-              <span className="truncate">cs24.hit@gmail.com</span>
-            </Button>
+                  <CardContent className="flex flex-col items-center gap-2 px-4 sm:px-6">
+                    <div className={`relative flex items-center gap-2 px-6 py-3 rounded-lg ${courseType === 'cs' ? 'bg-blue-800' : 'bg-purple-800'}`}>
+                      <span className="text-base sm:text-lg text-white select-all">cs24.hit@gmail.com</span>
+                      <button
+                        onClick={copyToClipboard}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          courseType === 'cs' 
+                            ? 'hover:bg-blue-700 active:bg-blue-600' 
+                            : 'hover:bg-purple-700 active:bg-purple-600'
+                        }`}
+                        aria-label="העתק לזכרון"
+                      >
+                        {copySuccess ? (
+                          <Check className="h-5 w-5 text-white" />
+                        ) : (
+                          <Copy className="h-5 w-5 text-white" />
+                        )}
+                      </button>
+                    </div>
+                    <div 
+                      className={`flex items-center justify-center ${
+                        copySuccess ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'
+                      } transition-all duration-200`}
+                    >
+                      <span className={`text-sm ${courseType === 'cs' ? 'text-blue-800' : 'text-purple-800'}`}>
+                        הכתובת הועתקה בהצלחה!
+                      </span>
+                    </div>
           </CardContent>
         </Card>
+
+                <style jsx global>{`
+                  @keyframes bounce-gentle {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                  }
+                  
+                  .animate-bounce-gentle {
+                    animation: bounce-gentle 2s infinite;
+                  }
+                  
+                  .shadow-glow {
+                    box-shadow: 0 0 15px ${courseType === 'cs' ? 'rgba(37, 99, 235, 0.3)' : 'rgba(147, 51, 234, 0.3)'};
+                    transition: box-shadow 0.3s ease-in-out;
+                  }
+                  
+                  .shadow-glow:hover {
+                    box-shadow: 0 0 25px ${courseType === 'cs' ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 51, 234, 0.5)'};
+                  }
+                `}</style>
 
       </main>
     </div>

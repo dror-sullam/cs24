@@ -146,13 +146,13 @@ const eeYearFourCourses = [
   { id: 411, tag: 'ביו הנדסה', name: "מעבדה למיכשור רפואי", driveLink: "#" },
   { id: 412, tag: 'ביו הנדסה', name: "שיטות למידת מכונה לניתוח אותות FMRI", driveLink: "#" },
   { id: 413, tag: 'תקשורת ועיבוד אותות', name: "תקשורת ספרתית מתקדמת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fתקשורת%20ספרתית%20מתקדמת&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 413, tag: 'תקשורת ועיבוד אותות', name: "נושאים נבחרים בעיבוד אותות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fנושאים%20נבחרים%20בעיבוד%20אותות%20ספרתי&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 413, tag: 'תקשורת ועיבוד אותות', name: "מערכות תקשורת בסיב אופטי", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20תקשורת%20בסיב%20אופטי&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 414, tag: 'תקשורת ועיבוד אותות', name: "למידה עמוקה לראייה ממוחשבת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fלמידה%20עמוקה%20ליישומי%20ראייה%20ממוחשבת&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 415, tag: 'תקשורת ועיבוד אותות', name: "אנטנות וקרינה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאנטנות%20וקרינה&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 416, tag: 'תקשורת ועיבוד אותות', name: "אנליזה וסימולציה של רשתות מחשבים", driveLink: "#" },
-  { id: 417, tag: 'תקשורת ועיבוד אותות', name: "מעבדה לתקשורת ספרתית", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לתקשורת%20ספרתית&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 418, tag: 'תקשורת ועיבוד אותות', name: "מודולים בתכנון מערכות תקשורת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמודולים%20בתכנון%20מערכות%20תקשורת&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 414, tag: 'תקשורת ועיבוד אותות', name: "נושאים נבחרים בעיבוד אותות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fנושאים%20נבחרים%20בעיבוד%20אותות%20ספרתי&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 415, tag: 'תקשורת ועיבוד אותות', name: "מערכות תקשורת בסיב אופטי", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20תקשורת%20בסיב%20אופטי&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 416, tag: 'תקשורת ועיבוד אותות', name: "למידה עמוקה לראייה ממוחשבת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fלמידה%20עמוקה%20ליישומי%20ראייה%20ממוחשבת&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 417, tag: 'תקשורת ועיבוד אותות', name: "אנטנות וקרינה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאנטנות%20וקרינה&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 418, tag: 'תקשורת ועיבוד אותות', name: "אנליזה וסימולציה של רשתות מחשבים", driveLink: "#" },
+  { id: 419, tag: 'תקשורת ועיבוד אותות', name: "מעבדה לתקשורת ספרתית", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לתקשורת%20ספרתית&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 441, tag: 'תקשורת ועיבוד אותות', name: "מודולים בתכנון מערכות תקשורת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמודולים%20בתכנון%20מערכות%20תקשורת&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 419, tag: 'תקשורת ועיבוד אותות', name: "עיבוד תמונה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fעיבוד%20תמונה&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 420, tag: 'תקשורת ועיבוד אותות', name: "מערכות תקשורת MIMO", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20תקשורת%20MIMO&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 421, tag: 'תקשורת ועיבוד אותות', name: "עקרונות מכמ", driveLink: "#" },
@@ -215,24 +215,54 @@ const YearSection = ({ title, courses, selectedTag, courseType = 'cs' }) => {
       {isOpen && (
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
           {courses
-            .filter(course => !selectedTag || !course.tag || course.tag === selectedTag)
-            .map(course => (
-              <a
-                key={course.id}
-                href={course.driveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`block bg-white ${hoverBgLight} transition-all duration-300 border ${borderColor} rounded-lg shadow-md hover:shadow-lg`}
-              >
-                <div className="p-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`${bgLight} p-1.5 rounded-md`}>
-                      <BookOpen className={`h-5 w-5 ${iconColor} shrink-0`} />
+              .filter(course => !selectedTag || !course.tag || (Array.isArray(course.tag) ? course.tag.includes(selectedTag) : course.tag === selectedTag))
+              .map(course => (
+              course.driveLink === "#" ? (
+                <div
+                  key={course.id}
+                  className={`block bg-gray-50 transition-all duration-300 border ${borderColor} rounded-lg shadow-md`}
+                >
+                  <div className="p-4 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 min-h-[2rem]">
+                      <div className={`bg-gray-200 p-1.5 rounded-md mt-0.5`}>
+                        <BookOpen className={`h-5 w-5 text-gray-600 shrink-0`} />
+                      </div>
+                      <h3 className={`text-lg font-medium text-gray-700`}>
+                        {course.name} <span className="text-red-500">(חסר)</span>
+                      </h3>
                     </div>
-                    <h3 className={`text-lg font-medium ${textColor}`}>{course.name}</h3>
+                    <button 
+                      className={`px-4 py-1.5 ${courseType === 'cs' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'} text-white rounded-md transition-colors text-sm font-medium whitespace-nowrap shrink-0 mt-0.5`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.scrollTo({
+                          top: document.documentElement.scrollHeight,
+                          behavior: 'smooth'
+                        });
+                      }}
+                    >
+                      יש לי
+                    </button>
                   </div>
                 </div>
-              </a>
+              ) : (
+                <a
+                  key={course.id}
+                  href={course.driveLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block bg-white ${hoverBgLight} transition-all duration-300 border ${borderColor} rounded-lg shadow-md hover:shadow-lg`}
+                >
+                  <div className="p-4 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 min-h-[2rem]">
+                      <div className={`${bgLight} p-1.5 rounded-md mt-0.5`}>
+                        <BookOpen className={`h-5 w-5 ${iconColor} shrink-0`} />
+                      </div>
+                      <h3 className={`text-lg font-medium ${textColor}`}>{course.name}</h3>
+                    </div>
+                  </div>
+                </a>
+              )
             ))}
         </div>
       )}

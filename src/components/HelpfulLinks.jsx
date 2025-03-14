@@ -1,11 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Link as LinkIcon, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card} from './ui/card'
+import { Card } from './ui/card'
+
+// Add useWindowSize hook
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+      });
+    }
+    
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call initially
+    
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+};
 
 const HelpfulLinksSection = ({ courseType }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { width } = useWindowSize();
+  const [isOpen, setIsOpen] = useState(width >= 1024);
 
-  
+  // Update isOpen when screen size changes
+  useEffect(() => {
+    setIsOpen(width >= 1024);
+  }, [width]);
+
   const csHelpfulLinks = [
     { 
       title: "דרייב האגודה",
@@ -17,11 +44,11 @@ const HelpfulLinksSection = ({ courseType }) => {
       description: "כל החומר של הסתברות מהאתר הרשמי של ראש הקורס",
       url: "https://eugenekanzieper.faculty.hit.ac.il/probability.html"
     },
-    {
+    /*{
       title: "cs20",
       description: "דרייב ישן יותר של מבחנים",
       url: "https://drive.google.com/drive/u/1/folders/1Mmh1MW_zwNyqhNDB1gtkeklA4w_kHV5V"
-    },
+    },*/
     {
       title: "חומרים בטלגרם",
       description: "יש גם בוט בנוסף: @Hithelpbot (לא קשור לאתר)" ,
@@ -36,7 +63,13 @@ const HelpfulLinksSection = ({ courseType }) => {
       title: "הדרייב של אלעד עטייא",
       description: "למי שרוצה לעשות ארגזים בהייטקס",
       url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
+    },
+    {
+      title: "הדרייב של נועה אלריך",
+      description: "סיכומים ברמה בינלאומית",
+      url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
     }
+    
   ]
 
   const eeHelpfulLinks = [
@@ -77,10 +110,10 @@ const HelpfulLinksSection = ({ courseType }) => {
 
   return (
     <Card className={`mb-2.5 bg-white ${courseType === 'cs' ? 'border-blue-200' : 'border-purple-200'}`}>
-      <div className={`p-6 ${courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100'}`}>
+      <div className={`${width < 1024 ? 'p-6 pt-7' : 'p-9 pt-10'} ${courseType === 'cs' ? 'bg-blue-100' : 'bg-purple-100'}`}>
         <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between gap-2"
+          onClick={() => width < 1024 && setIsOpen(!isOpen)}
+          className={`w-full flex items-center justify-between gap-2 ${width < 1024 ? 'cursor-pointer' : ''}`}
         >
           <div className="flex items-center gap-2">
             <LinkIcon className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} />
@@ -88,11 +121,13 @@ const HelpfulLinksSection = ({ courseType }) => {
               קישורים שיכולים לעזור
             </h2>
           </div>
-          {isOpen ? 
-            <ChevronUp className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} /> 
-            : 
-            <ChevronDown className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} />
-          }
+          {/* Only show toggle icon on mobile */}
+          {width < 1024 && (
+            isOpen ? 
+              <ChevronUp className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} /> 
+              : 
+              <ChevronDown className={`h-6 w-6 ${courseType === 'cs' ? 'text-blue-600' : 'text-purple-600'}`} />
+          )}
         </button>
         
         {isOpen && (

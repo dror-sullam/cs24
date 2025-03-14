@@ -4,10 +4,33 @@ import { Button } from './ui/button';
 import { Briefcase, RefreshCw, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
 
+// Add useWindowSize hook at the top of the file
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+      });
+    }
+    
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call initially
+    
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+};
+
 const JobPostingsCard = ({ courseType = 'cs' }) => {
+  const { width } = useWindowSize();
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(width >= 1024);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -110,6 +133,11 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
     fetchJobs();
   }, [courseType]);
 
+  // Update isOpen when screen size changes
+  useEffect(() => {
+    setIsOpen(width >= 1024);
+  }, [width]);
+
   return (
     <Card className={`mb-4 bg-white relative ${cardBorder}`}>
       {/* Bell bubble */}
@@ -169,23 +197,27 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
       )}
 
       {/* Card Header with Dropdown Toggle */}
-      <CardHeader className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <CardHeader 
+        className={width < 1024 ? "cursor-pointer" : ""}
+        onClick={() => width < 1024 && setIsOpen(!isOpen)}
+      >
         <div className="flex justify-between items-center w-full">
           <CardTitle className={`text-2xl flex items-center gap-2 ${textColor}`}>
             <Briefcase className={`h-6 w-6 ${iconColor}`} />
             {courseType === 'cs' ? "משרות למדמ״ח" : "משרות לחשמל"}
           </CardTitle>
-          {/* Toggle icon changes based on dropdown state */}
-          {isOpen ? (
-            <ChevronUp className={`h-6 w-6 ${iconColor}`} />
-          ) : (
-            <ChevronDown className={`h-6 w-6 ${iconColor}`} />
+          {/* Only show toggle icon on mobile */}
+          {width < 1024 && (
+            isOpen ? (
+              <ChevronUp className={`h-6 w-6 ${iconColor}`} />
+            ) : (
+              <ChevronDown className={`h-6 w-6 ${iconColor}`} />
+            )
           )}
-         
         </div>
       </CardHeader>
 
-      {/* Dropdown Content: Only show when open */}
+      {/* Dropdown Content */}
       {isOpen && (
         <CardContent>
           {isLoading ? (
@@ -193,7 +225,7 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
               <div className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${courseType === 'cs' ? 'border-blue-600' : 'border-purple-600'}`}></div>
             </div>
           ) : (
-            <div className="h-80 overflow-y-auto pr-1 space-y-3">
+            <div className="h-96 overflow-y-auto pr-1 space-y-3">
               {jobs.map(job => (
                 <div 
                   key={job.id || `job-${job.title}-${job.date}`}
