@@ -1,3 +1,55 @@
+# CS24 Site
+
+A comprehensive resource platform for HIT students.
+
+## Environment Setup
+
+Before running the project, you need to set up your environment variables:
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Fill in your environment variables in the `.env` file:
+   - `VITE_SUPABASE_URL`: Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `VITE_ADMIN_EMAIL`: Admin email address for managing tutor requests
+
+## Development
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Deployment
+
+1. Build the project:
+   ```bash
+   npm run build
+   ```
+
+2. Make sure to set up the same environment variables in your deployment platform (e.g., Netlify, Vercel).
+
+## Security Notes
+
+- Never commit the `.env` file to version control
+- Keep your Supabase keys secure
+- Regularly rotate your API keys
+- Use environment variables for all sensitive data
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
