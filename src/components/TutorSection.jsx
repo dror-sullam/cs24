@@ -185,5 +185,5 @@ const TutorSection = ({ courseType }) => {
     </Card>
   );
 };
-
+ 
 export default TutorSection;
