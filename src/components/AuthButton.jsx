@@ -32,6 +32,7 @@ const AuthButton = ({ courseType }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error) {
+      console.error('Error signing out:', error.message);
       alert('התנתקות נכשלה. אנא נסה שוב.');
     } finally {
       setIsLoggingOut(false);
@@ -40,13 +41,12 @@ const AuthButton = ({ courseType }) => {
 
   const handleJoinRequest = async () => {
     if (!session) {
-      try {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: window.location.origin }
-        });
-        if (error) throw error;
-      } catch (error) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) {
+        console.error('Error signing in:', error.message);
         alert('התחברות נכשלה. אנא נסה שוב.');
       }
     } else {
@@ -68,7 +68,7 @@ const AuthButton = ({ courseType }) => {
           size="sm"
         >
           <LogIn className="h-4 w-4" />
-          <span className="hidden sm:inline">התחבר</span>
+          <span className="hidden sm:inline">התחברות</span>
         </Button>
       )}
       <Button
