@@ -32,7 +32,6 @@ const AuthButton = ({ courseType }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error) {
-      console.error('Error signing out:', error.message);
       alert('התנתקות נכשלה. אנא נסה שוב.');
     } finally {
       setIsLoggingOut(false);
@@ -41,12 +40,13 @@ const AuthButton = ({ courseType }) => {
 
   const handleJoinRequest = async () => {
     if (!session) {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) {
-        console.error('Error signing in:', error.message);
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin }
+        });
+        if (error) throw error;
+      } catch (error) {
         alert('התחברות נכשלה. אנא נסה שוב.');
       }
     } else {
@@ -55,29 +55,33 @@ const AuthButton = ({ courseType }) => {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1 sm:gap-2">
       {!session && (
         <Button
           onClick={() => supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo: window.location.origin }
           })}
-          className={`flex items-center gap-2 ${
+          className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base ${
             courseType === 'cs' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
           } text-white`}
+          size="sm"
         >
           <LogIn className="h-4 w-4" />
-          התחבר
+          <span className="hidden sm:inline">התחבר</span>
         </Button>
       )}
       <Button
         onClick={handleJoinRequest}
-        className={`flex items-center gap-2 ${
+        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base ${
           courseType === 'cs' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
         } text-white`}
+        size="sm"
       >
         <UserPlus className="h-4 w-4" />
-        {!session ? 'התחבר כדי להגיש בקשה' : 'בקשה להצטרפות'}
+        <span className="hidden sm:inline">
+          {!session ? 'הצטרף כמורה' : 'בקשת הצטרפות'}
+        </span>
       </Button>
 
       {session && (
@@ -85,10 +89,13 @@ const AuthButton = ({ courseType }) => {
           variant="outline"
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex items-center gap-2"
+          className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+          size="sm"
         >
           <LogOut className="h-4 w-4" />
-          {isLoggingOut ? '...מתנתק' : 'התנתק'}
+          <span className="hidden sm:inline">
+            {isLoggingOut ? '...מתנתק' : 'התנתקות'}
+          </span>
         </Button>
       )}
 

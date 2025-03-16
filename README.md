@@ -1,6 +1,89 @@
 # CS24 Site
 
-A comprehensive resource platform for HIT students.
+A comprehensive resource website for students at HIT (Holon Institute of Technology), featuring course materials, tutors, and more.
+
+## Features
+
+- Course materials organized by year and degree (CS/EE)
+- Tutor listings with contact information and reviews
+- Admin panel for managing tutor requests
+- Specialization filtering for EE courses
+- Job postings for CS and EE students
+
+## Tech Stack
+
+- React
+- Create React App
+- Tailwind CSS
+- Supabase (Authentication & Database)
+
+## Deployment Instructions
+
+### Prerequisites
+
+- Node.js (v16+)
+- npm or yarn
+- Supabase account
+- GitHub account
+- Netlify account
+
+### Local Development
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/cs24-site.git
+   cd cs24-site
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Create a `.env` file based on `.env.example` and fill in your Supabase credentials:
+   ```
+   REACT_APP_SUPABASE_URL=your-supabase-url
+   REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+   REACT_APP_ADMIN_EMAIL_1=your-admin-email
+   ```
+
+4. Start the development server:
+   ```
+   npm start
+   ```
+
+### Deploying to Netlify
+
+1. Push your code to GitHub:
+   ```
+   git add .
+   git commit -m "Ready for production"
+   git push
+   ```
+
+2. Log in to Netlify and create a new site from your GitHub repository.
+
+3. In the Netlify site settings, add the following environment variables:
+   - `REACT_APP_SUPABASE_URL`
+   - `REACT_APP_SUPABASE_ANON_KEY`
+   - `REACT_APP_ADMIN_EMAIL_1` (and others as needed)
+
+4. Configure the build settings:
+   - Build command: `npm run build`
+   - Publish directory: `build` (not dist, since this is Create React App)
+
+5. Deploy the site.
+
+## Security Considerations
+
+- Never commit `.env` files or any files containing sensitive information
+- Use environment variables for all sensitive data
+- Set up proper Row Level Security (RLS) in Supabase
+- Regularly rotate your API keys
+
+## License
+
+MIT
 
 ## Environment Setup
 
@@ -12,9 +95,9 @@ Before running the project, you need to set up your environment variables:
    ```
 
 2. Fill in your environment variables in the `.env` file:
-   - `VITE_SUPABASE_URL`: Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-   - `VITE_ADMIN_EMAIL`: Admin email address for managing tutor requests
+   - `REACT_APP_SUPABASE_URL`: Your Supabase project URL
+   - `REACT_APP_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `REACT_APP_ADMIN_EMAIL`: Admin email address for managing tutor requests
 
 ## Development
 
@@ -25,7 +108,7 @@ Before running the project, you need to set up your environment variables:
 
 2. Start the development server:
    ```bash
-   npm run dev
+   npm start
    ```
 
 ## Deployment
@@ -46,7 +129,7 @@ Before running the project, you need to set up your environment variables:
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
+- `npm start` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build locally
 

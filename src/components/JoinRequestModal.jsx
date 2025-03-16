@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { yearOneCourses, yearTwoCourses, yearThreeCourses, eeYearOneCourses, eeYearTwoCourses, eeYearThreeCourses, eeYearFourCourses } from './CoursesList';
+import { showNotification } from './ui/notification';
 
 const YEARS = ['שנה א', 'שנה ב', 'שנה ג', 'שנה ד'];
 
@@ -69,31 +70,32 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
   const [phone, setPhone] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   if (!isOpen || !session) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // Validate form data
-    if (!name.trim() || !phone.trim() || !degree || selectedYears.length === 0 || selectedSubjects.length === 0) {
-      alert('אנא מלא את כל השדות הנדרשים');
-      setIsSubmitting(false);
+    
+    // Validate form
+    if (!name || !phone || selectedYears.length === 0 || selectedSubjects.length === 0) {
+      showNotification('אנא מלא את כל השדות הנדרשים', 'warning');
       return;
     }
 
     // Validate phone number format
     const phoneRegex = /^05\d{8}$/;
     if (!phoneRegex.test(phone)) {
-      alert('מספר הטלפון אינו תקין. אנא הכנס מספר טלפון ישראלי תקין');
-      setIsSubmitting(false);
+      showNotification('מספר טלפון לא תקין. אנא הזן מספר בפורמט 05XXXXXXXX', 'warning');
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       // Insert new request
-      const { error: insertError } = await supabase
+      const { error } = await supabase
         .from('tutor_requests')
         .insert([{
           name,
@@ -108,25 +110,24 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
           email: session.user.email
         }]);
 
-      if (insertError) {
-        if (insertError.code === '23505') { // Unique constraint violation
-          alert('כבר קיימת בקשה פעילה עם מספר טלפון זה. אנא המתן לתשובה.');
-          return;
-        }
-        throw insertError;
-      }
-
-      alert('בקשתך נשלחה בהצלחה! נחזור אליך בקרוב');
-      onClose();
-      // Reset form
+      if (error) throw error;
+      
+      // Reset form and show success message
       setName('');
       setPhone('');
       setSelectedYears([]);
       setSpecialization('');
       setSelectedSubjects([]);
+      setSubmitSuccess(true);
+      
+      // Close modal after delay
+      setTimeout(() => {
+        onClose();
+        setSubmitSuccess(false);
+      }, 2000);
     } catch (error) {
-      console.error('Error submitting request:', error);
-      alert('אירעה שגיאה בשליחת הבקשה. אנא נסה שוב מאוחר יותר');
+      setSubmitError(true);
+      showNotification('אירעה שגיאה בשליחת הבקשה. אנא נסה שוב מאוחר יותר', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -157,10 +158,10 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
         <CardHeader className="relative border-b">
           <Button
             variant="outline"
-            className="absolute left-4 top-4"
+            className="absolute left-2 sm:left-4 top-2 sm:top-4 p-1 sm:p-2"
             onClick={onClose}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
           <CardTitle className="text-2xl font-bold text-center" dir="rtl">
             בקשת הצטרפות למאגר המורים
@@ -304,7 +305,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
                 disabled={isSubmitting || !selectedSubjects.length}
                 className={`w-24 text-white ${degree === 'cs' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'}`}
               >
-                {isSubmitting ? '...שולח' : 'שלח'}
+                {isSubmitting ? '...שולח' : 'שליחה'}
               </Button>
             </div>
           </form>

@@ -66,6 +66,23 @@ const TutorSection = ({ courseType }) => {
     }));
   };
 
+  const handleFeedbackClick = async (tutorId) => {
+    if (!user) {
+      // Redirect to login if user is not logged in
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) {
+        console.error('Error signing in:', error.message);
+      }
+    } else {
+      toggleFeedbackForm(tutorId);
+    }
+  };
+
   const submitFeedback = async (tutorId, rating, comment) => {
     if (!user) {
       alert('אנא התחבר כדי להשאיר ביקורת');
@@ -127,15 +144,13 @@ const TutorSection = ({ courseType }) => {
               <p className="text-gray-600">{tutor.subjects}</p>
             </div>
             
-            {user && (
-              <Button
-                onClick={() => toggleFeedbackForm(tutor.id)}
-                className="mt-4"
-                variant="outline"
-              >
-                הוסף ביקורת
-              </Button>
-            )}
+            <Button
+              onClick={() => handleFeedbackClick(tutor.id)}
+              className="mt-4"
+              variant="outline"
+            >
+              הוסף ביקורת
+            </Button>
 
             {feedbackForms[tutor.id] && (
               <div className="mt-4">
