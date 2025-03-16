@@ -38,6 +38,7 @@ const App = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showAllTutors, setShowAllTutors] = useState(false);
   const [tutorSpecialization, setTutorSpecialization] = useState('');
+  const [showFixedButton, setShowFixedButton] = useState(false);
   const TUTORS_PER_PAGE = 6;
   
           const theme = courseType === 'cs' ? 'blue' : 'dark-purple';
@@ -56,6 +57,12 @@ const App = () => {
             'אנרגיות חלופיות ומערכות הספק משולב',
             'מערכות משובצות מחשב'
           ];
+
+          // Make sure to set REACT_APP_GOOGLE_CLIENT_ID in your .env file
+          // This should be your Google OAuth Client ID from the Google Cloud Console
+          if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+            console.warn('REACT_APP_GOOGLE_CLIENT_ID is not set. Custom Google OAuth will not work.');
+          }
 
           const handleCourseSwitch = (type) => {
             setCourseType(type);
@@ -130,7 +137,7 @@ const App = () => {
         .eq('degree', courseType);
 
       if (error) {
-        console.error('Error fetching tutors:', error);
+        // Removed console.error
         // Fallback to local data if there's an error
         const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
         setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
@@ -159,7 +166,7 @@ const App = () => {
         setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
       }
     } catch (error) {
-      console.error('Error in loadTutorsWithFeedback:', error);
+      // Removed console.error
       // Fallback to local data on any error
       const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
       setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
@@ -174,6 +181,20 @@ const App = () => {
     }
 
     try {
+      // Validate comment on server side as well
+      const MAX_COMMENT_LENGTH = 200;
+      const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+\.(com|org|net|il|co|io))/gi;
+      
+      if (comment && comment.length > MAX_COMMENT_LENGTH) {
+        showNotification(`הערה ארוכה מדי. מוגבל ל-${MAX_COMMENT_LENGTH} תווים.`, 'error');
+        return;
+      }
+      
+      if (comment && urlRegex.test(comment)) {
+        showNotification('לא ניתן להכניס קישורים בהערות.', 'error');
+        return;
+      }
+      
       // First, check if user already has feedback for this tutor
       const { data: existingFeedback, error: fetchError } = await supabase
         .from('feedback')
@@ -182,14 +203,18 @@ const App = () => {
         .eq('user_id', user.id);
 
       if (fetchError) {
-        console.error('Error fetching existing feedback:', fetchError);
         showNotification('שגיאה בבדיקת ביקורות קיימות', 'error');
         return;
       }
 
       let error;
       
-      if (existingFeedback && existingFeedback.length > 0) {
+      // If rating is null, it means we're deleting the feedback
+      if (rating === null) {
+        // This is a refresh after deletion, just reload the data
+        loadTutorsWithFeedback();
+        return;
+      } else if (existingFeedback && existingFeedback.length > 0) {
         // Update existing feedback
         ({ error } = await supabase
           .from('feedback')
@@ -213,7 +238,6 @@ const App = () => {
       }
 
       if (error) {
-        console.error('Error submitting feedback:', error);
         showNotification('שגיאה בשליחת הביקורת', 'error');
         return;
       }
@@ -223,7 +247,6 @@ const App = () => {
       showNotification('הביקורת נשלחה בהצלחה', 'success');
       
     } catch (error) {
-      console.error('Error in handleSubmitFeedback:', error);
       showNotification('שגיאה בשליחת הביקורת', 'error');
     }
   };

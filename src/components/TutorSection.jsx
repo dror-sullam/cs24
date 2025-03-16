@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './ui/card';
 import { Button } from './ui/button';
-import { Star, LogIn, LogOut } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import GoogleLoginButton from './GoogleLoginButton';
+import TutorCard from './TutorCard';
+import { showNotification } from './ui/notification';
 
-const TutorSection = ({ courseType }) => {
+const TutorSection = ({ courseType, onSubmitFeedback }) => {
   const [user, setUser] = useState(null);
   const [tutors, setTutors] = useState([]);
   const [feedbackForms, setFeedbackForms] = useState({});
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [selectedTutorForLogin, setSelectedTutorForLogin] = useState(null);
   
   useEffect(() => {
     // Check auth status
@@ -30,7 +35,8 @@ const TutorSection = ({ courseType }) => {
       .select('*');
 
     if (error) {
-      console.error('Error loading tutors:', error);
+      // Error handling without console.error
+      alert('שגיאה בטעינת המורים');
       return;
     }
 
@@ -68,19 +74,28 @@ const TutorSection = ({ courseType }) => {
 
   const handleFeedbackClick = async (tutorId) => {
     if (!user) {
-      // Redirect to login if user is not logged in
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) {
-        console.error('Error signing in:', error.message);
-      }
+      setSelectedTutorForLogin(tutorId);
+      setShowLoginModal(true);
     } else {
       toggleFeedbackForm(tutorId);
     }
+  };
+
+  const handleLoginSuccess = (data) => {
+    setShowLoginModal(false);
+    // If the user just logged in and wants to submit feedback, open the feedback form
+    if (selectedTutorForLogin) {
+      setTimeout(() => {
+        toggleFeedbackForm(selectedTutorForLogin);
+        setSelectedTutorForLogin(null);
+      }, 1000);
+    }
+  };
+
+  const handleLoginError = (error) => {
+    // Error is already handled in the GoogleLoginButton component
+    setShowLoginModal(false);
+    setSelectedTutorForLogin(null);
   };
 
   const submitFeedback = async (tutorId, rating, comment) => {
@@ -108,82 +123,100 @@ const TutorSection = ({ courseType }) => {
   };
 
   return (
-    <Card className={`mb-8 bg-white ${courseType === 'cs' ? 'border-blue-200' : 'border-purple-200'}`}>
-      <CardHeader className="flex flex-row justify-between items-center">
-        <CardTitle className={`text-3xl ${courseType === 'cs' ? 'text-blue-950' : 'text-purple-950'}`}>
-          מורים פרטיים מומלצים
-        </CardTitle>
-        {!user && (
-          <Button
-            onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}
-            className={`${courseType === 'cs' ? 'bg-blue-600' : 'bg-purple-600'} text-white`}
-          >
-            <LogIn className="mr-2 h-4 w-4" />
-            התחבר עם Google
-          </Button>
-        )}
-      </CardHeader>
+    <div className="container mx-auto px-4 py-8">
+      <Card className={`mb-8 bg-white ${courseType === 'cs' ? 'border-blue-200' : 'border-purple-200'}`}>
+        <CardHeader>
+          <CardTitle className={`text-3xl ${courseType === 'cs' ? 'text-blue-950' : 'text-purple-950'}`}>
+            מורים פרטיים מומלצים
+          </CardTitle>
+        </CardHeader>
 
-      <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        {tutors.map((tutor) => (
-          <Card key={tutor.id} className="p-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="text-xl font-semibold">{tutor.name}</h3>
-                <p className="text-gray-600 text-sm whitespace-nowrap">
-                  {tutor.feedback.count > 0 ? (
-                    <>
-                      <Star className="inline-block h-4 w-4 text-yellow-400 mb-0.5" />
-                      {tutor.feedback.avgRating.toFixed(1)} ({tutor.feedback.count} ביקורות)
-                    </>
-                  ) : (
-                    'אין ביקורות עדיין'
-                  )}
-                </p>
+        <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          {tutors.map((tutor) => (
+            <Card key={tutor.id} className="p-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="text-xl font-semibold">{tutor.name}</h3>
+                  <p className="text-gray-600 text-sm whitespace-nowrap">
+                    {tutor.feedback.count > 0 ? (
+                      <>
+                        <Star className="inline-block h-4 w-4 text-yellow-400 mb-0.5" />
+                        {tutor.feedback.avgRating.toFixed(1)} ({tutor.feedback.count} ביקורות)
+                      </>
+                    ) : (
+                      'אין ביקורות עדיין'
+                    )}
+                  </p>
+                </div>
+                <p className="text-gray-600">{tutor.subjects}</p>
               </div>
-              <p className="text-gray-600">{tutor.subjects}</p>
-            </div>
+              
+              <Button
+                onClick={() => handleFeedbackClick(tutor.id)}
+                className="mt-4"
+                variant="outline"
+              >
+                הוסף ביקורת
+              </Button>
+
+              {feedbackForms[tutor.id] && (
+                <div className="mt-4">
+                  <select
+                    className="w-full mb-2 p-2 border rounded"
+                    id={`rating-${tutor.id}`}
+                  >
+                    {[1,2,3,4,5].map(num => (
+                      <option key={num} value={num}>{'★'.repeat(num)}</option>
+                    ))}
+                  </select>
+                  <textarea
+                    className="w-full mb-2 p-2 border rounded"
+                    placeholder="הערות (אופציונלי)"
+                    id={`comment-${tutor.id}`}
+                  />
+                  <Button
+                    onClick={() => submitFeedback(
+                      tutor.id,
+                      document.getElementById(`rating-${tutor.id}`).value,
+                      document.getElementById(`comment-${tutor.id}`).value
+                    )}
+                    className={`${courseType === 'cs' ? 'bg-blue-600' : 'bg-purple-600'} text-white`}
+                  >
+                    שלח ביקורת
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 text-center">התחברות</h2>
+            <p className="mb-4 text-center">התחבר כדי לדרג מורים</p>
             
-            <Button
-              onClick={() => handleFeedbackClick(tutor.id)}
-              className="mt-4"
-              variant="outline"
+            <GoogleLoginButton 
+              onSuccess={handleLoginSuccess} 
+              onError={handleLoginError} 
+            />
+            
+            <button
+              onClick={() => {
+                setShowLoginModal(false);
+                setSelectedTutorForLogin(null);
+              }}
+              className="w-full mt-4 px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none"
             >
-              הוסף ביקורת
-            </Button>
-
-            {feedbackForms[tutor.id] && (
-              <div className="mt-4">
-                <select
-                  className="w-full mb-2 p-2 border rounded"
-                  id={`rating-${tutor.id}`}
-                >
-                  {[1,2,3,4,5].map(num => (
-                    <option key={num} value={num}>{'★'.repeat(num)}</option>
-                  ))}
-                </select>
-                <textarea
-                  className="w-full mb-2 p-2 border rounded"
-                  placeholder="הערות (אופציונלי)"
-                  id={`comment-${tutor.id}`}
-                />
-                <Button
-                  onClick={() => submitFeedback(
-                    tutor.id,
-                    document.getElementById(`rating-${tutor.id}`).value,
-                    document.getElementById(`comment-${tutor.id}`).value
-                  )}
-                  className={`${courseType === 'cs' ? 'bg-blue-600' : 'bg-purple-600'} text-white`}
-                >
-                  שלח ביקורת
-                </Button>
-              </div>
-            )}
-          </Card>
-        ))}
-      </CardContent>
-    </Card>
+              ביטול
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
- 
+
 export default TutorSection;

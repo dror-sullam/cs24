@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Star, MessageCircle, Edit2, ThumbsUp, ChevronDown, ChevronUp, X } from 'lucide-react';
@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { showNotification } from './ui/notification';
 import { isAdmin } from '../config/admin';
+import GoogleLoginButton from './GoogleLoginButton';
 
 const EE_SPECIALIZATIONS = [
   'בקרה',
@@ -24,12 +25,20 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [commentError, setCommentError] = useState('');
   const [showReviews, setShowReviews] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
+  const MAX_COMMENT_LENGTH = 200; // Maximum character limit for comments
   const userIsAdmin = user && isAdmin(user.email);
 
-  // Filter reviews to only show ones with comments
-  const reviewsWithComments = tutor.feedback?.filter(fb => fb.comment?.trim()) || [];
+  // Find user's own feedback if it exists
+  const userOwnFeedback = user ? tutor.feedback?.find(fb => fb.user_id === user.id) : null;
+  
+  // Filter reviews to show ones with comments and the user's own feedback
+  const reviewsWithComments = tutor.feedback?.filter(fb => 
+    fb.comment?.trim() || (user && fb.user_id === user.id)
+  ) || [];
   
   // Sort reviews to show the user's own feedback first
   const sortedReviews = [...reviewsWithComments].sort((a, b) => {
@@ -51,21 +60,23 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const handleFeedbackClick = async () => {
     if (!user) {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin,
-          },
-        });
-        
-        if (error) throw error;
-      } catch (error) {
-        // Removed console.error
-      }
+      setShowLoginModal(true);
     } else {
       setShowFeedbackForm(true);
     }
+  };
+
+  const handleLoginSuccess = (data) => {
+    setShowLoginModal(false);
+    // If the user just logged in and wants to submit feedback, open the feedback form
+    setTimeout(() => {
+      setShowFeedbackForm(true);
+    }, 1000);
+  };
+
+  const handleLoginError = (error) => {
+    // Error is already handled in the GoogleLoginButton component
+    setShowLoginModal(false);
   };
 
   const handleWhatsAppClick = async (e) => {
@@ -102,20 +113,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
         return;
       }
 
-      // Verify the deletion was successful
-      const { data: verifyData, error: verifyError } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('id', feedbackId);
-        
-      if (verifyError) {
-        // Continue with the process even if verification fails
-      } else {
-        if (verifyData && verifyData.length > 0) {
-          // Feedback still exists after deletion attempt
-        }
-      }
-
       showNotification('הביקורת נמחקה בהצלחה', 'success');
       
       // Remove the feedback from the local state
@@ -143,203 +140,302 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     }
   };
 
+  const handleCommentChange = (e) => {
+    const newComment = e.target.value;
+    
+    // Check for character limit
+    if (newComment.length > MAX_COMMENT_LENGTH) {
+      setCommentError(`הערה ארוכה מדי. מוגבל ל-${MAX_COMMENT_LENGTH} תווים.`);
+      return;
+    }
+    
+    // Check for URLs/links
+    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+\.(com|org|net|il|co|io))/gi;
+    if (urlRegex.test(newComment)) {
+      setCommentError('לא ניתן להכניס קישורים בהערות.');
+      return;
+    }
+    
+    setCommentError('');
+    setComment(newComment);
+  };
+
   return (
-    <Card className={`bg-white ${courseType === 'cs' ? 'border-sky-200' : 'border-purple-200'}`}>
-      <CardHeader className="pb-3">
-        <div className="flex flex-col space-y-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">{tutor.name}</h3>
-              <div className="flex items-center gap-1">
-                <Star className={`h-4 w-4 ${starColor} ${tutor.average_rating ? 'fill-current' : ''}`} />
-                <span className="text-sm font-medium">{tutor.average_rating?.toFixed(1) || 'אין'}</span>
-                <span className="text-sm text-gray-500">({tutor.feedback?.length || 0})</span>
+    <>
+      <Card className={`bg-white ${courseType === 'cs' ? 'border-sky-200' : 'border-purple-200'}`}>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold">{tutor.name}</h3>
+                <div className="flex items-center gap-1">
+                  <Star className={`h-4 w-4 ${starColor} ${tutor.average_rating ? 'fill-current' : ''}`} />
+                  <span className="text-sm font-medium">{tutor.average_rating?.toFixed(1) || 'אין'}</span>
+                  <span className="text-sm text-gray-500">({tutor.feedback?.length || 0})</span>
+                </div>
+              </div>
+              <a
+                href={`https://wa.me/972${tutor.phone.substring(1)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`w-10 h-10 flex items-center justify-center rounded-md ${
+                  courseType === 'cs'
+                    ? 'bg-sky-600 hover:bg-sky-700'
+                    : 'bg-purple-600 hover:bg-purple-700'
+                } text-white transition-colors`}
+                title="WhatsApp"
+                onClick={handleWhatsAppClick}
+              >
+                <FontAwesomeIcon icon={faWhatsapp} size="xl" />
+              </a>
+
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-gray-600">{tutor.phone}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleFeedbackClick}
+                  className={`text-sm ${courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'}`}
+                >
+                  הוסף ביקורת
+                </Button>
               </div>
             </div>
-            <a
-              href={`https://wa.me/972${tutor.phone.substring(1)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`w-10 h-10 flex items-center justify-center rounded-md ${
-                courseType === 'cs'
-                  ? 'bg-sky-600 hover:bg-sky-700'
-                  : 'bg-purple-600 hover:bg-purple-700'
-              } text-white transition-colors`}
-              title="WhatsApp"
-              onClick={handleWhatsAppClick}
-            >
-              <FontAwesomeIcon icon={faWhatsapp} size="xl" />
-            </a>
-
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-600">{tutor.phone}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleFeedbackClick}
-                className={`text-sm ${courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'}`}
-              >
-                הוסף ביקורת
-              </Button>
+        </CardHeader>
+
+        <CardContent className="pt-0">
+          <div className="space-y-2">
+            {/* Subjects list */}
+            <div className="flex flex-wrap gap-1.5 -mx-0.5">
+              {tutor.subjects?.map((subject, index) => (
+                <span
+                  key={index}
+                  className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
+                    courseType === 'cs'
+                      ? 'bg-sky-100 text-sky-800'
+                      : 'bg-purple-100 text-purple-800'
+                  }`}
+                >
+                  {subject}
+                </span>
+              ))}
             </div>
-          </div>
-        </div>
-      </CardHeader>
 
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          {/* Subjects list */}
-          <div className="flex flex-wrap gap-1.5 -mx-0.5">
-            {tutor.subjects?.map((subject, index) => (
-              <span
-                key={index}
-                className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-                  courseType === 'cs'
-                    ? 'bg-sky-100 text-sky-800'
-                    : 'bg-purple-100 text-purple-800'
-                }`}
-              >
-                {subject}
-              </span>
-            ))}
-          </div>
+            {/* Reviews section */}
+            {tutor.feedback?.length > 0 && (
+              <div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowReviews(!showReviews)}
+                  className={`text-sm ${courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'}`}
+                >
+                  {showReviews ? 'הסתר ביקורות' : `ראה ביקורות (${reviewsWithComments.length})`}
+                </Button>
 
-          {/* Reviews section */}
-          {tutor.feedback?.length > 0 && reviewsWithComments.length > 0 && (
-            <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowReviews(!showReviews)}
-                className={`text-sm ${courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'}`}
-              >
-                {showReviews ? 'הסתר ביקורות' : `ראה ביקורות (${reviewsWithComments.length})`}
-              </Button>
-
-              {showReviews && reviewsWithComments.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  {displayedReviews.map((fb, index) => {
-                    const isUserOwnFeedback = user && fb.user_id === user.id;
-                    return (
-                    <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
+                {/* Always show user's own feedback if it exists */}
+                {userOwnFeedback && !showReviews && (
+                  <div className="mt-2 space-y-2">
+                    <div className="bg-blue-50 rounded-lg p-3 relative">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-3.5 w-3.5 ${i < fb.rating ? `${starColor} fill-current` : 'text-gray-300'}`}
+                              className={`h-3.5 w-3.5 ${i < userOwnFeedback.rating ? `${starColor} fill-current` : 'text-gray-300'}`}
                             />
                           ))}
-                          {isUserOwnFeedback && (
-                            <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
-                          )}
+                          <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {fb.created_at && (
+                          {userOwnFeedback.created_at && (
                             <span className="text-xs text-gray-500">
-                              {format(new Date(fb.created_at), 'dd/MM/yyyy')}
+                              {format(new Date(userOwnFeedback.created_at), 'dd/MM/yyyy')}
                             </span>
                           )}
-                          {(userIsAdmin || isUserOwnFeedback) && (
-                            <button
-                              onClick={() => {
-                                handleDeleteFeedback(fb.id);
-                              }}
-                              className="text-gray-400 hover:text-red-500 transition-colors"
-                              title="מחק ביקורת"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => {
+                              handleDeleteFeedback(userOwnFeedback.id);
+                            }}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                            title="מחק ביקורת"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-700 mt-1">{fb.comment}</p>
-                    </div>
-                  )})}
-                  
-                  {reviewsWithComments.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowAllReviews(!showAllReviews)}
-                      className={`w-full text-sm ${
-                        courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'
-                      }`}
-                    >
-                      {showAllReviews ? (
-                        <>
-                          הצג פחות <ChevronUp className="h-4 w-4" />
-                        </>
-                      ) : (
-                        <>
-                          הצג עוד {reviewsWithComments.length - 1} ביקורות <ChevronDown className="h-4 w-4" />
-                        </>
+                      {userOwnFeedback.comment && (
+                        <p className="text-sm text-gray-700 mt-1">{userOwnFeedback.comment}</p>
                       )}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                    </div>
+                  </div>
+                )}
 
-          {/* Feedback form */}
-          {showFeedbackForm && (
-            <div className="space-y-3 bg-white p-3 rounded-lg shadow-sm mt-3">
-              <div className="flex justify-center gap-2">
-                {[5, 4, 3, 2, 1].map((value) => (
-                  <button
-                    key={value}
-                    onClick={() => setRating(value)}
-                    className={`transition-all ${hoverStarColor}`}
-                  >
-                    <Star
-                      className={`h-7 w-7 ${
-                        value <= rating ? `${starColor} fill-current` : 'text-gray-300'
-                      }`}
-                    />
-                  </button>
-                ))}
+                {showReviews && reviewsWithComments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {displayedReviews.map((fb, index) => {
+                      const isUserOwnFeedback = user && fb.user_id === user.id;
+                      return (
+                      <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-3.5 w-3.5 ${i < fb.rating ? `${starColor} fill-current` : 'text-gray-300'}`}
+                              />
+                            ))}
+                            {isUserOwnFeedback && (
+                              <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {fb.created_at && (
+                              <span className="text-xs text-gray-500">
+                                {format(new Date(fb.created_at), 'dd/MM/yyyy')}
+                              </span>
+                            )}
+                            {(userIsAdmin || isUserOwnFeedback) && (
+                              <button
+                                onClick={() => {
+                                  handleDeleteFeedback(fb.id);
+                                }}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                title="מחק ביקורת"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        {fb.comment && <p className="text-sm text-gray-700 mt-1">{fb.comment}</p>}
+                      </div>
+                    )})}
+                    
+                    {reviewsWithComments.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllReviews(!showAllReviews)}
+                        className={`w-full text-sm ${
+                          courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'
+                        }`}
+                      >
+                        {showAllReviews ? (
+                          <>
+                            הצג פחות <ChevronUp className="h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            הצג עוד {reviewsWithComments.length - 1} ביקורות <ChevronDown className="h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="הערות (אופציונלי)"
-                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all resize-none text-sm`}
-                rows={2}
-                dir="rtl"
-              />
-              <div className="flex gap-2">
-                <Button
-                  className={`flex-1 gap-2 ${
-                    courseType === 'cs' 
-                      ? 'bg-sky-600 hover:bg-sky-700' 
-                      : 'bg-purple-600 hover:bg-purple-700'
-                  } text-white`}
-                  onClick={() => {
-                    onSubmitFeedback(tutor.id, rating, comment);
-                    setShowFeedbackForm(false);
-                    setComment('');
-                    setRating(5);
-                  }}
-                >
-                  <ThumbsUp className="h-4 w-4" />
-                  שלח
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowFeedbackForm(false)}
-                >
-                  ביטול
-                </Button>
+            )}
+
+            {/* Feedback form */}
+            {showFeedbackForm && (
+              <div className="space-y-3 bg-white p-3 rounded-lg shadow-sm mt-3">
+                <div className="flex justify-center gap-2">
+                  {[5, 4, 3, 2, 1].map((value) => (
+                    <button
+                      key={value}
+                      onClick={() => setRating(value)}
+                      className={`transition-all ${hoverStarColor}`}
+                    >
+                      <Star
+                        className={`h-7 w-7 ${
+                          value <= rating ? `${starColor} fill-current` : 'text-gray-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={comment}
+                  onChange={handleCommentChange}
+                  placeholder="הערות (אופציונלי)"
+                  className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all resize-none text-sm ${commentError ? 'border-red-500' : ''}`}
+                  rows={2}
+                  dir="rtl"
+                  maxLength={MAX_COMMENT_LENGTH}
+                />
+                {commentError && (
+                  <p className="text-red-500 text-xs mt-1">{commentError}</p>
+                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">
+                    {comment.length}/{MAX_COMMENT_LENGTH}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      className={`flex-1 gap-2 ${
+                        courseType === 'cs' 
+                          ? 'bg-sky-600 hover:bg-sky-700' 
+                          : 'bg-purple-600 hover:bg-purple-700'
+                      } text-white`}
+                      onClick={() => {
+                        if (!commentError) {
+                          onSubmitFeedback(tutor.id, rating, comment);
+                          setShowFeedbackForm(false);
+                          setComment('');
+                          setRating(5);
+                          setCommentError('');
+                        }
+                      }}
+                      disabled={!!commentError}
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                      שלח
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setShowFeedbackForm(false);
+                        setComment('');
+                        setCommentError('');
+                      }}
+                    >
+                      ביטול
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 text-center">התחברות</h2>
+            <p className="mb-4 text-center">אנחנו לא משתמשים במידע הזה, זה נועד לוודא שאת/ה לא רובוט</p>
+            
+            <GoogleLoginButton 
+              onSuccess={handleLoginSuccess} 
+              onError={handleLoginError} 
+            />
+            
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="w-full mt-4 px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none"
+            >
+              ביטול
+            </button>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 };
 

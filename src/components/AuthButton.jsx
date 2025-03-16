@@ -1,76 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { LogOut, UserPlus, LogIn } from 'lucide-react';
+import { UserPlus, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import JoinRequestModal from './JoinRequestModal';
+import { showNotification } from './ui/notification';
+import GoogleLoginButton from './GoogleLoginButton';
+import useAuth from '../hooks/useAuth';
 
 const AuthButton = ({ courseType }) => {
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [session, setSession] = useState(null);
-
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      if (!session) {
-        throw new Error('לא מחובר למערכת');
-      }
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error signing out:', error.message);
-      alert('התנתקות נכשלה. אנא נסה שוב.');
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
+  const { user, session, signOut, loading } = useAuth();
 
   const handleJoinRequest = async () => {
     if (!session) {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) {
-        console.error('Error signing in:', error.message);
-        alert('התחברות נכשלה. אנא נסה שוב.');
-      }
+      setShowLoginModal(true);
     } else {
       setShowJoinModal(true);
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await signOut();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleLoginSuccess = (data) => {
+    setShowLoginModal(false);
+    // If the user just logged in and wants to join as a tutor, show the join modal
+    if (!session) {
+      setTimeout(() => {
+        setShowJoinModal(true);
+      }, 1000);
+    }
+  };
+
+  const handleLoginError = (error) => {
+    // Error is already handled in the GoogleLoginButton component
+    setShowLoginModal(false);
+  };
+
   return (
     <div className="flex gap-1 sm:gap-2">
-      {!session && (
-        <Button
-          onClick={() => supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin }
-          })}
-          className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base ${
-            courseType === 'cs' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
-          } text-white`}
-          size="sm"
-        >
-          <LogIn className="h-4 w-4" />
-          <span className="hidden sm:inline">התחברות</span>
-        </Button>
-      )}
       <Button
         onClick={handleJoinRequest}
         className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base ${
@@ -88,7 +64,7 @@ const AuthButton = ({ courseType }) => {
         <Button
           variant="outline"
           onClick={handleLogout}
-          disabled={isLoggingOut}
+          disabled={isLoggingOut || loading}
           className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
           size="sm"
         >
@@ -97,6 +73,28 @@ const AuthButton = ({ courseType }) => {
             {isLoggingOut ? '...מתנתק' : 'התנתקות'}
           </span>
         </Button>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 text-center">התחברות</h2>
+            <p className="mb-4 text-center">אנחנו לא משתמשים במידע הזה, זה נועד לוודא שאת/ה לא רובוט</p>
+            
+            <GoogleLoginButton 
+              onSuccess={handleLoginSuccess} 
+              onError={handleLoginError} 
+            />
+            
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="w-full mt-4 px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none"
+            >
+              ביטול
+            </button>
+          </div>
+        </div>
       )}
 
       <JoinRequestModal 

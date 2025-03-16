@@ -70,8 +70,6 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
   const [phone, setPhone] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   if (!isOpen || !session) return null;
 
@@ -95,7 +93,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
 
     try {
       // Insert new request
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('tutor_requests')
         .insert([{
           name,
@@ -110,23 +108,24 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
           email: session.user.email
         }]);
 
-      if (error) throw error;
-      
-      // Reset form and show success message
+      if (insertError) {
+        if (insertError.code === '23505') { // Unique constraint violation
+          showNotification('כבר קיימת בקשה פעילה עם מספר טלפון זה. אנא המתן לתשובה.', 'warning');
+          return;
+        }
+        throw insertError;
+      }
+
+      showNotification('בקשתך נשלחה בהצלחה! נחזור אליך בקרוב', 'success');
+      onClose();
+      // Reset form
       setName('');
       setPhone('');
       setSelectedYears([]);
       setSpecialization('');
       setSelectedSubjects([]);
-      setSubmitSuccess(true);
-      
-      // Close modal after delay
-      setTimeout(() => {
-        onClose();
-        setSubmitSuccess(false);
-      }, 2000);
     } catch (error) {
-      setSubmitError(true);
+      console.error('Error submitting request:', error);
       showNotification('אירעה שגיאה בשליחת הבקשה. אנא נסה שוב מאוחר יותר', 'error');
     } finally {
       setIsSubmitting(false);
