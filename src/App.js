@@ -58,11 +58,6 @@ const App = () => {
             'מערכות משובצות מחשב'
           ];
 
-          // Make sure to set REACT_APP_GOOGLE_CLIENT_ID in your .env file
-          // This should be your Google OAuth Client ID from the Google Cloud Console
-          if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
-            console.warn('REACT_APP_GOOGLE_CLIENT_ID is not set. Custom Google OAuth will not work.');
-          }
 
           const handleCourseSwitch = (type) => {
             setCourseType(type);
