@@ -39,6 +39,7 @@ const App = () => {
   const [showAllTutors, setShowAllTutors] = useState(false);
   const [tutorSpecialization, setTutorSpecialization] = useState('');
   const [showFixedButton, setShowFixedButton] = useState(false);
+  const [isLoadingTutors, setIsLoadingTutors] = useState(true);
   const TUTORS_PER_PAGE = 6;
   
           const theme = courseType === 'cs' ? 'blue' : 'dark-purple';
@@ -114,6 +115,7 @@ const App = () => {
 
   // Tutor data loading
   const loadTutorsWithFeedback = async () => {
+    setIsLoadingTutors(true);
     try {
       // Fetch tutors with their feedback using a single query
       const { data: tutors, error } = await supabase
@@ -165,6 +167,8 @@ const App = () => {
       // Fallback to local data on any error
       const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
       setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
+    } finally {
+      setIsLoadingTutors(false);
     }
   };
 
@@ -573,35 +577,46 @@ const App = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                {sortTutorsByRating(filteredTutors)
-                  .slice(0, showAllTutors ? undefined : TUTORS_PER_PAGE)
-                  .map((tutor) => (
-                    <TutorCard
-                      key={tutor.id}
-                      tutor={tutor}
-                      courseType={courseType}
-                      user={user}
-                      onSubmitFeedback={handleSubmitFeedback}
-                    />
-              ))}
-            </div>
-
-              {filteredTutors.length > TUTORS_PER_PAGE && !showAllTutors && (
-                <div className="flex justify-center mt-4">
-                  <Button
-                    onClick={() => setShowAllTutors(true)}
-                    variant="outline"
-                    className={`${
-                      courseType === 'cs'
-                        ? 'text-sky-600 hover:bg-sky-100'
-                        : 'text-purple-600 hover:bg-purple-100'
-                    }`}
-                  >
-                    הצג עוד {filteredTutors.length - TUTORS_PER_PAGE} מתרגלים
-                  </Button>
-          </div>
+                {isLoadingTutors ? (
+                  // Loading skeleton
+                  <>
+                    {[...Array(4)].map((_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="bg-gray-200 h-40 rounded-lg mb-4"></div>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  sortTutorsByRating(filteredTutors)
+                    .slice(0, showAllTutors ? undefined : TUTORS_PER_PAGE)
+                    .map((tutor) => (
+                      <TutorCard
+                        key={tutor.id}
+                        tutor={tutor}
+                        courseType={courseType}
+                        user={user}
+                        onSubmitFeedback={handleSubmitFeedback}
+                      />
+                ))
               )}
-        </CardContent>
+          </div>
+
+                {filteredTutors.length > TUTORS_PER_PAGE && !showAllTutors && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      onClick={() => setShowAllTutors(true)}
+                      variant="outline"
+                      className={`${
+                        courseType === 'cs'
+                          ? 'text-sky-600 hover:bg-sky-100'
+                          : 'text-purple-600 hover:bg-purple-100'
+                      }`}
+                    >
+                      הצג עוד {filteredTutors.length - TUTORS_PER_PAGE} מתרגלים
+                    </Button>
+              </div>
+                )}
+          </CardContent>
       </Card>
 
         {/* Missing Tests Banner */}
