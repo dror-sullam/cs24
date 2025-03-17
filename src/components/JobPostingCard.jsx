@@ -75,11 +75,9 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
           setSubscribeSuccess(false);
           setEmail('');
         }, 2000);
-      } else {
-        console.error('Form submission failed:', response.status);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
+      // Removed console.error
     }
   };
 
@@ -118,12 +116,12 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const fetchJobs = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://my-public-jobs-json.s3.us-east-1.amazonaws.com/jobs.json");
+      const response = await fetch(process.env.REACT_APP_JOBS_API_URL);
       const data = await response.json();
       const jobsData = courseType === 'cs' ? data["secretjuniordevelopers"] : data["-1002263628689"];
       setJobs(jobsData || []);
     } catch (error) {
-      console.error("Error fetching jobs:", error);
+      // Removed console.error
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 
-const yearOneCourses = [
+export const yearOneCourses = [
     { id: 1, name: "תכנות מונחה עצמים", driveLink: "https://drive.google.com/drive/folders/1DfI4EwDUx4pNjWIeQz0SU_TITPy4PBMn?usp=drive_link" },
     { id: 2, name: "סדנה מתקדמת בתכנות", driveLink: "https://drive.google.com/drive/folders/1gW2LE8jD_Yhb9BNzdS583aonXdSGpOk_?usp=drive_link" },
     { id: 3, name: "מבני נתונים", driveLink: "https://drive.google.com/drive/folders/17Sv6VSK3HgaofeZ7Tl-FB3SbzLeoeCuU?usp=drive_link" },
@@ -9,11 +9,11 @@ const yearOneCourses = [
     { id: 5, name: "מבוא למדעי המחשב", driveLink: "https://drive.google.com/drive/folders/1Cy-yEGmXx4u0PA2ejUZxQ33-pBzBQ6xn?usp=drive_link" },
     { id: 6, name: "בדידה 2", driveLink: "https://drive.google.com/drive/folders/1NquaLProAL_ewrNRx9ZJy13ysWBpQyLH?usp=drive_link" },
     { id: 7, name: "בדידה 1", driveLink: "https://drive.google.com/drive/folders/1XdBYqhLtbtflQU3fp-XlmEL9ajt9Hh1g?usp=drive_link" },
-    { id: 8, name: "אלגברה לינארית 1", driveLink: "https://drive.google.com/drive/folders/1jP8H6qmem2HtKChLG7mUg6lQ0C1hcojW?usp=drive_link" },
+    { id: 8, name: "אלגברה ליניארית 1", driveLink: "https://drive.google.com/drive/folders/1jP8H6qmem2HtKChLG7mUg6lQ0C1hcojW?usp=drive_link" },
     { id: 9, name: "אינפי 1", driveLink: "https://drive.google.com/drive/folders/1ViNjQEhT571efRNEpvS51xH0FZz8ABJa?usp=drive_link" },
 ]; 
 
-const yearTwoCourses = [
+export const yearTwoCourses = [
   { id: 10, name: "רשתות תקשורת מחשבים", driveLink: "https://drive.google.com/drive/folders/1YSnDxrx-nV7U5CodB21-yUpZMvZjyCDP?usp=share_link" },
   { id: 11, name: "מבוא למדעי הנתונים", driveLink: "https://drive.google.com/drive/folders/158eBODzY05k568sBR9dpMLbClGOL9ApT?usp=share_link" },
   { id: 12, name: "הסתברות", driveLink: "https://drive.google.com/drive/folders/1Nnnun-DJtFXBgrmQtLjhAe0ymLMVfE00?usp=sharing" },
@@ -27,14 +27,13 @@ const yearTwoCourses = [
   { id: 20, name: "אלגוריתמים 2", driveLink: "https://drive.google.com/drive/folders/1ME21TQUflIfQR93COVr0BKGtHHy5hpy2?usp=share_link" },
 ];
 
-
-const yearThreeCourses = [
+export const yearThreeCourses = [
   
   { id: 21, name: "אוטומטים ושפות פורמליות", driveLink: "https://drive.google.com/drive/folders/1HHv_5NGFKITUMbLM8INccG3jzz2cCmFS?usp=sharing" },
   { id: 22, name: "חישוביות וסיבוכיות", driveLink: "https://drive.google.com/drive/folders/1wPppIA0y7hFRf3CxEs0YBsEo5a_qCwdI?usp=share_link" }
 ];
 
-const choosingCourses = [
+export const choosingCourses = [
   { id: 23, name: "בלוקציין", driveLink: "https://drive.google.com/drive/folders/1rrR0a1k89Yu9jBdo08WMwiHLlJrui9Vn?usp=share_link" },
   { id: 24, name: "מבוא למערכות מידע גיאוגרפי GIS", driveLink: "https://drive.google.com/drive/folders/1tyinoo_MKNvX0n3sryv3dpFHDMNmSWRa?usp=share_link" },
   { id: 25, name: "אנטומיה ופיזיולוגיה של גוף האדם", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאנטומיה%20ופיזיולוגיה%20של%20גוף%20האדם&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -63,8 +62,7 @@ const choosingCourses = [
   { id: 48, name: "תקשורת בעולם טכנולוגי", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fתקשורת%20בעולם%20טכנולוגי&sortField=LinkFilename&isAscending=true&ga=1" },
 ];
 
-// Electrical Engineering courses (example data - replace with actual courses)
-const eeYearOneCourses = [
+export const eeYearOneCourses = [
   { id: 101, name: "פיסיקה 1 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fפיזיקה%201&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 102, name: "חשבון אינפיניטסימלי 1 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fחשבון%20אינפיניטסימלי%201&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 103, name: "אלגברה ליניארית", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאלגברה%20ליניארית&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -73,11 +71,11 @@ const eeYearOneCourses = [
   { id: 106, name: "חשבון אינפיניטסימלי 2 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fחשבון%20אינפיניטסימלי%202&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 107, name: "משוואות דיפרנציאליות רגילות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמשוואות%20דיפרנציאליות%20רגילות&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 108, name: "טורים והתמרות אינטגראליות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fטורים%20והתמרות%20אינטגרליות&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 109, name: "מעבדה לפיסיקה 1 למהנדסים - אין?", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לפיזיקה%201&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 109, name: "מעבדה לפיסיקה 1 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לפיזיקה%201&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 110, name: "פיסיקה 2 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fפיזיקה%202&sortField=LinkFilename&isAscending=true&ga=1" },
 ];
 
-const eeYearTwoCourses = [
+export const eeYearTwoCourses = [
   { id: 201, name: "הסתברות למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fהסתברות&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 202, name: "מעבדה לפיסיקה 2 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לפיזיקה%202&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 203, name: "משוואות דיפרנציאליות חלקיות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמשוואות%20דיפרנציאליות%20חלקיות&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -94,7 +92,7 @@ const eeYearTwoCourses = [
   { id: 214, name: "קדם פרויקט ופיתוח מיומנויות רכות לסטודנטים", driveLink: "#" }
 ];
 
-const eeYearThreeCourses = [
+export const eeYearThreeCourses = [
   { id: 301, name: "התקני מוליכים למחצה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fהתקני%20מוליכים%20למחצה&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 302, name: "אותות אקראיים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאותות%20אקראיים&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 303, name: "מבוא למערכות תקשורת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמבוא%20למערכות%20תקשורת&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -118,12 +116,12 @@ const eeYearThreeCourses = [
   { id: 321, tag: 'תקשורת ועיבוד אותות', name: "רשתות מחשבים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fרשתות%20מחשבים&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 322, tag: 'תקשורת ועיבוד אותות', name: "מעבדה למיקרו בקרים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20למיקרו%20בקרים&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 323, tag: 'תקשורת ועיבוד אותות', name: "מעבדה להנדסת תקשורת", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20להנדסת%20תקשורת&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 324, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "'מערכות הספק ב", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20הספק%20ב&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 324, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "מערכות הספק ב", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20הספק%20ב&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 325, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "מעבדה להמרת אנרגיה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20להמרת%20אנרגיה&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 327, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "טכניקות מתח גבוה", driveLink: "#" },
   { id: 328, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "התקני מתח גבוה ונמוך", driveLink: "#" },
   { id: 329, tag: 'אנרגיה ומערכות הספק(זרם חזק)', name: "מערכות הספק אלקטרוניות", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמערכות%20הספק%20אלקטרוניות&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 330, tag: ['אנרגיה ומערכות הספק(זרם חזק)','אנרגיות חלופיות ומערכות הספק משולב'], name: "המרת אנרגיה א'", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fהמרת%20אנרגיה&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 330, tag: ['אנרגיה ומערכות הספק(זרם חזק)','אנרגיות חלופיות ומערכות הספק משולב'], name: "המרת אנרגיה א", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fהמרת%20אנרגיה&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 331, tag: 'אנרגיות חלופיות ומערכות הספק משולב', name: "הינע חשמלי", driveLink: "#" },
   { id: 332, tag: 'אנרגיות חלופיות ומערכות הספק משולב', name: "תהליכים אנרגטיים ושימור אנרגיה", driveLink: "#" },
   { id: 333, tag: 'מערכות משובצות מחשב', name: "אלגוריתמים ומבני נתונים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאלגוריתמים%20ומבנה%20נתונים&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -133,7 +131,7 @@ const eeYearThreeCourses = [
 
 
 ];
-const eeYearFourCourses = [
+export const eeYearFourCourses = [
   { id: 401, tag: 'בקרה', name: "מעבדה מתקדמת לבקרה", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20לבקרה%20מתקדמת&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 402, name: "מעבדה להתקנים אלקטרוניים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמעבדה%20להתקנים%20אלקטרונים&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 403, name: "פרוייקט גמר", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fפרויקט%20גמר%20%2D%20תואר%20ראשון&sortField=LinkFilename&isAscending=true&ga=1" },
@@ -187,9 +185,6 @@ const eeYearFourCourses = [
 
 
 ];
-
-
-
 
 const YearSection = ({ title, courses, selectedTag, courseType = 'cs' }) => {
   const [isOpen, setIsOpen] = useState(false);
