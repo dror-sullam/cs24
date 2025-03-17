@@ -419,7 +419,13 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-center">התחברות</h2>
-            <p className="mb-4 text-center">אנחנו לא משתמשים במידע הזה, זה נועד לוודא שאת/ה לא רובוט</p>
+            <p className="mb-4 text-center">
+              לא אוהבים רובוטים 😉
+              <br />
+              כדי למנוע ספאם ולהבטיח קהילה נעימה באתר,
+              <br />
+              אנחנו משתמשים בהתחברות פשוטה עם גוגל.
+            </p>
             
             <GoogleLoginButton 
               onSuccess={handleLoginSuccess} 
