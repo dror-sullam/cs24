@@ -233,7 +233,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                   onClick={() => setShowReviews(!showReviews)}
                   className={`text-sm ${courseType === 'cs' ? 'text-sky-600 hover:text-sky-700' : 'text-purple-600 hover:text-purple-700'}`}
                 >
-                  {showReviews ? 'הסתר ביקורות' : `ראה ביקורות (${reviewsWithComments.length})`}
+                  {showReviews ? 'הסתר תגובות' : `ראה תגובות (${reviewsWithComments.length})`}
                 </Button>
 
                 {/* Always show user's own feedback if it exists */}
