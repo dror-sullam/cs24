@@ -80,7 +80,22 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
   };
 
   const handleWhatsAppClick = async (e) => {
-    // Click tracking removed since it's no longer needed
+    try {
+      // Insert click record into tutor_clicks table
+      const { error } = await supabase
+        .from('tutor_clicks')
+        .insert([{
+          tutor_id: tutor.id,
+          clicked_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.error('Error tracking click:', error);
+      }
+    } catch (error) {
+      // Silently fail - don't block the user from contacting the tutor
+      console.error('Error tracking click:', error);
+    }
   };
 
   const handleDeleteFeedback = async (feedbackId) => {
