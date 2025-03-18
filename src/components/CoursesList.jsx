@@ -9,7 +9,7 @@ export const yearOneCourses = [
     { id: 5, name: "מבוא למדעי המחשב", driveLink: "https://drive.google.com/drive/folders/1Cy-yEGmXx4u0PA2ejUZxQ33-pBzBQ6xn?usp=drive_link" },
     { id: 6, name: "בדידה 2", driveLink: "https://drive.google.com/drive/folders/1NquaLProAL_ewrNRx9ZJy13ysWBpQyLH?usp=drive_link" },
     { id: 7, name: "בדידה 1", driveLink: "https://drive.google.com/drive/folders/1XdBYqhLtbtflQU3fp-XlmEL9ajt9Hh1g?usp=drive_link" },
-    { id: 8, name: "אלגברה ליניארית 1", driveLink: "https://drive.google.com/drive/folders/1jP8H6qmem2HtKChLG7mUg6lQ0C1hcojW?usp=drive_link" },
+    { id: 8, name: "אלגברה לינארית 1", driveLink: "https://drive.google.com/drive/folders/1jP8H6qmem2HtKChLG7mUg6lQ0C1hcojW?usp=drive_link" },
     { id: 9, name: "אינפי 1", driveLink: "https://drive.google.com/drive/folders/1ViNjQEhT571efRNEpvS51xH0FZz8ABJa?usp=drive_link" },
 ]; 
 
@@ -65,7 +65,7 @@ export const choosingCourses = [
 export const eeYearOneCourses = [
   { id: 101, name: "פיסיקה 1 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fפיזיקה%201&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 102, name: "חשבון אינפיניטסימלי 1 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fחשבון%20אינפיניטסימלי%201&sortField=LinkFilename&isAscending=true&ga=1" },
-  { id: 103, name: "אלגברה ליניארית", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאלגברה%20ליניארית&sortField=LinkFilename&isAscending=true&ga=1" },
+  { id: 103, name: "אלגברה לינארית", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fאלגברה%20ליניארית&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 104, name: "מיתוג ותכנון לוגי", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fמיתוג%20ותכנון%20לוגי&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 105, name: "תכנות C", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fתכנות%20C&sortField=LinkFilename&isAscending=true&ga=1" },
   { id: 106, name: "חשבון אינפיניטסימלי 2 למהנדסים", driveLink: "https://hitacil-my.sharepoint.com/personal/barucha_my_hit_ac_il/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbarucha%5Fmy%5Fhit%5Fac%5Fil%2FDocuments%2Fדרייברי%20%2D%20הדרייב%20של%20ברי%20אגייב%2Fחשבון%20אינפיניטסימלי%202&sortField=LinkFilename&isAscending=true&ga=1" },
