@@ -17,6 +17,7 @@ const AdminPanel = ({ user }) => {
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [error, setError] = useState(null);
+  const [showAllRequests, setShowAllRequests] = useState(false);
 
   const userIsAdmin = user && isAdmin(user.email);
 
@@ -31,21 +32,17 @@ const AdminPanel = ({ user }) => {
       setLoading(true);
       setError(null);
       
-      // Remove any status filter to show all requests
+      // Only fetch pending requests by default
       const { data, error } = await supabase
         .from('tutor_requests')
         .select('*')
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) {
         setError(`Error loading requests: ${error.message}`);
         throw error;
       }
-      
-      // Remove the count query that's causing 400 errors
-      // const { data: tableInfo, error: tableError } = await supabase
-      //   .from('tutor_requests')
-      //   .select('count()');
       
       setRequests(data || []);
     } catch (error) {
@@ -142,7 +139,15 @@ const AdminPanel = ({ user }) => {
       <CardHeader className="border-b sticky top-0 bg-white z-10">
         <CardTitle className="text-2xl">ניהול בקשות מורים</CardTitle>
         <div className="text-sm text-gray-500">מחובר כמנהל: {user?.email}</div>
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          <Button 
+            onClick={() => setShowAllRequests(!showAllRequests)}
+            size="sm"
+            variant="outline"
+            className="text-blue-600 hover:text-blue-700"
+          >
+            {showAllRequests ? 'הצג רק בקשות ממתינות' : 'הצג את כל הבקשות'}
+          </Button>
           <Button 
             onClick={loadRequests} 
             size="sm"

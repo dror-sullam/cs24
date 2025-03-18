@@ -92,6 +92,22 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
     setIsSubmitting(true);
 
     try {
+      // Check for active (pending) requests with the same phone number
+      const { data: existingRequests, error: checkError } = await supabase
+        .from('tutor_requests')
+        .select('*')
+        .eq('phone', phone)
+        .eq('status', 'pending');
+
+      if (checkError) {
+        throw checkError;
+      }
+
+      if (existingRequests && existingRequests.length > 0) {
+        showNotification('כבר קיימת בקשה פעילה עם מספר טלפון זה. אנא המתן לתשובה.', 'warning');
+        return;
+      }
+
       // Insert new request
       const { error: insertError } = await supabase
         .from('tutor_requests')
@@ -109,10 +125,6 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
         }]);
 
       if (insertError) {
-        if (insertError.code === '23505') { // Unique constraint violation
-          showNotification('כבר קיימת בקשה פעילה עם מספר טלפון זה. אנא המתן לתשובה.', 'warning');
-          return;
-        }
         throw insertError;
       }
 
