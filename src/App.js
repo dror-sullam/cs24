@@ -117,13 +117,15 @@ const App = () => {
   const loadTutorsWithFeedback = async () => {
     setIsLoadingTutors(true);
     try {
-      // Use the public view instead of direct table access
+      // Fetch tutors with their feedback using a single query
       const { data: tutors, error } = await supabase
-        .from('public_tutor_info')
+        .from('tutors')
         .select(`
           *,
-          public_feedback (
+          feedback (
             id,
+            user_id,
+            email,
             rating,
             comment,
             created_at
@@ -132,14 +134,17 @@ const App = () => {
         .eq('degree', courseType);
 
       if (error) {
+        // Removed console.error
+        // Fallback to local data if there's an error
         const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
         setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
         return;
       }
       
       if (tutors && tutors.length > 0) {
+        // Calculate average rating and feedback count for each tutor
         const tutorsWithStats = tutors.map(tutor => {
-          const validRatings = tutor.public_feedback?.filter(f => f.rating) || [];
+          const validRatings = tutor.feedback.filter(f => f.rating);
           const average_rating = validRatings.length > 0
             ? validRatings.reduce((sum, f) => sum + f.rating, 0) / validRatings.length
             : null;
@@ -147,17 +152,19 @@ const App = () => {
           return {
             ...tutor,
             average_rating,
-            feedback_count: tutor.public_feedback?.length || 0,
-            feedback: tutor.public_feedback || []
+            feedback_count: tutor.feedback.length
           };
         });
         
         setTutorsWithFeedback(tutorsWithStats);
       } else {
+        // Fallback to local data if no tutors in Supabase
         const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
         setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
       }
     } catch (error) {
+      // Removed console.error
+      // Fallback to local data on any error
       const fallbackTutors = courseType === 'cs' ? csTutors : eeTutors;
       setTutorsWithFeedback(fallbackTutors.map(tutor => ({...tutor, feedback: []})));
     } finally {

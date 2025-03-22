@@ -440,8 +440,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
               כדי למנוע ספאם ולהבטיח קהילה נעימה באתר,
               <br />
               אנחנו משתמשים בהתחברות פשוטה עם גוגל.
-              <br/>
-              <strong>התגובות אנונימיות לחלוטין.</strong>
             </p>
             
             <GoogleLoginButton 
