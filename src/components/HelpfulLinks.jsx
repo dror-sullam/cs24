@@ -65,7 +65,7 @@ const HelpfulLinksSection = ({ courseType }) => {
       url: "https://drive.google.com/drive/u/0/folders/1EOpfuGEXp-hCD_DCBYerJiXP-YIrIfnB"
     },
     {
-      title: "הדרייב של נועה אלריך",
+      title: "הדרייב של נועה ארליכמן",
       description: "סיכומים ברמה בינלאומית",
       url: "https://drive.google.com/drive/folders/1s1BBsq2UwPZDvdnMSgYlNuuzXpRThx2m"
     }
