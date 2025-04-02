@@ -30,7 +30,19 @@ export const yearTwoCourses = [
 export const yearThreeCourses = [
   
   { id: 21, name: "אוטומטים ושפות פורמליות", driveLink: "https://drive.google.com/drive/folders/1HHv_5NGFKITUMbLM8INccG3jzz2cCmFS?usp=sharing" },
-  { id: 22, name: "חישוביות וסיבוכיות", driveLink: "https://drive.google.com/drive/folders/1wPppIA0y7hFRf3CxEs0YBsEo5a_qCwdI?usp=share_link" }
+  { id: 22, name: "חישוביות וסיבוכיות", driveLink: "https://drive.google.com/drive/folders/1wPppIA0y7hFRf3CxEs0YBsEo5a_qCwdI?usp=share_link" },
+  //cs choosing courses
+  { id: 50, name: "בלוקצ'יין", driveLink: "https://drive.google.com/drive/folders/1rrR0a1k89Yu9jBdo08WMwiHLlJrui9Vn?usp=sharing"},
+  { id: 51, name: "מבוא למערכות מידע גיאוגרפי GIS", driveLink: "https://drive.google.com/drive/folders/1tyinoo_MKNvX0n3sryv3dpFHDMNmSWRa?usp=drive_link"},
+  { id: 52, name: "הנדסת פתרונות תוכנה מתקדמים (חלק א')", driveLink: "https://drive.google.com/drive/folders/1viWDkv9AJVOh3XO_oTSKjhVbA-sUX6v5?usp=sharing"},
+  { id: 53, name: "מבוא לתורת ההצפנה", driveLink: "https://drive.google.com/drive/folders/1xVpuxzJz2U9WJN2VZyUY4cyNAy8U_qsN?usp=sharing"},
+  { id: 54, name: "פיתוח צד לקוח בסביבת אנדרואיד 1", driveLink: "https://drive.google.com/drive/folders/1pKsN9bGYcHsBojg3cgzWpEIQpRhrI6nQ?usp=sharing"},
+  { id: 55, name: "אבטחת מחשבים", driveLink: "https://drive.google.com/drive/folders/1_F79AnxBh9z-MMGNlqqO5xoiAUzx6Z3_?usp=sharing"},
+  { id: 56, name: "אבטחת רשתות ומרשתת", driveLink: "https://drive.google.com/drive/folders/1KDn2p44y6x2fXWM5GHSn3-8ZM-uNCEkD?usp=sharing"},
+  { id: 57, name: "פיתוח צד לקוח בסביבת אנדרואיד 2", driveLink: "https://drive.google.com/drive/folders/1srTFfiJqb-YJz1JYqxFYfttcnG_pSqKF?usp=sharing"},
+  { id: 58, name: "fuzzy logic and soft computing", driveLink: "https://drive.google.com/drive/folders/1TQvNttFuySm6PJxv6XifAgm16lfGGV2f?usp=sharing"},
+  { id: 59, name: "עיבוד שפה טבעית (דיבור וטקסט) בעזרת מחשב", driveLink: "https://drive.google.com/drive/folders/1K37wNz9cQhCM-CZQR7Dw_0Q9cN8_zLEl?usp=sharing"}
+
 ];
 
 export const choosingCourses = [
