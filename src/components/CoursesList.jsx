@@ -70,7 +70,7 @@ export const choosingCourses = [
   { id: 71, name: "תהליכי שינוי בתקשורת בישראל", driveLink: "https://drive.google.com/drive/folders/1Xv39r2HuOSfh-tC0CTNVzVPed42S4k5T?usp=sharing" },
   { id: 72, name: "תחנות בחיי האדם מבט אנתרופולוגי בין תרבותי", driveLink: "https://drive.google.com/drive/folders/1Xv39r2HuOSfh-tC0CTNVzVPed42S4k5T?usp=sharing" },
   { id: 73, name: "תקשורת בעולם טכנולוגי", driveLink: "https://drive.google.com/drive/folders/1df61V_FAFbyiTkHj-4Io_Ds7h9l60c_2?usp=sharing" },
-  { id: 74, name: "שואה וזכרון בישראל", driveLink: "#https://drive.google.com/drive/folders/1XgJwfXK991w-RJNecubq0FSPpEzImi4Y?usp=sharing" }
+  { id: 74, name: "שואה וזכרון בישראל", driveLink: "https://drive.google.com/drive/folders/1XgJwfXK991w-RJNecubq0FSPpEzImi4Y?usp=sharing" }
   ];
 
 export const eeYearOneCourses = [
