@@ -70,7 +70,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
       const { error } = await supabase
         .from('tutor_clicks')
         .insert([{
-          tutor_id: tutor.id,
+          p_tutor_id: tutor.id,
           clicked_at: new Date().toISOString()
         }]);
   
@@ -86,18 +86,12 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const handleDeleteFeedback = async () => {
     try {
-      const { error } = await supabase
-        .rpc('delete_feedback', {
-          p_tutor_id: tutor.id
-        });
-
-      if (error) throw error;
-
-      // Refresh the tutors list or update the UI
-      loadTutorsWithFeedback();
-      showNotification('הביקורת נמחקה בהצלחה', 'success');
+      await onSubmitFeedback(tutor.id, null, null);
+      setShowFeedbackForm(false);
+      setComment('');
+      setRating(5);
+      setCommentError('');
     } catch (error) {
-      console.error('Error deleting feedback:', error);
       showNotification('שגיאה במחיקת הביקורת', 'error');
     }
   };
