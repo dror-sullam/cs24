@@ -25,18 +25,14 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const styles = courseStyles[courseType] || courseStyles.cs;
 
-  // Modified: Use has_user_feedback to determine if the user has submitted feedback
   const hasUserFeedback = tutor.has_user_feedback;
 
-  // Modified: Filter reviews to show ones with comments
   const reviewsWithComments = tutor.feedback?.filter(fb => fb.comment?.trim()) || [];
 
-  // Modified: Sort reviews by date (newest first), no need to sort by user_id
   const sortedReviews = [...reviewsWithComments].sort((a, b) => {
     return new Date(b.created_at) - new Date(a.created_at);
   });
 
-  // Get the reviews to display based on showAllReviews state
   const displayedReviews = showAllReviews 
     ? sortedReviews 
     : sortedReviews.slice(0, 1);
@@ -79,7 +75,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     }
   };
 
-  // Modified: Use onSubmitFeedback to handle deletion via server-side function
   const handleDeleteFeedback = async () => {
     try {
       await onSubmitFeedback(tutor.id, null, null);
@@ -110,7 +105,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     setComment(newComment);
   };
 
-  const phoneWithoutZero = tutor.contact?.substring(1) || ""; 
+  const phoneWithoutZero = tutor.phone?.substring(1) || ""; 
 
   return (
     <>
@@ -139,7 +134,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <p className="text-sm text-gray-600">{tutor.contact}</p>
+                <p className="text-sm text-gray-600">{tutor.phone || 'לא זמין'}</p>
                 <Button
                   className={styles.textSecondary}
                   onClick={handleFeedbackClick}
@@ -211,7 +206,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                 {showReviews && reviewsWithComments.length > 0 && (
                   <div className="mt-2 space-y-2">
                     {displayedReviews.map((fb, index) => {
-                      const isUserOwnFeedback = hasUserFeedback && index === 0; // Since has_user_feedback is true, the first review is the user's
+                      const isUserOwnFeedback = hasUserFeedback && index === 0;
                       return (
                         <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
                           <div className="flex items-center justify-between">
