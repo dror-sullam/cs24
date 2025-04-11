@@ -1,20 +1,18 @@
-import {Mail, Laptop, FileText, GraduationCap, Linkedin, ChevronDown, Copy, Check} from 'lucide-react'
-import { Button } from './components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card'
-import CoursesDropdown from './components/CoursesDropdown'
-import HelpfulLinksSection from './components/HelpfulLinks'
-import { useState, useEffect } from 'react'
-import JobPostingsCard from './components/JobPostingCard'
-import { supabase } from './lib/supabase'
-import AuthButton from './components/AuthButton'
-import TutorCard from './components/TutorCard'
-import AdminPanel from './components/AdminPanel'
-import { NotificationProvider, showNotification } from './components/ui/notification'
+import { Mail, Laptop, FileText, GraduationCap, Linkedin, ChevronDown, Copy, Check } from 'lucide-react';
+import { Button } from './components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './components/ui/card';
+import CoursesDropdown from './components/CoursesDropdown';
+import HelpfulLinksSection from './components/HelpfulLinks';
+import { useState, useEffect } from 'react';
+import JobPostingsCard from './components/JobPostingCard';
+import { supabase } from './lib/supabase';
+import AuthButton from './components/AuthButton';
+import TutorCard from './components/TutorCard';
+import AdminPanel from './components/AdminPanel';
+import { NotificationProvider, showNotification } from './components/ui/notification';
 import mockData from './config/mockData.json';
 import { courseStyles, courseTypeOptions } from './config/courseStyles';
-import { courseMappings, specializationsMappings, tutorMappings} from './config/courseMappings';
-
-
+import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
 
 const App = () => {
   const [courseType, setCourseType] = useState('cs');
@@ -35,10 +33,9 @@ const App = () => {
   const TUTORS_PER_PAGE = 6;
   const hideIEButton = 1; // Hardcoded switch to hide ie button
 
-  
-
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];
+  
   const handleCourseSwitch = (type) => {
     setCourseType(type);
     // Reset selected tag based on whether the course type has specializations
@@ -53,12 +50,12 @@ const App = () => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+      setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
     });
 
     // Load tutors with feedback
@@ -75,9 +72,7 @@ const App = () => {
           setIsVisible(true);
         }
       },
-      {
-        threshold: 0.1
-      }
+      { threshold: 0.1 }
     );
 
     const missingSection = document.getElementById('missing-tests-section');
@@ -92,26 +87,23 @@ const App = () => {
     };
   }, []);
 
-  const calculateWilsonScore = (avg, count, maxRating = 5, z = 1.96) => { // 1.96 for 95% confidence
+  const calculateWilsonScore = (avg, count, maxRating = 5, z = 1.96) => {
     if (count === 0) return 0;
-
     const phat = avg; // already normalized!
     const n = count;
     // Prevent math errors on exact 0 or 1
     const safePhat = Math.min(Math.max(phat, 0.0001), 0.9999);
-
     const numerator =
-      safePhat + (z ** 2) / (2 * n) -
+      safePhat +
+      (z ** 2) / (2 * n) -
       (z * Math.sqrt((safePhat * (1 - safePhat) + (z ** 2) / (4 * n)) / n));
-
-    const denominator = 1 + ((z ** 2) / n);
-
+    const denominator = 1 + (z ** 2) / n;
     return numerator / denominator;
   };
 
   const scoreAndSortTutors = (tutors) => {
-    const tutorsWithStats = tutors.map(tutor => {
-      const validRatings = tutor.feedback?.filter(f => f.rating) || [];
+    const tutorsWithStats = tutors.map((tutor) => {
+      const validRatings = tutor.feedback?.filter((f) => f.rating) || [];
       const count = validRatings.length;
       const sum = validRatings.reduce((acc, f) => acc + f.rating, 0);
       const average_rating = count > 0 ? sum / count : null;
@@ -123,15 +115,15 @@ const App = () => {
         ...tutor,
         average_rating,
         feedback_count: count,
-        wilson_score
+        wilson_score,
       };
     });
 
     // Sort by Wilson score descending
     const sorted = tutorsWithStats.sort((a, b) => b.wilson_score - a.wilson_score);
-
     return sorted;
   };
+
   // Tutor data loading
   const loadTutorsWithFeedback = async () => {
     setIsLoadingTutors(true);
@@ -156,18 +148,9 @@ const App = () => {
 
     try {
       const { data: tutors, error } = await supabase
-        .from('tutors')
-        .select(
-          `*, feedback (
-             id,
-             user_id,
-             email,
-             rating,
-             comment,
-             created_at
-           )`
-        )
-        .eq('degree', courseType);
+        .rpc('get_tutors_with_feedback', {
+          degree_type: courseType,
+        });
 
       if (error) return handleError("אין חיבור לשרת. נסה שוב מאוחר יותר.");
       if (!tutors || tutors.length === 0) {
@@ -203,47 +186,32 @@ const App = () => {
         return;
       }
 
-      // First, check if user already has feedback for this tutor
-      const { data: existingFeedback, error: fetchError } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('tutor_id', tutorId)
-        .eq('user_id', user.id);
-
-      if (fetchError) {
-        showNotification('שגיאה בבדיקת ביקורות קיימות', 'error');
-        return;
-      }
-
       let error;
 
       // If rating is null, it means we're deleting the feedback
       if (rating === null) {
-        // This is a refresh after deletion, just reload the data
-        loadTutorsWithFeedback();
-        return;
-      } else if (existingFeedback && existingFeedback.length > 0) {
-        // Update existing feedback
         ({ error } = await supabase
-          .from('feedback')
-          .update({
-            rating,
-            comment,
-            email: user.email // Add email when updating
-          })
-          .eq('id', existingFeedback[0].id));
-      } else {
-        // Insert new feedback
-        ({ error } = await supabase
-          .from('feedback')
-          .insert([{
+          .rpc('delete_feedback', {
             tutor_id: tutorId,
-            user_id: user.id,
-            email: user.email, // Add email when creating
-            rating,
-            comment
-          }]));
+          }));
+
+        if (error) {
+          showNotification('שגיאה במחיקת הביקורת', 'error');
+          return;
+        }
+
+        loadTutorsWithFeedback();
+        showNotification('הביקורת נמחקה בהצלחה', 'success');
+        return;
       }
+
+      // Insert or update feedback using the server-side function
+      ({ error } = await supabase
+        .rpc('upsert_feedback', {
+          tutor_id: tutorId,
+          rating: rating,
+          comment: comment,
+        }));
 
       if (error) {
         showNotification('שגיאה בשליחת הביקורת', 'error');
@@ -253,7 +221,6 @@ const App = () => {
       // Reload tutors with feedback
       loadTutorsWithFeedback();
       showNotification('הביקורת נשלחה בהצלחה', 'success');
-
     } catch (error) {
       showNotification('שגיאה בשליחת הביקורת', 'error');
     }
@@ -289,7 +256,7 @@ const App = () => {
   const getCoursesForYear = (year) => {
     const courses = courseMappings[courseType];
     // Add quote mark to year if it's not 'בחירה'
-    const yearKey = year === 'בחירה' ? year : year + "'";
+    const yearKey = year === 'רב-תחומי' ? year : year + "'";
     console.log('Looking for courses for year:', yearKey);
     console.log('Available years:', Object.keys(courses || {}));
     return courses?.[yearKey] || [];
@@ -314,10 +281,10 @@ const App = () => {
     setSelectedCourse(course === selectedCourse ? null : course);
   };
 
-  const filteredTutors = tutorsWithFeedback.filter(tutor => {
+  const filteredTutors = tutorsWithFeedback.filter((tutor) => {
     if (!selectedYear && !selectedCourse) return true;
     if (selectedCourse) {
-      return tutor.subjects?.some(subject => subject.includes(selectedCourse));
+      return tutor.subjects?.some((subject) => subject.includes(selectedCourse));
     }
     return true;
   });
@@ -340,16 +307,16 @@ const App = () => {
                 className="flex items-center transition-transform duration-300 hover:scale-110"
                 title="בואו נתחבר"
               >
-                <h2 className={`text-xl ${styles.textColor}`}> פותח ע״י דניאל זיו  </h2>
+                <h2 className={`text-xl ${styles.textColor}`}> פותח ע״י דניאל זיו </h2>
                 <p> - </p>
                 <Linkedin strokeWidth={1} className="h-6 w-6" color="#0077B5" />
               </a>
-  </div>
-  </div>
+            </div>
+          </div>
           {/* Course Type Selection Buttons */}
           <div className="flex flex-row flex-wrap gap-3 mt-4 justify-center mb-5">
             {courseTypeOptions
-              .filter(option => !hideIEButton || option.type !== 'ie')
+              .filter((option) => !hideIEButton || option.type !== 'ie')
               .map((option) => (
                 <Button
                   key={option.type}
@@ -360,7 +327,7 @@ const App = () => {
                 >
                   {option.label}
                 </Button>
-            ))}
+              ))}
           </div>
 
           {/* Top Mobile Section - Jobs and Laptop */}
@@ -457,7 +424,7 @@ const App = () => {
             <HelpfulLinksSection courseType={courseType} />
           </div>
 
-          {/* New Tutors Section with Supabase Integration */}
+          {/* Tutors Section with Supabase Integration */}
           <Card className={`mb-8 border bg-white ${styles.cardBorder}`}>
             <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -476,32 +443,36 @@ const App = () => {
                 </div>
               </div>
               {/* Specialization dropdown for years ג and ד */}
-              {specializationsMappings[courseType]?.length > 0 && selectedYear && (selectedYear === 'שנה ג' || selectedYear === 'שנה ד') && (
-                <div className="mt-4 mb-3">
-                  <label htmlFor="specialization" className={`block text-sm font-medium ${styles.textColor} mb-2`}>בחירת התמחות:</label>
-                  <div className="relative">
-                    <select
-                      id="specialization"
-                      value={tutorSpecialization}
-                      onChange={(e) => setTutorSpecialization(e.target.value)}
-                      className={`appearance-none w-full md:w-64 bg-white border ${styles.textSecondary} py-2 px-4 pr-10 rounded-md shadow-md text-base focus:outline-none focus:ring-2 transition-colors`}
-                    >
-                      <option value="">ללא התמחות</option>
-                      {specializationsMappings[courseType].map(spec => (
-                        <option key={spec} value={spec}>{spec}</option>
-                      ))}
-                    </select>
-                    <div className={`pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 ${styles.iconColor}`}>
-                      <ChevronDown className="h-5 w-5" />
+              {specializationsMappings[courseType]?.length > 0 &&
+                selectedYear &&
+                (selectedYear === 'שנה ג' || selectedYear === 'שנה ד') && (
+                  <div className="mt-4 mb-3">
+                    <label htmlFor="specialization" className={`block text-sm font-medium ${styles.textColor} mb-2`}>
+                      בחירת התמחות:
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="specialization"
+                        value={tutorSpecialization}
+                        onChange={(e) => setTutorSpecialization(e.target.value)}
+                        className={`appearance-none w-full md:w-64 bg-white border ${styles.textSecondary} py-2 px-4 pr-10 rounded-md shadow-md text-base focus:outline-none focus:ring-2 transition-colors`}
+                      >
+                        <option value="">ללא התמחות</option>
+                        {specializationsMappings[courseType].map((spec) => (
+                          <option key={spec} value={spec}>{spec}</option>
+                        ))}
+                      </select>
+                      <div className={`pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 ${styles.iconColor}`}>
+                        <ChevronDown className="h-5 w-5" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
               {/* Year filter buttons */}
               {!tutorsError && (
                 <div className="flex flex-wrap gap-2 mt-3 sm:mt-4">
                   {Object.keys(courseMappings[courseType] || {})
-                    .filter(year => year !== 'בחירה')
+                    .filter((year) => year !== 'רב-תחומי')
                     .map((year) => (
                       <Button
                         key={year}
@@ -538,9 +509,7 @@ const App = () => {
             </CardHeader>
             <CardContent>
               {tutorsError ? (
-                <div
-                  className={`p-4 rounded-md text-center ${styles.cardBg} ${styles.cardBorder}`}
-                >
+                <div className={`p-4 rounded-md text-center ${styles.cardBg} ${styles.cardBorder}`}>
                   {tutorsError}
                 </div>
               ) : (
@@ -574,7 +543,7 @@ const App = () => {
                       <Button
                         onClick={() => setShowAllTutors(true)}
                         variant="outline"
-                        className={` ${styles.buttonThird}`}
+                        className={`${styles.buttonThird}`}
                       >
                         הצג עוד {filteredTutors.length - TUTORS_PER_PAGE} מתרגלים
                       </Button>
@@ -597,7 +566,7 @@ const App = () => {
                 <FileText className={`h-8 w-8 ${styles.iconColor}`} aria-hidden="true" />
                 <span>חוסרים</span>
               </CardTitle>
-              <CardDescription className={`text-center text-lg  ${styles.textColor}`}>
+              <CardDescription className={`text-center text-lg ${styles.textColor}`}>
                 יש לכם מבחנים שאינם נמצאים במאגר? נשמח שתשלחו לנו אותם
               </CardDescription>
             </CardHeader>

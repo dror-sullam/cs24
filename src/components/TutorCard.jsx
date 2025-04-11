@@ -11,8 +11,6 @@ import { isAdmin } from '../config/admin';
 import GoogleLoginButton from './GoogleLoginButton';
 import { courseStyles } from '../config/courseStyles';
 
-
-
 const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -27,23 +25,17 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const styles = courseStyles[courseType] || courseStyles.cs;
 
-  // Find user's own feedback if it exists
-  const userOwnFeedback = user ? tutor.feedback?.find(fb => fb.user_id === user.id) : null;
-  
-  // Filter reviews to show ones with comments and the user's own feedback
-  const reviewsWithComments = tutor.feedback?.filter(fb => 
-    fb.comment?.trim() || (user && fb.user_id === user.id)
-  ) || [];
-  
-  // Sort reviews to show the user's own feedback first
+  // Modified: Use has_user_feedback to determine if the user has submitted feedback
+  const hasUserFeedback = tutor.has_user_feedback;
+
+  // Modified: Filter reviews to show ones with comments
+  const reviewsWithComments = tutor.feedback?.filter(fb => fb.comment?.trim()) || [];
+
+  // Modified: Sort reviews by date (newest first), no need to sort by user_id
   const sortedReviews = [...reviewsWithComments].sort((a, b) => {
-    // User's own feedback comes first
-    if (user && a.user_id === user.id) return -1;
-    if (user && b.user_id === user.id) return 1;
-    // Then sort by date (newest first)
     return new Date(b.created_at) - new Date(a.created_at);
   });
-  
+
   // Get the reviews to display based on showAllReviews state
   const displayedReviews = showAllReviews 
     ? sortedReviews 
@@ -59,20 +51,17 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const handleLoginSuccess = (data) => {
     setShowLoginModal(false);
-    // If the user just logged in and wants to submit feedback, open the feedback form
     setTimeout(() => {
       setShowFeedbackForm(true);
     }, 1000);
   };
 
   const handleLoginError = (error) => {
-    // Error is already handled in the GoogleLoginButton component
     setShowLoginModal(false);
   };
 
   const handleWhatsAppClick = async (e) => {
     try {
-      // Insert click record into tutor_clicks
       const { error } = await supabase
         .from('tutor_clicks')
         .insert([{
@@ -80,73 +69,24 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
           clicked_at: new Date().toISOString()
         }]);
   
-      // If there's a Supabase error, prevent navigation
       if (error) {
         e.preventDefault();
         console.error('Error tracking click:', error);
-        // Optionally show a toast or do something else
       }
-  
     } catch (err) {
-      // On any unexpected error, also prevent the link from opening
       e.preventDefault();
       console.error('Error tracking click:', err);
     }
   };
-  
 
-  const handleDeleteFeedback = async (feedbackId) => {
+  // Modified: Use onSubmitFeedback to handle deletion via server-side function
+  const handleDeleteFeedback = async () => {
     try {
-      if (!feedbackId) {
-        showNotification('שגיאה במחיקת הביקורת: מזהה חסר', 'error');
-        return;
-      }
-
-      // First, verify the feedback exists
-      const { data: checkData, error: checkError } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('id', feedbackId)
-        .single();
-        
-      if (checkError) {
-        showNotification('שגיאה בבדיקת הביקורת', 'error');
-        return;
-      }
-
-      // Perform the delete operation
-      const { error } = await supabase
-        .from('feedback')
-        .delete()
-        .eq('id', feedbackId);
-
-      if (error) {
-        showNotification('שגיאה במחיקת הביקורת: ' + error.message, 'error');
-        return;
-      }
-
-      showNotification('הביקורת נמחקה בהצלחה', 'success');
-      
-      // Remove the feedback from the local state
-      const updatedFeedback = tutor.feedback.filter(fb => fb.id !== feedbackId);
-      tutor.feedback = updatedFeedback;
-      
-      // Update the average rating
-      const validRatings = updatedFeedback.filter(f => f.rating);
-      tutor.average_rating = validRatings.length > 0
-        ? validRatings.reduce((sum, f) => sum + f.rating, 0) / validRatings.length
-        : null;
-      
-      // Force a re-render
-      setShowReviews(showReviews);
-      
-      // Reload the data from the server to verify changes
-      if (onSubmitFeedback) {
-        // Use a timeout to allow the deletion to complete
-        setTimeout(() => {
-          onSubmitFeedback(tutor.id, null, null);
-        }, 1000);
-      }
+      await onSubmitFeedback(tutor.id, null, null);
+      setShowFeedbackForm(false);
+      setComment('');
+      setRating(5);
+      setCommentError('');
     } catch (error) {
       showNotification('שגיאה במחיקת הביקורת', 'error');
     }
@@ -155,13 +95,11 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
   const handleCommentChange = (e) => {
     const newComment = e.target.value;
     
-    // Check for character limit
     if (newComment.length > MAX_COMMENT_LENGTH) {
       setCommentError(`הערה ארוכה מדי. מוגבל ל-${MAX_COMMENT_LENGTH} תווים.`);
       return;
     }
     
-    // Check for URLs/links
     const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([^\s]+\.(com|org|net|il|co|io))/gi;
     if (urlRegex.test(newComment)) {
       setCommentError('לא ניתן להכניס קישורים בהערות.');
@@ -171,8 +109,8 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     setCommentError('');
     setComment(newComment);
   };
-//check it because in the original code it was phone but in the data it was contact
-  const phoneWithoutZero = tutor.phone?.substring(1) || ""; 
+
+  const phoneWithoutZero = tutor.contact?.substring(1) || ""; 
 
   return (
     <>
@@ -198,11 +136,10 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
               >
                 <FontAwesomeIcon icon={faWhatsapp} size="xl" />
               </a>
-
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <p className="text-sm text-gray-600">{tutor.phone}</p>
+                <p className="text-sm text-gray-600">{tutor.contact}</p>
                 <Button
                   className={styles.textSecondary}
                   onClick={handleFeedbackClick}
@@ -216,7 +153,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
         <CardContent className="pt-0">
           <div className="space-y-2">
-            {/* Subjects list */}
             <div className="flex flex-wrap gap-1.5 -mx-0.5">
               {tutor.subjects?.map((subject, index) => (
                 <span
@@ -228,7 +164,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
               ))}
             </div>
 
-            {/* Reviews section */}
             {tutor.feedback?.length > 0 && (
               <div>
                 <Button
@@ -238,8 +173,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                   {showReviews ? 'הסתר תגובות' : `ראה תגובות (${reviewsWithComments.length})`}
                 </Button>
 
-                {/* Always show user's own feedback if it exists */}
-                {userOwnFeedback && !showReviews && (
+                {hasUserFeedback && !showReviews && (
                   <div className="mt-2 space-y-2">
                     <div className="bg-blue-50 rounded-lg p-3 relative">
                       <div className="flex items-center justify-between">
@@ -247,21 +181,19 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-3.5 w-3.5 ${i < userOwnFeedback.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
+                              className={`h-3.5 w-3.5 ${i < tutor.feedback.find(fb => fb.rating)?.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
                             />
                           ))}
                           <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {userOwnFeedback.created_at && (
+                          {tutor.feedback[0].created_at && (
                             <span className="text-xs text-gray-500">
-                              {format(new Date(userOwnFeedback.created_at), 'dd/MM/yyyy')}
+                              {format(new Date(tutor.feedback.find(fb => fb.rating)?.created_at), 'dd/MM/yyyy')}
                             </span>
                           )}
                           <button
-                            onClick={() => {
-                              handleDeleteFeedback(userOwnFeedback.id);
-                            }}
+                            onClick={handleDeleteFeedback}
                             className="text-gray-400 hover:text-red-500 transition-colors"
                             title="מחק ביקורת"
                           >
@@ -269,8 +201,8 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                           </button>
                         </div>
                       </div>
-                      {userOwnFeedback.comment && (
-                        <p className="text-sm text-gray-700 mt-1">{userOwnFeedback.comment}</p>
+                      {tutor.feedback.find(fb => fb.comment)?.comment && (
+                        <p className="text-sm text-gray-700 mt-1">{tutor.feedback.find(fb => fb.comment)?.comment}</p>
                       )}
                     </div>
                   </div>
@@ -279,43 +211,42 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                 {showReviews && reviewsWithComments.length > 0 && (
                   <div className="mt-2 space-y-2">
                     {displayedReviews.map((fb, index) => {
-                      const isUserOwnFeedback = user && fb.user_id === user.id;
+                      const isUserOwnFeedback = hasUserFeedback && index === 0; // Since has_user_feedback is true, the first review is the user's
                       return (
-                      <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3.5 w-3.5 ${i < fb.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
-                              />
-                            ))}
-                            {isUserOwnFeedback && (
-                              <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
-                            )}
+                        <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3.5 w-3.5 ${i < fb.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
+                                />
+                              ))}
+                              {isUserOwnFeedback && (
+                                <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {fb.created_at && (
+                                <span className="text-xs text-gray-500">
+                                  {format(new Date(fb.created_at), 'dd/MM/yyyy')}
+                                </span>
+                              )}
+                              {(userIsAdmin || isUserOwnFeedback) && (
+                                <button
+                                  onClick={handleDeleteFeedback}
+                                  className="text-gray-400 hover:text-red-500 transition-colors"
+                                  title="מחק ביקורת"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {fb.created_at && (
-                              <span className="text-xs text-gray-500">
-                                {format(new Date(fb.created_at), 'dd/MM/yyyy')}
-                              </span>
-                            )}
-                            {(userIsAdmin || isUserOwnFeedback) && (
-                              <button
-                                onClick={() => {
-                                  handleDeleteFeedback(fb.id);
-                                }}
-                                className="text-gray-400 hover:text-red-500 transition-colors"
-                                title="מחק ביקורת"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
+                          {fb.comment && <p className="text-sm text-gray-700 mt-1">{fb.comment}</p>}
                         </div>
-                        {fb.comment && <p className="text-sm text-gray-700 mt-1">{fb.comment}</p>}
-                      </div>
-                    )})}
+                      );
+                    })}
                     
                     {reviewsWithComments.length > 1 && (
                       <Button
@@ -340,7 +271,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
               </div>
             )}
 
-            {/* Feedback form */}
             {showFeedbackForm && (
               <div className="space-y-3 bg-white p-3 rounded-lg shadow-sm mt-3">
                 <div className="flex justify-center gap-2">
@@ -410,7 +340,6 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
         </CardContent>
       </Card>
 
-      {/* Login Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">

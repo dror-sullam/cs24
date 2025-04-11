@@ -5,21 +5,21 @@ export const courseMappings = {
     "שנה א'": csYearOneCourses,
     "שנה ב'": csYearTwoCourses,
     "שנה ג'": csYearThreeCourses,
-    "בחירה": choosingCourses,
+    "רב-תחומי": choosingCourses,
   },
   ee: {
     "שנה א'": eeYearOneCourses,
     "שנה ב'": eeYearTwoCourses,
     "שנה ג'": eeYearThreeCourses,
     "שנה ד'": eeYearFourCourses,
-    "בחירה": choosingCourses,
-  },
+    "רב-תחומי": choosingCourses,
+  },  
   ie: {
     "שנה א'": ieYearOneCourses,
     "שנה ב'": ieYearTwoCourses,
     "שנה ג'": ieYearThreeCourses,
     "שנה ד'": ieYearFourCourses,
-    "בחירה": choosingCourses,
+    "רב-תחומי": choosingCourses,
   },
 };
 
