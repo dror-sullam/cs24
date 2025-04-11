@@ -534,6 +534,7 @@ const App = () => {
                             courseType={courseType}
                             user={user}
                             onSubmitFeedback={handleSubmitFeedback}
+                            loadTutorsWithFeedback={loadTutorsWithFeedback}
                           />
                         ))
                     )}

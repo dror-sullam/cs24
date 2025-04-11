@@ -11,7 +11,7 @@ import { isAdmin } from '../config/admin';
 import GoogleLoginButton from './GoogleLoginButton';
 import { courseStyles } from '../config/courseStyles';
 
-const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
+const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFeedback }) => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [rating, setRating] = useState(5);
@@ -86,12 +86,18 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const handleDeleteFeedback = async () => {
     try {
-      await onSubmitFeedback(tutor.id, null, null);
-      setShowFeedbackForm(false);
-      setComment('');
-      setRating(5);
-      setCommentError('');
+      const { error } = await supabase
+        .rpc('delete_feedback', {
+          p_tutor_id: tutor.id
+        });
+  
+      if (error) throw error;
+  
+      // Now loadTutorsWithFeedback is available
+      loadTutorsWithFeedback();
+      showNotification('הביקורת נמחקה בהצלחה', 'success');
     } catch (error) {
+      console.error('Error deleting feedback:', error);
       showNotification('שגיאה במחיקת הביקורת', 'error');
     }
   };
