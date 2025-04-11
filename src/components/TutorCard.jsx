@@ -45,13 +45,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     ? tutor.feedback?.find(fb => fb.id === tutor.user_feedback_id)
     : null;
 
-  // Debug logs
-  console.log('Tutor ID:', tutor.id);
-  console.log('Has user feedback:', tutor.has_user_feedback);
-  console.log('User feedback ID:', tutor.user_feedback_id);
-  console.log('Show delete button:', showDeleteButton);
-  console.log('Found user feedback:', userFeedback);
-
+ 
   const handleFeedbackClick = async () => {
     if (!user) {
       setShowLoginModal(true);
@@ -92,12 +86,18 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
 
   const handleDeleteFeedback = async () => {
     try {
-      await onSubmitFeedback(tutor.id, null, null);
-      setShowFeedbackForm(false);
-      setComment('');
-      setRating(5);
-      setCommentError('');
+      const { error } = await supabase
+        .rpc('delete_feedback', {
+          p_tutor_id: tutor.id
+        });
+
+      if (error) throw error;
+
+      // Refresh the tutors list or update the UI
+      loadTutorsWithFeedback();
+      showNotification('הביקורת נמחקה בהצלחה', 'success');
     } catch (error) {
+      console.error('Error deleting feedback:', error);
       showNotification('שגיאה במחיקת הביקורת', 'error');
     }
   };
