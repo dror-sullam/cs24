@@ -7,32 +7,13 @@ import { courseMappings, specializationsMappings } from '../config/courseMapping
 import { courseStyles } from '../config/courseStyles';
 import { showNotification } from './ui/notification';
 
-const YEARS = ['שנה א', 'שנה ב', 'שנה ג', 'שנה ד'];
-
-// Helper function to get courses based on degree and selected years
-const getCoursesByYears = (degree, selectedYears, specialization = null) => {
-  let allCourses = [];
-
-  selectedYears.forEach(year => {
-    let yearCourses = courseMappings[degree]?.[year] || [];
-    
-    if (specialization && (year === 'שנה ג' || year === 'שנה ד')) {
-      yearCourses = yearCourses.filter(course =>
-        !course.tag ||
-        (Array.isArray(course.tag) && course.tag.includes(specialization)) ||
-        course.tag === specialization
-      );
-    } else {
-      yearCourses = yearCourses.filter(course => !course.tag);
-    }
-    allCourses = [...allCourses, ...yearCourses];
-  });
-
-  return allCourses;
+const getYearsForDegree = (degree) => {
+  return Object.keys(courseMappings[degree] || {})
+    .filter(year => year !== 'רב-תחומי'); // Exclude רב-תחומי from the years list
 };
 
-const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
-  const [, setDegree] = useState(courseType);
+const JoinRequestModal = ({ isOpen, onClose, courseType: initialCourseType, session }) => {
+  const [courseType, setCourseType] = useState(initialCourseType);
   const [selectedYears, setSelectedYears] = useState([]);
   const [specialization, setSpecialization] = useState('');
   const [name, setName] = useState('');
@@ -43,6 +24,26 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
   const styles = courseStyles[courseType] || courseStyles.cs;
 
   if (!isOpen || !session) return null;
+
+  const getCoursesByYears = (degree, selectedYears, specialization = null) => {
+    let allCourses = [];
+
+    selectedYears.forEach(year => {
+      let yearCourses = courseMappings[degree]?.[year] || [];
+      
+      if (specialization && (year === 'שנה ג\'' || year === 'שנה ד\'')) {
+        yearCourses = yearCourses.filter(course =>
+          !course.tag ||
+          (Array.isArray(course.tag) ? course.tag.includes(specialization) : course.tag === specialization)
+        );
+      } else {
+        yearCourses = yearCourses.filter(course => !course.tag);
+      }
+      allCourses = [...allCourses, ...yearCourses];
+    });
+
+    return allCourses;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -188,7 +189,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
               <select
                 value={courseType}
                 onChange={(e) => {
-                  setDegree(e.target.value);
+                  setCourseType(e.target.value);
                   setSelectedYears([]);
                   setSpecialization('');
                   setSelectedSubjects([]);
@@ -207,7 +208,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType, session }) => {
                 שנים
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {YEARS.filter(y => courseType === 'cs' ? y !== 'שנה ד' : true).map(year => (
+                {getYearsForDegree(courseType).map(year => (
                   <button
                     key={year}
                     type="button"
