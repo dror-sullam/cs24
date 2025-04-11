@@ -37,6 +37,21 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
     ? sortedReviews 
     : sortedReviews.slice(0, 1);
 
+  // Only show delete button if has_user_feedback is true AND we have a valid user_feedback_id
+  const showDeleteButton = tutor.has_user_feedback && tutor.user_feedback_id;
+
+  // Get the user's feedback using the ID
+  const userFeedback = showDeleteButton 
+    ? tutor.feedback?.find(fb => fb.id === tutor.user_feedback_id)
+    : null;
+
+  // Debug logs
+  console.log('Tutor ID:', tutor.id);
+  console.log('Has user feedback:', tutor.has_user_feedback);
+  console.log('User feedback ID:', tutor.user_feedback_id);
+  console.log('Show delete button:', showDeleteButton);
+  console.log('Found user feedback:', userFeedback);
+
   const handleFeedbackClick = async () => {
     if (!user) {
       setShowLoginModal(true);
@@ -168,7 +183,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                   {showReviews ? 'הסתר תגובות' : `ראה תגובות (${reviewsWithComments.length})`}
                 </Button>
 
-                {hasUserFeedback && !showReviews && (
+                {showDeleteButton && userFeedback && (
                   <div className="mt-2 space-y-2">
                     <div className="bg-blue-50 rounded-lg p-3 relative">
                       <div className="flex items-center justify-between">
@@ -176,15 +191,15 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-3.5 w-3.5 ${i < tutor.feedback.find(fb => fb.rating)?.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
+                              className={`h-3.5 w-3.5 ${i < userFeedback.rating ? `${styles.starColor} fill-current` : 'text-gray-300'}`}
                             />
                           ))}
                           <span className="text-xs text-blue-600 ml-2">(הביקורת שלך)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {tutor.feedback[0].created_at && (
+                          {userFeedback.created_at && (
                             <span className="text-xs text-gray-500">
-                              {format(new Date(tutor.feedback.find(fb => fb.rating)?.created_at), 'dd/MM/yyyy')}
+                              {format(new Date(userFeedback.created_at), 'dd/MM/yyyy')}
                             </span>
                           )}
                           <button
@@ -196,8 +211,8 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback }) => {
                           </button>
                         </div>
                       </div>
-                      {tutor.feedback.find(fb => fb.comment)?.comment && (
-                        <p className="text-sm text-gray-700 mt-1">{tutor.feedback.find(fb => fb.comment)?.comment}</p>
+                      {userFeedback.comment && (
+                        <p className="text-sm text-gray-700 mt-1">{userFeedback.comment}</p>
                       )}
                     </div>
                   </div>
