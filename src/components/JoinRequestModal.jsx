@@ -86,7 +86,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType: initialCourseType, sess
         .insert([{
           name,
           phone,
-          degree_type: courseType,
+          degree: courseType,
           years: selectedYears,
           specialization: specializationsMappings[courseType]?.length > 0 ? specialization : null,
           subjects: selectedSubjects,

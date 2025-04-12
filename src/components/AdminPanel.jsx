@@ -53,7 +53,7 @@ const AdminPanel = ({ user }) => {
 
       try {
         const { data, error } = await supabase
-          .rpc('is_admin', { user_id: user.id });
+          .rpc('check_is_admin', { user_id: user.id });
         
         if (error) throw error;
         setIsAdmin(data);
