@@ -7,7 +7,6 @@ import { courseMappings } from '../config/courseMappings';
 import { showNotification } from './ui/notification';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { isAdmin } from '../config/admin';
 
 const AdminPanel = ({ user }) => {
   const [requests, setRequests] = useState([]);
@@ -17,21 +16,13 @@ const AdminPanel = ({ user }) => {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [error, setError] = useState(null);
   const [showAllRequests, setShowAllRequests] = useState(false);
-
-  const userIsAdmin = user && isAdmin(user.email);
-
-  useEffect(() => {
-    if (user && userIsAdmin) {
-      loadRequests();
-    }
-  }, [user, userIsAdmin]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const loadRequests = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Only fetch pending requests by default
       const { data, error } = await supabase
         .from('tutor_requests')
         .select('*')
@@ -50,6 +41,41 @@ const AdminPanel = ({ user }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      setLoading(true);
+      if (!user) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .rpc('is_admin', { user_id: user.id });
+        
+        if (error) throw error;
+        setIsAdmin(data);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      loadRequests();
+    }
+  }, [user, isAdmin]);
+
+  if (loading) return null;
+  if (!isAdmin) return null;
 
   const handleStatusChange = async (requestId, newStatus) => {
     try {
@@ -90,11 +116,6 @@ const AdminPanel = ({ user }) => {
       showNotification('שגיאה בעדכון הבקשה', 'error');
     }
   };
-
-  // If not admin or not logged in, don't show the panel
-  if (!userIsAdmin) {
-    return null;
-  }
 
   // Get unique years from requests
   const years = [...new Set(requests.map(req => req.year).filter(Boolean))].sort();

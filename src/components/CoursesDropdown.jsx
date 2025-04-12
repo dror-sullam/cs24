@@ -5,7 +5,7 @@ import { courseStyles } from '../config/courseStyles';
 
 const YearSection = ({ title, courses, selectedTag, courseType = 'cs', styles }) => {
   const [isOpen, setIsOpen] = useState(false);
-  styles = courseStyles[courseType] || courseStyles.cs;
+
 
 
   return (
@@ -60,7 +60,7 @@ const YearSection = ({ title, courses, selectedTag, courseType = 'cs', styles })
                 >
                   <div className="p-4 flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2 min-h-[2rem]">
-                      <div className={`${styles.bgLight} p-1.5 rounded-md mt-0.5`}>
+                      <div className={`${styles.bgLight} p-1.5 rounded-md `}>
                         <BookOpen className={`h-5 w-5 ${styles.iconColor} shrink-0`} />
                       </div>
                       <h3 className={`text-lg font-medium ${styles.textColor}`}>{course.name}</h3>
