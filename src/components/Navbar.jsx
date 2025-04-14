@@ -16,35 +16,34 @@ export const AcmeLogo = () => {
   
   export default function NavigationBar() {
     return (
-      <Navbar dir="ltr">
+      <Navbar isBordered className="bg-white/70 backdrop-blur-md shadow-md">
         <NavbarBrand>
-          <AcmeLogo />
-          <p className="font-bold text-inherit">ACME</p>
+          <img src="/hit-logo-blue.png" alt="logo" width={36} height={36}/>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarItem>
+          <NavbarItem className="cursor-pointer">
             <Link color="foreground">
-              Features
+            ראשי
             </Link>
           </NavbarItem>
-          <NavbarItem isActive>
-            <Link aria-current="page">
-              Customers
+          <NavbarItem className="cursor-pointer">
+            <Link color="foreground">
+              מחשבון
             </Link>
           </NavbarItem>
-          <NavbarItem>
+          <NavbarItem className="cursor-pointer">
             <Link color="foreground">
-              Integrations
+              אודות
             </Link>
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
-          <NavbarItem className="hidden lg:flex">
-            <Link>Login</Link>
+          <NavbarItem className="cursor-pointer hidden lg:flex">
+            <Link>התחבר</Link>
           </NavbarItem>
           <NavbarItem>
             <Button as={Link} color="primary" variant="flat">
-              Sign Up
+              הירשם
             </Button>
           </NavbarItem>
         </NavbarContent>
