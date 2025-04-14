@@ -21,8 +21,8 @@ export const AcmeLogo = () => {
           <img src="/hit-logo-blue.png" alt="logo" width={36} height={36}/>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarItem className="cursor-pointer">
-            <Link color="foreground">
+          <NavbarItem className="cursor-pointer" isActive>
+            <Link aria-current="page">
             ראשי
             </Link>
           </NavbarItem>
@@ -38,12 +38,9 @@ export const AcmeLogo = () => {
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
-          <NavbarItem className="cursor-pointer hidden lg:flex">
-            <Link>התחבר</Link>
-          </NavbarItem>
           <NavbarItem>
             <Button as={Link} color="primary" variant="flat">
-              הירשם
+              התחבר
             </Button>
           </NavbarItem>
         </NavbarContent>
