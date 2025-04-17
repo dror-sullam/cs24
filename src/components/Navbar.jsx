@@ -6,7 +6,7 @@ import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button} from "@her
         <NavbarBrand>
           <img src="/hit-logo-blue.png" alt="logo" width={36} height={36}/>
         </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarContent className="sm:flex gap-4" justify="center">
           <NavbarItem className="cursor-pointer" isActive>
             <Link aria-current="page">
             ראשי
