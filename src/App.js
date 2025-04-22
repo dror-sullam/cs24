@@ -13,6 +13,7 @@ import { NotificationProvider, showNotification } from './components/ui/notifica
 import mockData from './config/mockData.json';
 import { courseStyles, courseTypeOptions } from './config/courseStyles';
 import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
+import Navbar from './components/Navbar';
 
 const App = () => {
   const [courseType, setCourseType] = useState('cs');
@@ -292,6 +293,7 @@ const App = () => {
   return (
     <NotificationProvider>
       <div className={`min-h-screen bg-gradient-to-b ${styles.bgGradient}`}>
+        <Navbar />
         <main className="container mx-auto px-4 py-8">
           <AdminPanel user={user} />
           <div className="flex flex-col items-center mb-4">
