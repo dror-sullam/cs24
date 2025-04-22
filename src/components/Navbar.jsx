@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FiMenu, FiArrowLeft } from "react-icons/fi";
+import { supabase } from '../lib/supabase';
+import { showNotification } from './ui/notification';
 
 const FlipNavWrapper = () => {
   return (
@@ -103,16 +105,52 @@ const NavLink = ({ text }) => {
   );
 };
 
+const LoginButton = ({ onSuccess, onError }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    
+      const handleLogin = async () => {
+        try {
+          setIsLoading(true);
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin
+            }
+          });
+    
+          if (error) {
+            throw error;
+          }
+    
+          if (data?.url) {
+            window.location.href = data.url;
+          }
+        } catch (error) {
+          console.error('Authentication error:', error);
+          showNotification(error.message || 'שגיאה בהתחברות. אנא נסה שוב.', 'error');
+          if (onError) onError(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      return (
+        <motion.button
+          onClick={handleLogin}
+          disabled={isLoading}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-4 py-2 bg-gradient-to-r from-[#006FEE] to-[#1E40AF] text-white font-bold text-lg rounded-md whitespace-nowrap"
+        >
+          {isLoading ? 'מתחבר...' : 'התחבר'}
+        </motion.button>
+      );
+  };
+
 const NavRight = () => {
   return (
     <div className="flex items-center gap-4">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="px-4 py-2 bg-gradient-to-r from-[#006FEE] to-[#1E40AF] text-white font-bold text-lg rounded-md whitespace-nowrap"
-      >
-        התחבר
-      </motion.button>
+      <LoginButton />
     </div>
   );
 };
