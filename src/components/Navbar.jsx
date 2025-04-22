@@ -24,9 +24,8 @@ const FlipNav = () => {
 const Logo = () => {
   return (
   <svg
+   className="w-12 h-12 lg:w-[59px] lg:h-[41px]"
    version="1.0"
-   width="44.5016785pt"
-   height="31.044394pt"
    viewBox="0 0 890.03357 620.88788"
    preserveAspectRatio="xMidYMid"
    id="svg16"
