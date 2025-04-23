@@ -85,7 +85,7 @@ const NavLink = ({ text, styles }) => {
       className="hidden lg:block h-[30px] overflow-hidden font-bold text-lg"
     >
       <motion.div whileHover={{ y: -30 }}>
-        <span className="flex items-center h-[30px] text-gray-500">{text}</span>
+        <span className={`flex items-center h-[30px] ${styles.textColor}`}>{text}</span>
         <span className={`flex items-center h-[30px] ${styles.linksIconColor}`}>
           {text}
         </span>
@@ -171,7 +171,7 @@ const MenuLink = ({ text, styles }) => {
         <FiArrowLeft className="h-[30px] text-gray-950"/>
       </motion.span>
       <motion.div whileHover={{ y: -30 }}>
-        <span className="flex items-center h-[30px] text-gray-500">{text}</span>
+        <span className={`flex items-center h-[30px] ${styles.textColor}`}>{text}</span>
         <span className={`flex items-center h-[30px] ${styles.linksIconColor}`}>
           {text}
         </span>
