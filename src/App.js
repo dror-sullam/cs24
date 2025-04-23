@@ -32,7 +32,7 @@ const App = () => {
   const [isLoadingTutors, setIsLoadingTutors] = useState(true);
   const [tutorsError, setTutorsError] = useState(null);
   const TUTORS_PER_PAGE = 6;
-  const hideIEButton = 1; // Hardcoded switch to hide ie button
+  const hideIEButton = 0; // Hardcoded switch to hide ie button
 
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];

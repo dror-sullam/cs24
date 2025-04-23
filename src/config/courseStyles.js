@@ -19,7 +19,8 @@ const courseStyles = {
     starColor: 'text-blue-400',
     TLBg: 'from-blue-800 via-blue-900 to-blue-800',
     shadowGlow: 'rgba(37, 99, 235, 0.3)',
-    shadowGlowHover: 'rgba(37, 99, 235, 0.5)'
+    shadowGlowHover: 'rgba(37, 99, 235, 0.5)',
+    fillColor: '#2563eb'
   },
   ee: {
     buttonPrimary: 'bg-purple-800 text-white hover:bg-purple-700 shadow-md', // Removed border, kept shadow
@@ -41,7 +42,8 @@ const courseStyles = {
     starColor: 'text-purple-400',
     TLBg: 'from-purple-800 via-purple-950 to-purple-800',
     shadowGlow: 'rgba(147, 51, 234, 0.3)',
-    shadowGlowHover: 'rgba(147, 51, 234, 0.5)'
+    shadowGlowHover: 'rgba(147, 51, 234, 0.5)',
+    fillColor: '#9333ea'
   },
   ie: {
     buttonPrimary: 'bg-orange-600 text-white hover:bg-orange-500 shadow-md', // Removed border, kept shadow
@@ -63,7 +65,8 @@ const courseStyles = {
     starColor: 'text-orange-400',
     TLBg: 'from-orange-600 via-orange-700 to-orange-600',
     shadowGlow: 'rgba(234, 88, 12, 0.3)',
-    shadowGlowHover: 'rgba(234, 88, 12, 0.5)'
+    shadowGlowHover: 'rgba(234, 88, 12, 0.5)',
+    fillColor: '#f97316'
   },
 };
 
