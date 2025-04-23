@@ -293,8 +293,8 @@ const App = () => {
   return (
     <NotificationProvider>
       <div className={`min-h-screen bg-gradient-to-b ${styles.bgGradient}`}>
-        <Navbar />
-        <main className="container mx-auto px-4 py-8 pt-28">
+        <Navbar courseType={courseType} />
+        <main className="container mx-auto px-4 py-8 pt-24">
           <AdminPanel user={user} />
           <div className="flex flex-col items-center mb-4">
             <h1 className={`text-5xl font-bold mb-4 text-center ${styles.textColor}`}>CS24</h1>
@@ -309,8 +309,8 @@ const App = () => {
                 className="flex items-center transition-transform duration-300 hover:scale-110"
                 title="בואו נתחבר"
               >
-                <h2 className={`text-xl ${styles.textColor}`}> פותח ע״י דניאל זיו </h2>
-                <p> - </p>
+                <h2 className={`text-xl ${styles.textColor}`}>פותח ע״י דניאל זיו&nbsp;</h2>
+                
                 <Linkedin strokeWidth={1} className="h-6 w-6" color="#0077B5" />
               </a>
             </div>
