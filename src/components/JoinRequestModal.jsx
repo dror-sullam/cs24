@@ -21,7 +21,7 @@ const JoinRequestModal = ({ isOpen, onClose, courseType: initialCourseType, sess
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const styles = courseStyles[courseType] || courseStyles.cs;
+  const styles = courseStyles[initialCourseType] || courseStyles.cs;
 
   if (!isOpen || !session) return null;
 
@@ -200,6 +200,8 @@ const JoinRequestModal = ({ isOpen, onClose, courseType: initialCourseType, sess
                 <option value="">בחר מסלול</option>
                 <option value="cs">מדעי המחשב</option>
                 <option value="ee">הנדסת חשמל</option>
+                <option value="ie">הנדסת תעשייה וניהול</option>
+
               </select>
             </div>
 
