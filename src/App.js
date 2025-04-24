@@ -16,7 +16,9 @@ import { courseMappings, specializationsMappings, tutorMappings } from './config
 import Navbar from './components/Navbar';
 
 const App = () => {
-  const [courseType, setCourseType] = useState('cs');
+  const [courseType, setCourseType] = useState(() => {
+    return localStorage.getItem('courseType') || 'cs';
+  });
   const styles = courseStyles[courseType] || courseStyles.cs;
 
   const [selectedTag, setSelectedTag] = useState('בחר');
@@ -39,6 +41,8 @@ const App = () => {
   
   const handleCourseSwitch = (type) => {
     setCourseType(type);
+    // Save courseType as a cookie
+    localStorage.setItem('courseType', type);
     // Reset selected tag based on whether the course type has specializations
     setSelectedTag(specializationsMappings[type]?.length > 0 ? 'בחר' : null);
     // Reset other relevant states
