@@ -1,11 +1,11 @@
 const courseStyles = {
   cs: {
-    buttonPrimary: 'bg-blue-800 text-white hover:bg-blue-700', // Reverted to original
+    buttonPrimary: 'bg-blue-800 text-white hover:bg-blue-700',
     buttonSecondary: 'bg-white text-blue-800 hover:bg-blue-100',
     buttonThird: 'bg-white text-sky-600 hover:bg-sky-100',
     buttonMissing: 'bg-blue-800 text-white',
-    bgGradient: 'from-blue-50 to-white', // Softer background
-    textColor: 'text-blue-950', // Reverted to the previous color for dynamic text
+    bgGradient: 'from-blue-50 to-white',
+    textColor: 'text-blue-950',
     textSecondary: 'text-sky-600 hover: text-sky-700',
     cardBorder: 'border-blue-200',
     cardBorderStrong: 'border-blue-600',
@@ -22,11 +22,11 @@ const courseStyles = {
     shadowGlowHover: 'rgba(37, 99, 235, 0.5)'
   },
   ee: {
-    buttonPrimary: 'bg-purple-800 text-white hover:bg-purple-700 shadow-md', // Removed border, kept shadow
+    buttonPrimary: 'bg-purple-800 text-white hover:bg-purple-700 shadow-md',
     buttonSecondary: 'bg-white text-purple-800 hover:bg-purple-100 shadow-md',
     buttonThird: 'bg-white text-purple-600 hover:bg-purple-100',
     buttonMissing: 'bg-purple-800 text-white',
-    bgGradient: 'from-purple-50 to-white', // Softer background
+    bgGradient: 'from-purple-50 to-white',
     textColor: 'text-purple-950',
     textSecondary: 'text-purple-600 hover: text-purple-700',
     cardBorder: 'border-purple-200',
@@ -44,26 +44,26 @@ const courseStyles = {
     shadowGlowHover: 'rgba(147, 51, 234, 0.5)'
   },
   ie: {
-    buttonPrimary: 'bg-orange-600 text-white hover:bg-orange-500 shadow-md', // Removed border, kept shadow
-    buttonSecondary: 'bg-white text-orange-600 hover:bg-orange-100 shadow-md',
-    buttonThird: 'bg-white text-orange-500 hover:bg-orange-100',
-    buttonMissing: 'bg-orange-600 text-white',
-    bgGradient: 'from-orange-50 to-white', // Softer background
-    textColor: 'text-orange-900',
-    textSecondary: 'text-orange-500 hover: text-orange-600',
-    cardBorder: 'border-orange-200',
-    cardBorderStrong: 'border-orange-600',
-    cardBg: 'from-orange-600 to-orange-500',
-    iconColor: 'text-orange-500',
-    iconColorReverse:'md bg-orange-600 hover:bg-orange-700 text-white',
-    linksIconBg: 'bg-orange-50',
-    linksIconColor: 'text-orange-500',
-    bgLight: 'bg-orange-50',
-    subjectBg: 'bg-orange-100',
-    starColor: 'text-orange-400',
-    TLBg: 'from-orange-600 via-orange-700 to-orange-600',
-    shadowGlow: 'rgba(234, 88, 12, 0.3)',
-    shadowGlowHover: 'rgba(234, 88, 12, 0.5)'
+    buttonPrimary: 'bg-rose-800 text-white hover:bg-rose-700 shadow-md',
+    buttonSecondary: 'bg-white text-rose-800 hover:bg-rose-100 shadow-md',
+    buttonThird: 'bg-white text-rose-600 hover:bg-rose-100',
+    buttonMissing: 'bg-rose-800 text-white',
+    bgGradient: 'from-rose-50 to-white',
+    textColor: 'text-rose-950',
+    textSecondary: 'text-rose-600 hover: text-rose-700',
+    cardBorder: 'border-rose-200',
+    cardBorderStrong: 'border-rose-600',
+    cardBg: 'from-rose-800 to-rose-700',
+    iconColor: 'text-rose-700',
+    iconColorReverse:'md bg-rose-600 hover:bg-rose-700 text-white',
+    linksIconBg: 'bg-rose-50',
+    linksIconColor: 'text-rose-600',
+    bgLight: 'bg-rose-50',
+    subjectBg: 'bg-rose-100',
+    starColor: 'text-rose-400',
+    TLBg: 'from-rose-800 via-rose-950 to-rose-800',
+    shadowGlow: 'rgba(225, 29, 72, 0.3)',
+    shadowGlowHover: 'rgba(225, 29, 72, 0.5)',
   },
 };
 
