@@ -4,6 +4,8 @@ import { FiMenu, FiArrowLeft } from "react-icons/fi";
 import { supabase } from '../lib/supabase';
 import { showNotification } from './ui/notification';
 import { courseStyles } from '../config/courseStyles';
+import { LogOut } from "lucide-react";
+import useAuth from "../hooks/useAuth";
 
 const FlipNav = ({ courseType }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,11 +97,9 @@ const NavLink = ({ text, styles }) => {
 };
 
 const LoginButton = ({ onSuccess, onError, styles }) => {
-    const [isLoading, setIsLoading] = useState(false);
     
       const handleLogin = async () => {
         try {
-          setIsLoading(true);
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -118,28 +118,47 @@ const LoginButton = ({ onSuccess, onError, styles }) => {
           console.error('Authentication error:', error);
           showNotification(error.message || 'שגיאה בהתחברות. אנא נסה שוב.', 'error');
           if (onError) onError(error);
-        } finally {
-          setIsLoading(false);
         }
       };
 
       return (
         <motion.button
           onClick={handleLogin}
-          disabled={isLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={`px-4 py-2 bg-gradient-to-r ${styles.buttonLoginGradient} text-white font-bold text-md rounded-md whitespace-nowrap`}
         >
-          {isLoading ? 'מתחבר...' : 'התחבר'}
+          התחברות
         </motion.button>
       );
   };
 
+const LogoutButton = ({ styles, auth }) => {
+
+  return (
+    (
+      <motion.button
+          onClick={auth.signOut}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`flex items-center gap-2 px-4 py-2 ${styles.buttonSecondary} font-bold text-md rounded-md whitespace-nowrap`}
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="inline">
+            התנתקות
+          </span>
+        </motion.button>
+    )
+  )
+};
+
 const NavLeft = ({ styles }) => {
+
+  const auth = useAuth();
+
   return (
     <div className="flex items-center gap-4">
-      <LoginButton styles={styles} />
+      {auth.session ? <LogoutButton styles={styles} auth={auth} /> : <LoginButton styles={styles} />}
     </div>
   );
 };
