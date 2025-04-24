@@ -34,7 +34,6 @@ const App = () => {
   const [isLoadingTutors, setIsLoadingTutors] = useState(true);
   const [tutorsError, setTutorsError] = useState(null);
   const TUTORS_PER_PAGE = 6;
-  const hideIEButton = 0; // Hardcoded switch to hide ie button
 
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];
@@ -158,7 +157,7 @@ const App = () => {
         });
 
       if (error) return handleError("אין חיבור לשרת. נסה שוב מאוחר יותר.");
-      if (!tutors || tutors.length === 0) {
+      if (!tutors) {
         return handleError("אין מורים להצגה כרגע.");
       }
       setTutorsWithFeedback(scoreAndSortTutors(tutors));
@@ -322,7 +321,7 @@ const App = () => {
           {/* Course Type Selection Buttons */}
           <div className="flex flex-row flex-wrap gap-3 mt-4 justify-center mb-5">
             {courseTypeOptions
-              .filter((option) => !hideIEButton || option.type !== 'ie')
+              .filter((option) => option.type)
               .map((option) => (
                 <Button
                   key={option.type}

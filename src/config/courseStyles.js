@@ -1,12 +1,12 @@
 const courseStyles = {
   cs: {
-    buttonPrimary: 'bg-blue-800 text-white hover:bg-blue-700', // Reverted to original
+    buttonPrimary: 'bg-blue-800 text-white hover:bg-blue-700',
     buttonSecondary: 'bg-white text-blue-800 hover:bg-blue-100',
     buttonThird: 'bg-white text-sky-600 hover:bg-sky-100',
     buttonMissing: 'bg-blue-800 text-white',
     buttonLoginGradient: 'from-blue-600 to-blue-800',
-    bgGradient: 'from-blue-50 to-white', // Softer background
-    textColor: 'text-blue-950', // Reverted to the previous color for dynamic text
+    bgGradient: 'from-blue-50 to-white',
+    textColor: 'text-blue-950',
     textSecondary: 'text-sky-600 hover: text-sky-700',
     cardBorder: 'border-blue-200',
     cardBorderStrong: 'border-blue-600',
@@ -29,7 +29,7 @@ const courseStyles = {
     buttonThird: 'bg-white text-purple-600 hover:bg-purple-100',
     buttonMissing: 'bg-purple-800 text-white',
     buttonLoginGradient: 'from-purple-600 to-purple-800',
-    bgGradient: 'from-purple-50 to-white', // Softer background
+    bgGradient: 'from-purple-50 to-white',
     textColor: 'text-purple-950',
     textSecondary: 'text-purple-600 hover: text-purple-700',
     cardBorder: 'border-purple-200',
@@ -53,7 +53,7 @@ const courseStyles = {
     buttonThird: 'bg-white text-rose-600 hover:bg-rose-100',
     buttonMissing: 'bg-rose-800 text-white',
     buttonLoginGradient: 'from-rose-600 to-rose-800',
-    bgGradient: 'from-rose-50 to-white', // Softer background
+    bgGradient: 'from-rose-50 to-white',
     textColor: 'text-rose-950',
     textSecondary: 'text-rose-600 hover: text-rose-700',
     cardBorder: 'border-rose-200',
