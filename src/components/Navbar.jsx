@@ -129,7 +129,7 @@ const LoginButton = ({ onSuccess, onError, styles }) => {
           disabled={isLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`px-4 py-2 ${styles.buttonPrimary} font-bold text-md rounded-md whitespace-nowrap`}
+          className={`px-4 py-2 bg-gradient-to-r ${styles.buttonLoginGradient} text-white font-bold text-md rounded-md whitespace-nowrap`}
         >
           {isLoading ? 'מתחבר...' : 'התחבר'}
         </motion.button>
