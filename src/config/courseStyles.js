@@ -70,7 +70,7 @@ const courseStyles = {
 const courseTypeOptions = [
   { type: 'cs', label: 'מדעי המחשב' },
   { type: 'ee', label: 'הנדסת חשמל' },
-  { type: 'ie', label: 'תעשייה וניהול' },
+  { type: 'ie', label: 'הנדסת תעשייה וניהול' },
 ];
 
 export { courseStyles, courseTypeOptions };
