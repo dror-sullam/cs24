@@ -12,10 +12,13 @@ import AdminPanel from './components/AdminPanel';
 import { NotificationProvider, showNotification } from './components/ui/notification';
 import { courseStyles, courseTypeOptions } from './config/courseStyles';
 import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
+import Navbar from './components/Navbar';
 import ModalButton from './components/NewJobRequestModal';
 
 const App = () => {
-  const [courseType, setCourseType] = useState('cs');
+  const [courseType, setCourseType] = useState(() => {
+    return localStorage.getItem('courseType') || 'cs';
+  });
   const styles = courseStyles[courseType] || courseStyles.cs;
 
   const [selectedTag, setSelectedTag] = useState('בחר');
@@ -32,6 +35,7 @@ const App = () => {
   const [tutorsError, setTutorsError] = useState(null);
   const [degreeId, setDegreeId] = useState(null);
   const TUTORS_PER_PAGE = 6;
+  const isDevMode = process.env.REACT_APP_DEV?.toLowerCase() === 'true';
 
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];
@@ -41,6 +45,8 @@ const App = () => {
   
   const handleCourseSwitch = (type) => {
     setCourseType(type);
+    // Save courseType as a cookie
+    localStorage.setItem('courseType', type);
     // Reset selected tag based on whether the course type has specializations
     setSelectedTag(specializationsMappings[type]?.length > 0 ? 'בחר' : null);
     // Reset other relevant states
@@ -131,7 +137,6 @@ const App = () => {
   const loadTutorsWithFeedback = async () => {
     setIsLoadingTutors(true);
     setTutorsError(null); // Clear any previous error
-    const isDevMode = process.env.REACT_APP_DEV?.toLowerCase() === 'true';
 
     // Helper for fallback tutors
     const fallback = () => {
@@ -310,7 +315,8 @@ const App = () => {
   return (
     <NotificationProvider>
       <div className={`min-h-screen bg-gradient-to-b ${styles.bgGradient}`}>
-        <main className="container mx-auto px-4 py-8">
+        { isDevMode && <Navbar courseType={courseType} /> }
+        <main className={`container mx-auto px-4 py-8 ${ isDevMode && 'pt-24' }`}>
           <AdminPanel user={user} />
           <div className="flex flex-col items-center mb-4">
             <h1 className={`text-5xl font-bold mb-4 text-center ${styles.textColor}`}>CS24</h1>
@@ -325,8 +331,8 @@ const App = () => {
                 className="flex items-center transition-transform duration-300 hover:scale-110"
                 title="בואו נתחבר"
               >
-                <h2 className={`text-xl ${styles.textColor}`}> פותח ע״י דניאל זיו  </h2>
-                <p> - </p>
+                <h2 className={`text-xl ${styles.textColor}`}>פותח ע״י דניאל זיו&nbsp;</h2>
+                
                 <Linkedin strokeWidth={1} className="h-6 w-6" color="#0077B5" />
               </a>
             </div>
