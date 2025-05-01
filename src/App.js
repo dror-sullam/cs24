@@ -34,6 +34,7 @@ const App = () => {
   const [tutorsError, setTutorsError] = useState(null);
   const [degreeId, setDegreeId] = useState(null);
   const TUTORS_PER_PAGE = 6;
+  const isDevMode = process.env.REACT_APP_DEV?.toLowerCase() === 'true';
 
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];
@@ -135,7 +136,6 @@ const App = () => {
   const loadTutorsWithFeedback = async () => {
     setIsLoadingTutors(true);
     setTutorsError(null); // Clear any previous error
-    const isDevMode = process.env.REACT_APP_DEV?.toLowerCase() === 'true';
 
     // Helper for fallback tutors
     const fallback = () => {
@@ -314,8 +314,8 @@ const App = () => {
   return (
     <NotificationProvider>
       <div className={`min-h-screen bg-gradient-to-b ${styles.bgGradient}`}>
-        { process.env.REACT_APP_DEV?.toLowerCase() === 'true' && <Navbar courseType={courseType} /> }
-        <main className={`container mx-auto px-4 py-8 ${ process.env.REACT_APP_DEV?.toLowerCase() === 'true' && 'pt-24' }`}>
+        { isDevMode && <Navbar courseType={courseType} /> }
+        <main className={`container mx-auto px-4 py-8 ${ isDevMode && 'pt-24' }`}>
           <AdminPanel user={user} />
           <div className="flex flex-col items-center mb-4">
             <h1 className={`text-5xl font-bold mb-4 text-center ${styles.textColor}`}>CS24</h1>
