@@ -1,116 +1,134 @@
-import React, { useState } from 'react';
+import { AnimatePresence, motion } from "framer-motion";
+import { FiAlertCircle } from "react-icons/fi";
+import { useState } from "react";
+import { UserPlus } from 'lucide-react';
 import { Button } from './ui/button';
-import { UserPlus, LogOut } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import JoinRequestModal from './JoinRequestModal';
-import { showNotification } from './ui/notification';
-import GoogleLoginButton from './GoogleLoginButton';
-import useAuth from '../hooks/useAuth';
 import { courseStyles } from '../config/courseStyles';
+import useAuth from '../hooks/useAuth';
+import JoinRequestModal from './JoinRequestModal';
+import React from "react";
+import { supabase } from "../lib/supabase";
+import { showNotification } from "./ui/notification";
 
 const AuthButton = ({ courseType }) => {
-  const [showJoinModal, setShowJoinModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, session, signOut, loading } = useAuth();
-
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const { session } = useAuth();
+  
   const styles = courseStyles[courseType] || courseStyles.cs;
 
-  const handleJoinRequest = async () => {
-    if (!session) {
-      setShowLoginModal(true);
-    } else {
+  const handleJoinRequest = () => {
+    if (session) {
       setShowJoinModal(true);
+    } else {
+      setShowLoginModal(true);
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      await signOut();
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
-
-  const handleLoginSuccess = (data) => {
-    setShowLoginModal(false);
-    // If the user just logged in and wants to join as a tutor, show the join modal
-    if (!session) {
-      setTimeout(() => {
-        setShowJoinModal(true);
-      }, 1000);
-    }
-  };
-
-  const handleLoginError = (error) => {
-    // Error is already handled in the GoogleLoginButton component
-    setShowLoginModal(false);
   };
 
   return (
-    <div className="flex gap-1 sm:gap-2">
+    <>
       <Button
         onClick={handleJoinRequest}
         className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base ${styles.buttonPrimary}`}
-        size="sm"
       >
         <UserPlus className="h-4 w-4" />
         <span className="hidden sm:inline">
-          {!session ? 'הצטרף כמורה' : 'בקשת הצטרפות'}
+          { session ? 'בקשת הצטרפות' : 'הצטרף כמורה' }
         </span>
       </Button>
-
-      {session && (
-        <Button
-          variant="outline"
-          onClick={handleLogout}
-          disabled={isLoggingOut || loading}
-          className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base shadow-md ${styles.buttonSecondary}`}
-          size="sm"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">
-            {isLoggingOut ? '...מתנתק' : 'התנתקות'}
-          </span>
-        </Button>
-      )}
-
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4 text-center">התחברות</h2>
-            <p className="mb-4 text-center">
-              לא אוהבים רובוטים 😉
-              <br />
-              כדי למנוע ספאם ולהבטיח קהילה נעימה באתר,
-              <br />
-              אנחנו משתמשים בהתחברות פשוטה עם גוגל.
-            </p>
-            <GoogleLoginButton 
-              onSuccess={handleLoginSuccess} 
-              onError={handleLoginError} 
-            />
-            
-            <button
-              onClick={() => setShowLoginModal(false)}
-              className="w-full mt-4 px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none"
-            >
-              ביטול
-            </button>
-          </div>
-        </div>
-      )}
-
-      <JoinRequestModal 
-        isOpen={showJoinModal} 
-        onClose={() => setShowJoinModal(false)}
-        courseType={courseType}
-        session={session}
-      />
-    </div>
+      <LoginModal isOpen={showLoginModal} setIsOpen={setShowLoginModal} styles={styles} />
+      <JoinRequestModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} courseType={courseType} session={session} />
+    </>
   );
+};
+
+const LoginModal = ({ onError, isOpen, setIsOpen, styles }) => {
+  const handleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      showNotification(error.message || 'שגיאה בהתחברות. אנא נסה שוב.', 'error');
+      if (onError) onError(error);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setIsOpen(false)}
+          className="bg-slate-900/20 backdrop-blur py-8 sm:p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
+        >
+          <motion.div
+            initial={{ scale: 0.5, rotate: "12.5deg" }}
+            animate={{ scale: 1, rotate: "0deg" }}
+            exit={{ scale: 0.5, rotate: "0deg" }}
+            onClick={(e) => e.stopPropagation()}
+            className={`bg-gradient-to-br ${styles.jobRequestModalGradient} text-white p-4 sm:p-6 rounded-lg w-[90%] sm:w-full max-w-lg shadow-xl cursor-default relative overflow-hidden`}
+          >
+            <FiAlertCircle className="text-white/10 rotate-12 text-[250px] absolute z-0 -top-24 -left-24" />
+            <div className="relative z-10">
+              <div className={`bg-white w-16 h-16 mb-2 rounded-full text-3xl ${styles.linksIconColor} grid place-items-center mx-auto`}>
+                <FiAlertCircle />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-center mb-2">
+                התחברות
+              </h3>
+              <p className="text-sm sm:text-base text-center mb-6">
+              לא אוהבים רובוטים 😉<br />
+כדי למנוע ספאם ולהבטיח קהילה נעימה באתר,<br />
+אנחנו משתמשים בהתחברות פשוטה עם גוגל.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="bg-transparent hover:bg-white/10 transition-colors text-white font-semibold w-full py-2 rounded"
+                >
+                  ביטול
+                </button>
+                <button
+                  onClick={handleLogin}
+                  className={`bg-white hover:opacity-90 transition-opacity ${styles.linksIconColor} font-semibold w-full py-2 px-3 sm:px-0 rounded flex items-center justify-center gap-2`}
+                >
+                  <GoogleLogo />
+                  התחבר עם גוגל
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const GoogleLogo = () => {
+    return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+          />
+        </svg>
+    );
 };
 
 export default AuthButton;
