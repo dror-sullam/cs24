@@ -13,6 +13,7 @@ import { NotificationProvider, showNotification } from './components/ui/notifica
 import mockData from './config/mockData.json';
 import { courseStyles, courseTypeOptions } from './config/courseStyles';
 import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
+import ModalButton from './components/NewJobRequestModal';
 
 const App = () => {
   const [courseType, setCourseType] = useState('cs');
@@ -437,7 +438,8 @@ const App = () => {
                       <AuthButton user={user} courseType={courseType} disabled />
                     </div>
                   ) : (
-                    <AuthButton user={user} courseType={courseType} />
+                    <ModalButton styles={styles} />
+                    // <AuthButton user={user} courseType={courseType} />
                   )}
                 </div>
               </div>
