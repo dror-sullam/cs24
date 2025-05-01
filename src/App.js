@@ -10,7 +10,6 @@ import AuthButton from './components/AuthButton';
 import TutorCard from './components/TutorCard';
 import AdminPanel from './components/AdminPanel';
 import { NotificationProvider, showNotification } from './components/ui/notification';
-import mockData from './config/mockData.json';
 import { courseStyles, courseTypeOptions } from './config/courseStyles';
 import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
 import Navbar from './components/Navbar';
@@ -33,10 +32,14 @@ const App = () => {
   const [showFixedButton, setShowFixedButton] = useState(false);
   const [isLoadingTutors, setIsLoadingTutors] = useState(true);
   const [tutorsError, setTutorsError] = useState(null);
+  const [degreeId, setDegreeId] = useState(null);
   const TUTORS_PER_PAGE = 6;
 
   // Get specializations for current course type
   const currentSpecializations = specializationsMappings[courseType] || [];
+  const DEGREE_NAMES = Object.fromEntries(
+    courseTypeOptions.map(option => [option.type, option.label])
+  );
   
   const handleCourseSwitch = (type) => {
     setCourseType(type);
@@ -151,9 +154,20 @@ const App = () => {
     };
 
     try {
+      const { data: newDegreeId, error: degreeError } = await supabase.rpc(
+        'get_degree_id_by_details',
+        {
+          p_degree_name: DEGREE_NAMES[courseType],
+          p_academy_id: 1
+        }
+      );
+
+     
+      setDegreeId(newDegreeId);
+
       const { data: tutors, error } = await supabase
-        .rpc('get_tutors_with_feedback', {
-          degree_type: courseType,
+        .rpc('new_get_tutors_with_feedback', {
+          p_degree_id: newDegreeId
         });
 
       if (error) return handleError("אין חיבור לשרת. נסה שוב מאוחר יותר.");
@@ -211,10 +225,12 @@ const App = () => {
 
       // Insert or update feedback using the server-side function
       ({ error } = await supabase
-        .rpc('upsert_feedback', {
+        .rpc('new_upsert_feedback', {
           tutor_id: tutorId,
           rating: rating,
           comment: comment,
+          degree_id: degreeId,
+          academy_id: 1
         }));
 
       if (error) {
@@ -288,7 +304,9 @@ const App = () => {
   const filteredTutors = tutorsWithFeedback.filter((tutor) => {
     if (!selectedYear && !selectedCourse) return true;
     if (selectedCourse) {
-      return tutor.subjects?.some((subject) => subject.includes(selectedCourse));
+      return tutor.subjects?.some(subject => 
+        subject.course_name === selectedCourse
+      );
     }
     return true;
   });
@@ -540,7 +558,18 @@ const App = () => {
                             user={user}
                             onSubmitFeedback={handleSubmitFeedback}
                             loadTutorsWithFeedback={loadTutorsWithFeedback}
-                          />
+                          >
+                            <div className="flex flex-wrap gap-1.5 -mx-0.5">
+                              {tutor.subjects?.map((subject, index) => (
+                                <span
+                                  key={index}
+                                  className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${styles.subjectBg} ${styles.textSecondary}`}
+                                >
+                                  {subject.course_name}
+                                </span>
+                              ))}
+                            </div>
+                          </TutorCard>
                         ))
                     )}
                   </div>
