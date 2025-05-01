@@ -38,11 +38,11 @@ const SpringModal = ({ isOpen, setIsOpen, styles }) => {
             animate={{ scale: 1, rotate: "0deg" }}
             exit={{ scale: 0.5, rotate: "0deg" }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-blue-600 to-blue-900 text-white p-4 sm:p-6 rounded-lg w-[90%] sm:w-full max-w-lg shadow-xl cursor-default relative overflow-hidden"
+            className={`bg-gradient-to-br ${styles.jobRequestModalGradient} text-white p-4 sm:p-6 rounded-lg w-[90%] sm:w-full max-w-lg shadow-xl cursor-default relative overflow-hidden`}
           >
             <FiAlertCircle className="text-white/10 rotate-12 text-[250px] absolute z-0 -top-24 -left-24" />
             <div className="relative z-10">
-              <div className="bg-white w-16 h-16 mb-2 rounded-full text-3xl text-blue-800 grid place-items-center mx-auto">
+              <div className={`bg-white w-16 h-16 mb-2 rounded-full text-3xl ${styles.linksIconColor} grid place-items-center mx-auto`}>
                 <FiAlertCircle />
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-center mb-2">
@@ -62,7 +62,7 @@ const SpringModal = ({ isOpen, setIsOpen, styles }) => {
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="bg-white hover:opacity-90 transition-opacity text-blue-800 font-semibold w-full py-2 px-3 sm:px-0 rounded flex items-center justify-center gap-2"
+                  className={`bg-white hover:opacity-90 transition-opacity ${styles.linksIconColor} font-semibold w-full py-2 px-3 sm:px-0 rounded flex items-center justify-center gap-2`}
                 >
                   <GoogleLogo />
                   התחבר עם גוגל
