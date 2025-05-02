@@ -1,34 +1,9 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiAlertCircle } from "react-icons/fi";
-import { supabase } from "../lib/supabase";
-import { showNotification } from "./ui/notification";
+import handleLogin from "../core/handleLogin";
 
 const LoginModal = ({ onError, isOpen, setIsOpen, styles }) => {
-    const handleLogin = async () => {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin,
-            queryParams: { prompt: 'select_account' }
-          }
-        });
-  
-        if (error) {
-          throw error;
-        }
-  
-        if (data?.url) {
-          window.location.href = data.url;
-        }
-      } catch (error) {
-        console.error('Authentication error:', error);
-        showNotification(error.message || 'שגיאה בהתחברות. אנא נסה שוב.', 'error');
-        if (onError) onError(error);
-      }
-    };
-  
     return (
       <AnimatePresence>
         {isOpen && (
@@ -67,7 +42,7 @@ const LoginModal = ({ onError, isOpen, setIsOpen, styles }) => {
                     ביטול
                   </button>
                   <button
-                    onClick={handleLogin}
+                    onClick={() => handleLogin({ onError })}
                     className={`bg-white hover:opacity-90 transition-opacity ${styles.linksIconColor} font-semibold w-full py-2 px-3 sm:px-0 rounded flex items-center justify-center gap-2`}
                   >
                     <GoogleLogo />
