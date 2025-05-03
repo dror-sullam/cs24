@@ -37,13 +37,13 @@ const LoginModal = ({ onError, isOpen, setIsOpen, styles }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="bg-transparent hover:bg-white/10 transition-colors text-white font-semibold w-full py-2 rounded"
+                    className="bg-transparent hover:bg-white/10 transition-colors text-white font-semibold w-full py-2 rounded text-sm sm:text-base"
                   >
                     ביטול
                   </button>
                   <button
                     onClick={() => handleLogin({ onError })}
-                    className={`bg-white hover:opacity-90 transition-opacity ${styles.linksIconColor} font-semibold w-full py-2 px-3 sm:px-0 rounded flex items-center justify-center gap-2`}
+                    className={`bg-white hover:opacity-90 transition-opacity ${styles.linksIconColor} font-semibold w-full py-2 px-4 sm:px-0 rounded flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base`}
                   >
                     <GoogleLogo />
                     התחבר עם גוגל
