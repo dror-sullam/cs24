@@ -55,10 +55,15 @@ export const tutorMappings = {
 };
 
 export const csHelpfulLinks = [
-  { 
+  /*{ 
     title: "דרייב האגודה",
     description: "מערכת הקורסים של המכון",
     url: "https://drive.google.com/drive/folders/1ITwPTm_Jv3w-nVT7PpE2HViDn56W_VWN"
+  },*/
+  {
+    title: "noodles simulator",
+    description: "ללמוד למונחה עצמים דרך משחק שפותח במכון",
+    url: "https://noodles-simulator.onrender.com"
   },
   { 
     title: "האתר של קנציפר",
