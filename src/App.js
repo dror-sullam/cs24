@@ -13,6 +13,7 @@ import { courseStyles, courseTypeOptions } from './config/courseStyles';
 import { courseMappings, specializationsMappings, tutorMappings } from './config/courseMappings';
 import Navbar from './components/Navbar';
 import AuthButton from './components/AuthButton';
+import Footer from './components/Footer';
 
 const App = () => {
   const [courseType, setCourseType] = useState(() => {
@@ -651,6 +652,7 @@ const App = () => {
             }
           `}</style>
         </main>
+        { isDevMode && <Footer /> }
       </div>
     </NotificationProvider>
   );
