@@ -7,7 +7,7 @@ import NavbarLink from "./navbarUtils/NavbarLink";
 import DropdownMenuLink from "./navbarUtils/DropdownMenuLink";
 import LoginButton from "./navbarUtils/LoginButton";
 import LogoutButton from "./navbarUtils/LogoutButton";
-import InstituteLogo from "./navbarUtils/InstituteLogo";
+import Logo from "./navbarUtils/Logo";
 import menuVariants from "./navbarUtils/menuVariants";
 
 const Navbar = ({ courseType = 'cs'}) => {
@@ -34,7 +34,7 @@ const NavRightSection = ({ setIsOpen, styles }) => {
       >
         <FiMenu size={32}/>
       </motion.button>
-      <InstituteLogo styles={styles} />
+      <Logo styles={styles} />
       <NavbarLink text="ראשי" styles={styles} href="/" />
       <NavbarLink text="מחשבון ציונים" styles={styles} href="/gpa" />
       <NavbarLink text="אודות" styles={styles} href="/about" />

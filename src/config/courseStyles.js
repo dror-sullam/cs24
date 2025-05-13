@@ -25,7 +25,9 @@ const courseStyles = {
     shadowGlow: 'rgba(37, 99, 235, 0.3)',
     shadowGlowHover: 'rgba(37, 99, 235, 0.5)',
     fillColor: '#2563eb',
-    ringColor: 'ring-blue-600'
+    ringColor: 'ring-blue-600',
+    logoStart: '#2563eb',
+    logoEnd: '#1e3a8a'
   },
   ee: {
     buttonPrimary: 'bg-purple-800 text-white hover:bg-purple-700',
@@ -53,7 +55,9 @@ const courseStyles = {
     shadowGlow: 'rgba(147, 51, 234, 0.3)',
     shadowGlowHover: 'rgba(147, 51, 234, 0.5)',
     fillColor: '#9333ea',
-    ringColor: 'ring-purple-600'
+    ringColor: 'ring-purple-600',
+    logoStart: '#9333ea',
+    logoEnd: '#581c87'
   },
   ie: {
     buttonPrimary: 'bg-rose-800 text-white hover:bg-rose-700',
@@ -81,7 +85,9 @@ const courseStyles = {
     shadowGlow: 'rgba(225, 29, 72, 0.3)',
     shadowGlowHover: 'rgba(225, 29, 72, 0.5)',
     fillColor: '#e11d48',
-    ringColor: 'ring-rose-600'
+    ringColor: 'ring-rose-600',
+    logoStart: '#e11d48',
+    logoEnd: '#881337'
   },
 };
 
