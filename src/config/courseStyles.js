@@ -25,6 +25,10 @@ const courseStyles = {
     shadowGlow: 'rgba(37, 99, 235, 0.3)',
     shadowGlowHover: 'rgba(37, 99, 235, 0.5)',
     fillColor: '#2563eb',
+    eventBg: 'bg-blue-500', // Added for event background
+    editBg: 'bg-blue-300',
+    background: "#9cc6fc",
+    contactBg: 'bg-blue-300 text-white hover:bg-blue-400',
     ringColor: 'ring-blue-600',
     logoStart: '#2563eb',
     logoEnd: '#1e3a8a'
@@ -55,6 +59,10 @@ const courseStyles = {
     shadowGlow: 'rgba(147, 51, 234, 0.3)',
     shadowGlowHover: 'rgba(147, 51, 234, 0.5)',
     fillColor: '#9333ea',
+    eventBg: 'bg-purple-500', // Added for event background
+    editBg: 'bg-purple-300',
+    background: "#ca99ff",
+    contactBg: 'bg-purple-300 text-white hover:bg-purple-400',
     ringColor: 'ring-purple-600',
     logoStart: '#9333ea',
     logoEnd: '#581c87'
@@ -85,6 +93,10 @@ const courseStyles = {
     shadowGlow: 'rgba(225, 29, 72, 0.3)',
     shadowGlowHover: 'rgba(225, 29, 72, 0.5)',
     fillColor: '#e11d48',
+    eventBg: 'bg-rose-500', // Added for event background
+    editBg: 'bg-rose-300',
+    background: "#ffb3b8",
+    contactBg: 'bg-rose-300 text-white hover:bg-rose-400',
     ringColor: 'ring-rose-600',
     logoStart: '#e11d48',
     logoEnd: '#881337'
