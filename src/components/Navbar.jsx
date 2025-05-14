@@ -6,7 +6,8 @@ import useAuth from "../hooks/useAuth";
 import NavbarLink from "./navbarUtils/NavbarLink";
 import DropdownMenuLink from "./navbarUtils/DropdownMenuLink";
 import LoginButton from "./navbarUtils/LoginButton";
-import InstituteLogo from "./navbarUtils/InstituteLogo";
+import LogoutButton from "./navbarUtils/LogoutButton";
+import Logo from "./navbarUtils/Logo";
 import menuVariants from "./navbarUtils/menuVariants";
 import Avatar from "./Avatar";
 
@@ -34,10 +35,10 @@ const NavRightSection = ({ setIsOpen, styles }) => {
       >
         <FiMenu size={32}/>
       </motion.button>
-      <InstituteLogo styles={styles} />
-      <NavbarLink text="ראשי" styles={styles} to="/" />
-      <NavbarLink text="מחשבון ציונים" styles={styles} to="/gpa" />
-      <NavbarLink text="אודות" styles={styles} to="/about" />
+      <Logo styles={styles} />
+      <NavbarLink text="ראשי" styles={styles} href="/" />
+      <NavbarLink text="מחשבון ציונים" styles={styles} href="/gpa" />
+      <NavbarLink text="אודות" styles={styles} href="/about" />
     </div>
   );
 };
