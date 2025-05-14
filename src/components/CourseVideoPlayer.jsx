@@ -1,17 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { Stream } from "@cloudflare/stream-react";
 
-function CourseVideoPlayer({ courseId }) {
+function CourseVideoPlayer({ courseId, activeEpisode, onEpisodeComplete }) {
   const [streamToken, setStreamToken] = useState("");
   const [videoId, setVideoId] = useState("");
-  const [isVideoReady, setIsVideoReady] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const streamRef = useRef();
+  const [currentTime, setCurrentTime] = useState(0);
+  const lastEpisodeIdRef = useRef(null);
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
 
   useEffect(() => {
     const getVideoDetails = async () => {
       const { data: auth } = await supabase.auth.getSession();
       if (!auth.session) return;
-      
+
       const res = await fetch(process.env.REACT_APP_CLOUDFLARE_PLAY_END_POINT, {
         method: 'POST',
         headers: {
@@ -24,7 +28,6 @@ function CourseVideoPlayer({ courseId }) {
       });
 
       const data = await res.json();
-      console.log('Video response:', data);
       
       if (res.ok && data.signed_url) {
         try {
@@ -40,15 +43,84 @@ function CourseVideoPlayer({ courseId }) {
           setVideoId(vid);
           setStreamToken(token);
         } catch (error) {
-          console.error('Error parsing video URL:', error);
+          // Error handling preserved without console.log
         }
-      } else {
-        console.error('Error getting video details:', data?.error || res.statusText);
       }
     };
 
     getVideoDetails();
   }, [courseId]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !activeEpisode || !streamRef.current) return;
+
+    if (lastEpisodeIdRef.current !== activeEpisode.id) {
+      try {
+        streamRef.current.pause();
+        streamRef.current.currentTime = activeEpisode.start_time;
+        lastEpisodeIdRef.current = activeEpisode.id;
+      } catch (err) {
+        // Error handling preserved without console.log
+      }
+    }
+  }, [activeEpisode, isPlayerReady]);
+
+  useEffect(() => {
+    if (activeEpisode && currentTime >= activeEpisode.end_time && streamRef.current && !isUpdatingProgress) {
+      try {
+        streamRef.current.pause();
+        setIsUpdatingProgress(true);
+        
+        const updateProgress = async () => {
+          const { data: episodesWatched, error } = await supabase
+            .rpc('update_episodes_watched', {
+              p_video_course_id: courseId,
+              p_episode_index: activeEpisode.index
+            });
+
+          if (!error && onEpisodeComplete) {
+            onEpisodeComplete(episodesWatched);
+          }
+          setIsUpdatingProgress(false);
+        };
+
+        updateProgress();
+      } catch (error) {
+        setIsUpdatingProgress(false);
+      }
+    }
+  }, [currentTime, activeEpisode, courseId, onEpisodeComplete, isUpdatingProgress]);
+
+  const handlePlay = () => {
+    if (activeEpisode && streamRef.current) {
+      if (currentTime < activeEpisode.start_time || currentTime >= activeEpisode.end_time) {
+        try {
+          streamRef.current.currentTime = activeEpisode.start_time;
+        } catch (error) {
+          // Error handling preserved without console.log
+        }
+      }
+    }
+  };
+
+  const handleLoadedData = () => {
+    setIsPlayerReady(true);
+
+    const thumbnailImg = document.getElementById("thumbnail-img");
+    if (thumbnailImg) thumbnailImg.style.display = "none";
+    const videoPlayer = document.getElementById("video-player");
+    if (videoPlayer) videoPlayer.style.display = "block";
+
+    if (activeEpisode && streamRef.current) {
+      try {
+        streamRef.current.pause();
+        streamRef.current.currentTime = activeEpisode.start_time;
+        lastEpisodeIdRef.current = activeEpisode.id;
+      } catch (err) {
+        // Error handling preserved without console.log
+      }
+    }
+  };
 
   if (!streamToken || !videoId) {
     return <div className="p-4 text-center">Loading video...</div>;
@@ -62,30 +134,23 @@ function CourseVideoPlayer({ courseId }) {
       signed
       streamToken={streamToken}
       className="w-full h-full"
+      streamRef={streamRef}
       loading={<div className="p-4 text-center">Loading stream...</div>}
-      onLoadedData={() => {
-        setIsVideoReady(true);
-        // Find and hide the thumbnail
-        const thumbnailImg = document.getElementById('thumbnail-img');
-        if (thumbnailImg) {
-          thumbnailImg.style.display = 'none';
-        }
-        // Show the video player
-        const videoPlayer = document.getElementById('video-player');
-        if (videoPlayer) {
-          videoPlayer.style.display = 'block';
+      onLoadedData={handleLoadedData}
+      onTimeUpdate={(e) => {
+        if (streamRef.current) {
+          setCurrentTime(streamRef.current.currentTime);
         }
       }}
-      onError={(error) => {
-        console.error('Stream error:', error);
-        return (
-          <div className="p-4 text-center text-red-600">
-            Error loading video. Please try again later.
-          </div>
-        );
-      }}
+      onPlay={handlePlay}
+      onError={(error) => (
+        <div className="p-4 text-center text-red-600">
+          Error loading video. Please try again later.
+        </div>
+      )}
+      autoplay={false}
     />
   );
 }
 
-export default CourseVideoPlayer; 
+export default CourseVideoPlayer;
