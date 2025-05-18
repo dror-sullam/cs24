@@ -8,7 +8,6 @@ import { Info, Plus, Trash2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { courseStyles, courseTypeOptions } from '../config/courseStyles';
 import useAuth from '../hooks/useAuth';
-import { useUppy } from '../hooks/useUppy';
 import { supabase } from '../lib/supabase';
 import { showNotification } from '../components/ui/notification';
 import { useNavigate } from 'react-router-dom';
@@ -17,58 +16,12 @@ import { useNavigate } from 'react-router-dom';
 /* 1. constants                                                        */
 /* ------------------------------------------------------------------ */
 
-const UPPY_VERSION = '3.3.1';
-const UPPY_CSS = `https://releases.transloadit.com/uppy/v${UPPY_VERSION}/uppy.min.css`;
-const UPPY_JS  = `https://releases.transloadit.com/uppy/v${UPPY_VERSION}/uppy.min.js`;
-const UPLOAD_FUNCTION_ENDPOINT = process.env.REACT_APP_UPLOAD_FUNCTION_ENDPOINT;
-
-// Add error checking for required environment variable
-if (!UPLOAD_FUNCTION_ENDPOINT) {
-  console.error('Missing upload function endpoint configuration. Please check your environment setup.');
-}
+// Hardcoded upload config endpoint
+const UPLOAD_CONFIG_ENDPOINT = '/functions/v1/get-upload-page';
 
 /* ------------------------------------------------------------------ */
 /* 2. component                                                        */
 /* ------------------------------------------------------------------ */
-
-const uploadCustomThumbnail = async (file, videoId, accessToken) => {
-  console.log('Starting uploadCustomThumbnail with:', {
-    fileName: file.name,
-    videoId,
-    supabaseUrl: process.env.REACT_APP_SUPABASE_URL
-  });
-
-  // 1) Convert file to base64
-  const fileBase64 = await new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result.split(',')[1]);
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
-
-  const url = `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/upload-thumbnail`;
-  console.log('Making request to:', url);
-
-  // 2) POST to your Edge Function
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      fileBase64,
-      fileName: file.name,
-      fileType: file.type,
-      videoId
-    })
-  });
-
-  console.log('Response status:', res.status);
-  const { url: thumbnailUrl, error } = await res.json();
-  if (!res.ok) throw new Error(error || 'Upload failed');
-  return thumbnailUrl;
-};
 
 // Helper function to convert time format (HH:MM:SS or MM:SS) to seconds
 const timeToSeconds = (timeString) => {
@@ -105,12 +58,10 @@ export default function UploadPage() {
   const [thumbnailTime, setThumbnailTime] = useState(20); // Default to 20 seconds
   const [price, setPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
-  // Original tutor check states (commented out temporarily)
-  /* const [isTutor, setIsTutor] = useState(false);
-  const [isCheckingTutor, setIsCheckingTutor] = useState(true); */
-  // Temporary override to bypass tutor check
-  const [isTutor, setIsTutor] = useState(true);
-  const [isCheckingTutor, setIsCheckingTutor] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [uploadConfig, setUploadConfig] = useState(null);
+  const [progress, setProgress] = useState(0);
   
   // New state for courses and degrees
   const [courses, setCourses] = useState([]);
@@ -121,7 +72,6 @@ export default function UploadPage() {
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-  const [uppyFiles, setUppyFiles] = useState(0);
   
   // New state for episodes (video parts)
   const [episodes, setEpisodes] = useState([
@@ -141,49 +91,66 @@ export default function UploadPage() {
   const auth = useAuth();
   const styles = courseStyles[courseTypeRef.current] || courseStyles.cs;
   
-  const { uppyRef, dashRef, progress, uploading, startUpload } = useUppy(auth);
-
   const navigate = useNavigate();
 
-  /* Temporarily disabled tutor status check */
+  /* Use the endpoint to check authorization status */
   useEffect(() => {
-    const checkTutorStatus = async () => {
-      console.log('Checking tutor status...');
-      setIsCheckingTutor(true);
+    const checkAuthorizationStatus = async () => {
+      setIsCheckingAuth(true);
       
       if (!auth.session) {
-        console.log('No auth session, setting isTutor to false');
-        setIsTutor(false);
-        setIsCheckingTutor(false);
+        console.log('No auth session, setting isAuthorized to false');
+        setIsAuthorized(false);
+        setIsCheckingAuth(false);
         return;
       }
 
       try {
-        console.log('Making RPC call to check tutor status...');
-        const { data, error } = await supabase.rpc('is_tutor_and_id', {
-          p_user_id: auth.session.user.id
+        // Get the Supabase URL from the client
+        const supabaseUrl = supabase.supabaseUrl;
+        const fullUploadConfigUrl = `${supabaseUrl}${UPLOAD_CONFIG_ENDPOINT}`;
+        
+        // Call the endpoint to check authorization and get config
+        const response = await fetch(fullUploadConfigUrl, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${auth.session.access_token}`,
+            apikey: process.env.REACT_APP_SUPABASE_ANON_KEY
+          }
         });
 
-        if (error) {
-          console.error('Error checking tutor status:', error);
-          setIsTutor(false);
-        } else {
-          console.log('Tutor status result:', data);
-          // Access the is_tutor property from the first object in the array
-          const isTutorResult = data?.[0]?.is_tutor ?? false;
-          //setIsTutor(isTutorResult);
-          setIsTutor(true);
+        if (!response.ok) {
+          console.log('User not authorized to upload videos');
+          setIsAuthorized(false);
+          setIsCheckingAuth(false);
+          
+          // Redirect to no access page
+          navigate('/no-access');
+          return;
         }
+
+        // If response is ok, parse the config
+        const config = await response.json();
+        console.log('Upload config received:', config);
+        
+        // Set config
+        setUploadConfig(config);
+        setIsAuthorized(true);
+        
       } catch (err) {
-        console.error('Exception checking tutor status:', err);
-        setIsTutor(false);
+        console.error('Exception checking authorization status:', err);
+        setIsAuthorized(false);
+        
+        // Redirect to no access page on error
+        navigate('/no-access');
       } finally {
-        setIsCheckingTutor(false);
+        setIsCheckingAuth(false);
+        setLoading(false);
       }
     };
 
-    checkTutorStatus();
-  }, [auth.session]);
+    checkAuthorizationStatus();
+  }, [auth.session, navigate]);
 
   // Fetch courses data
   useEffect(() => {
@@ -245,127 +212,17 @@ export default function UploadPage() {
     setThumbnailUrl(null);
   };
 
-  const handleUpload = async () => {
-    console.log('Starting handleUpload...');
-    let thumbnailUrl = null;
-
-    try {
-      // First handle thumbnail upload if one was selected
-      if (thumbnail) {
-        console.log('Thumbnail selected, starting upload...');
-        setIsUploadingThumbnail(true);
-        try {
-          // We'll use a temporary ID for the thumbnail upload
-          const tempVideoId = 'temp-' + Date.now();
-          thumbnailUrl = await uploadCustomThumbnail(
-            thumbnail,
-            tempVideoId,
-            auth.session.access_token
-          );
-          console.log('Thumbnail uploaded successfully:', thumbnailUrl);
-        } catch (error) {
-          console.error('Error uploading thumbnail:', error);
-          showNotification('שגיאה בהעלאת התמונה הממוזערת', 'error');
-          return;
-        } finally {
-          setIsUploadingThumbnail(false);
-        }
-      } else {
-        console.log('No thumbnail selected, skipping upload');
-      }
-
-      // Then handle video upload
-      const result = await startUpload(
-        title, 
-        description, 
-        selectedDegree, 
-        selectedCourse, // This is the course_id
-        thumbnail, 
-        price, 
-        salePrice
-      );
-      console.log('Video upload result:', result);
-      
-      if (result.success) {
-        // Insert video data
-        const { data: tutorId, error: tutorError } = await supabase.rpc("get_tutor_id_by_user_id", {
-          p_user_id: auth.session.user.id
-        });
-        
-        if (tutorError) {
-          console.error('Error getting tutor ID:', tutorError);
-          showNotification('שגיאה בקבלת מזהה מורה', 'error');
-          return;
-        }
-        
-        if (!tutorId) {
-          console.error('No tutor ID found for user');
-          showNotification('לא נמצא מזהה מורה למשתמש', 'error');
-          return;
-        }
-
-        console.log("Using Tutor ID:", tutorId);
-
-        // Process episodes to match expected format
-        const processedEpisodes = episodes.map((episode) => {
-          return {
-            title: episode.title,
-            description: episode.description || '',
-            start_time: episode.start_time,
-            end_time: episode.end_time
-          };
-        });
-
-        console.log("Processed episodes:", processedEpisodes);
-
-        const payload = {
-          p_tutor_id: tutorId,
-          p_course_id: selectedCourse, // This is the course_id from the select
-          p_video_uid: result.videoId,
-          p_title: title,
-          p_price: parseInt(price),
-          p_sale_price: salePrice ? parseInt(salePrice) : null,
-          p_description: description,
-          p_video_len: result.duration,
-          p_thumbnail: thumbnailTime,
-          p_custom_thumbnail_url: thumbnailUrl,
-          p_episodes: processedEpisodes // Store episodes as JSON
-        };
-
-        console.log("Inserting video with payload:", payload);
-
-        await supabase.rpc('insert_video_course', payload);
-
-        // Clear form fields
-        setTitle('');
-        setDescription('');
-        setSelectedDegree('');
-        setSelectedCourse('');
-        setThumbnail(null);
-        setThumbnailPreview(null);
-        setThumbnailUrl(null);
-        setThumbnailTime(20);
-        setPrice('');
-        setSalePrice('');
-        setEpisodes([{ 
-          id: Date.now(), 
-          title: 'מבוא לקורס', 
-          duration: '15:00', 
-          description: 'סקירה כללית של הקורס ומה נלמד', 
-          start_time: 0,
-          start_time_format: '00:00',
-          end_time: 900,
-          end_time_format: '15:00'
-        }]);
-        
-        showNotification('הסרטון הועלה בהצלחה', 'success');
-        
-        // Redirect to the success page with just the videoId
-        navigate(`/upload-success?videoId=${result.videoId}`);
-      }
-    } catch (error) {
-      console.error('Error in upload process:', error);
-      showNotification('שגיאה בתהליך ההעלאה', 'error');
+  // Simple upload handler that will use the configuration received from the server
+  const handleUpload = () => {
+    showNotification('החיבור לשרת ההעלאה יתבצע בקרוב', 'info');
+    
+    // Here you would implement the actual upload using the uploadConfig
+    // which contains createUploadEndpoint, confirmUploadEndpoint, etc.
+    console.log('Upload configuration:', uploadConfig);
+    
+    // For now, just show a message that we'd use the config
+    if (uploadConfig) {
+      showNotification(`התחברות לשרת: ${uploadConfig.createUploadEndpoint}`, 'info');
     }
   };
 
@@ -440,18 +297,7 @@ export default function UploadPage() {
     }));
   };
 
-  // Add effect to monitor Uppy files
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const filesCount = uppyRef.current?.getFiles().length || 0;
-      if (filesCount !== uppyFiles) {
-        setUppyFiles(filesCount);
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [uppyFiles]);
-
-  // Modify the button enable effect to check episodes validity
+  // Update button enabled state
   useEffect(() => {
     // Check if either custom thumbnail or thumbnail time is set
     const hasThumbnailOption = !!thumbnail || (!thumbnail && thumbnailTime > 0);
@@ -459,26 +305,25 @@ export default function UploadPage() {
     // Check if episodes have titles
     const hasValidEpisodes = episodes.every(episode => episode.title.trim() !== '');
 
-    const enabled = !uploading && 
+    const enabled = !loading && 
       !!auth.session && 
-      !isCheckingTutor && 
-      isTutor && 
+      !isCheckingAuth &&
+      isAuthorized &&
       !!title.trim() && 
       !!description.trim() &&  
       hasThumbnailOption &&    
       !!price &&
       !!selectedDegree &&
       !!selectedCourse &&
-      uppyFiles > 0 &&
       hasValidEpisodes;       
 
     setIsButtonEnabled(enabled);
 
     console.log('Button enabled state:', enabled, {
-      uploading,
+      loading,
       hasSession: !!auth.session,
-      isCheckingTutor,
-      isTutor,
+      isCheckingAuth,
+      isAuthorized,
       hasTitle: !!title.trim(),
       hasDescription: !!description.trim(),
       hasThumbnailOption,
@@ -487,10 +332,9 @@ export default function UploadPage() {
       hasPrice: !!price,
       selectedDegree,
       selectedCourse,
-      hasFiles: uppyFiles,
       hasValidEpisodes
     });
-  }, [uploading, auth.session, isCheckingTutor, isTutor, title, description, thumbnail, thumbnailTime, price, selectedDegree, selectedCourse, uppyFiles, episodes]);
+  }, [loading, auth.session, isCheckingAuth, isAuthorized, title, description, thumbnail, thumbnailTime, price, selectedDegree, selectedCourse, episodes]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white" dir="rtl">
@@ -517,16 +361,6 @@ export default function UploadPage() {
                   <div>
                     <p className="text-red-800 font-semibold">עליך להתחבר כדי להעלות סרטונים</p>
                     <p className="text-red-700 text-sm mt-1">לחץ על כפתור ההתחברות בתפריט העליון</p>
-                  </div>
-                </div>
-              )}
-
-              {auth.session && !isCheckingTutor && !isTutor && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-                  <Info className="text-yellow-500 shrink-0" />
-                  <div>
-                    <p className="text-yellow-800 font-semibold">רק מורים יכולים להעלות סרטונים</p>
-                    <p className="text-yellow-700 text-sm mt-1">אנא צור קשר עם מנהל המערכת לקבלת הרשאות מורה</p>
                   </div>
                 </div>
               )}
@@ -767,28 +601,23 @@ export default function UploadPage() {
                 disabled={!auth.session}
               />
 
-              {/* Uppy dashboard */}
-              <div ref={dashRef} />
-
-              <Button
-                className={styles.buttonPrimary}
-                onClick={handleUpload}
-                disabled={!isButtonEnabled}
-              >
-                {uploading ? 'מעלה...' : 
-                 !auth.session ? 'יש להתחבר תחילה' : 
-                 isCheckingTutor ? 'בודק הרשאות...' :
-                 !isTutor ? 'אין הרשאת מורה' : 
-                 'העלה סרטון'}
-              </Button>
-
-              {uploading && <ProgressBar percent={progress} styles={styles} />}
-            </CardContent>
-          </Card>
+                <Button
+                  className={styles.buttonPrimary}
+                  onClick={handleUpload}
+                  disabled={!isButtonEnabled}
+                >
+                  {loading ? 'מעלה...' : 
+                   !auth.session ? 'יש להתחבר תחילה' : 
+                   isCheckingAuth ? 'בודק הרשאות...' :
+                   !isAuthorized ? 'אין הרשאות' : 
+                   'העלה סרטון'}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 function LabeledInput({ id, label, ...rest }) {
@@ -818,23 +647,6 @@ function LabeledTextarea({ id, label, ...rest }) {
         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         {...rest}
       />
-    </div>
-  );
-}
-
-function ProgressBar({ percent, styles }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span>מעלה סרטון...</span>
-        <span>{percent}%</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className={`h-2.5 rounded-full ${styles.buttonPrimary}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
     </div>
   );
 }

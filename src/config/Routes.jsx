@@ -8,7 +8,9 @@ import ProfilePage from '../components/ProfilePage';
 import ScrollToTop from '../components/ScrollToTop'; 
 import NotFoundPage from '../components/NotFoundPage';
 import CourseDetails from '../pages/CourseDetails';
-import UploadPage from '../pages/UploadPage';
+import NoAccessPage from '../pages/NoAccessPage';
+import CourseCreationPage from '../pages/CourseCreationPage';
+import CourseEditorPage from '../pages/CourseEditorPage';
 import UploadSuccess from '../pages/UploadSuccess';
 import UserDashboard from '../pages/userDashboard';
 import About from '../pages/About';
@@ -31,7 +33,9 @@ const AppRoutes = () => {
         <Route path="/course/:courseId" element={<CourseDetails />} />
         <Route path="/tutors/:courseType/:id/:tutorName" element={<ProfilePage />} />
         <Route path="*" element={<NotFoundPage />} />
-        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/create-course" element={<CourseCreationPage />} />
+        <Route path="/course-editor/:courseId" element={<CourseEditorPage />} />
+        <Route path="/no-access" element={<NoAccessPage />} />
         <Route path="/upload-success" element={<UploadSuccess />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/thank-you" element={<ThankYou />} />
