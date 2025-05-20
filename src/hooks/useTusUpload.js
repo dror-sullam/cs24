@@ -1,22 +1,80 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import * as tus from 'tus-js-client';
 import { supabase } from '../lib/supabase';
 import { showNotification } from '../components/ui/notification';
+
+// Helper function to get video duration
+const getVideoDuration = (file) => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    
+    video.onloadedmetadata = () => {
+      const duration = Math.round(video.duration);
+      window.URL.revokeObjectURL(video.src);
+      resolve(duration);
+    };
+    
+    video.onerror = (e) => {
+      console.error('Error getting video duration:', e);
+      resolve(0);
+    };
+    
+    video.src = URL.createObjectURL(file);
+  });
+};
 
 export function useTusUpload(auth) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
+  const uploadRef = useRef(null);
+  const currentVideoUidRef = useRef(null);
+
+  const abort = () => {
+    return new Promise((resolve) => {
+      if (uploadRef.current) {
+        // Get the videoUid before aborting
+        const videoUid = currentVideoUidRef.current;
+        
+        // Abort the upload
+        uploadRef.current.abort();
+        console.log('Upload aborted, returning videoUid:', videoUid);
+        
+        // Reset states
+        setIsUploading(false);
+        setUploadProgress(0);
+        uploadRef.current = null;
+        currentVideoUidRef.current = null;
+        
+        // Resolve with the videoUid
+        resolve(videoUid);
+      } else {
+        resolve(null);
+      }
+    });
+  };
 
   const upload = async (file, metadata = {}, onComplete) => {
+    console.log('Starting upload process for file:', file.name);
     setIsUploading(true);
     setUploadProgress(0);
     setError(null);
+    currentVideoUidRef.current = null;
 
     try {
       if (!auth || !auth.session || !auth.session.access_token) {
         throw new Error('No active session or access token');
       }
+
+      // Get video duration before starting upload
+      console.log('Starting duration detection');
+      const duration = await getVideoDuration(file);
+      console.log('Adding duration to metadata:', duration);
+      metadata.duration = duration;
+
+      // Log the complete metadata object
+      console.log('Complete upload metadata:', metadata);
 
       // 1. Get signed URL from quick-worker endpoint
       const supabaseUrl = supabase.supabaseUrl;
@@ -49,6 +107,10 @@ export function useTusUpload(auth) {
         throw new Error('No video UID received in stream-media-id header');
       }
 
+      
+      // Store the videoUid immediately after getting it from the headers
+      currentVideoUidRef.current = videoUid;
+
       // 2. Upload using tus
       return new Promise((resolve, reject) => {
         const upload = new tus.Upload(file, {
@@ -59,35 +121,47 @@ export function useTusUpload(auth) {
             filetype: file.type,
             ...metadata
           },
-          headers: {
-            // TUS client might not automatically send Authorization header for PATCH requests to Cloudflare
-            // Depending on Cloudflare TUS setup, this might or might not be needed.
-            // If uploads fail with 401 on PATCH, uncomment the line below.
-            // 'Authorization': `Bearer ${auth.session.access_token}`,
-          },
+          headers: {},
           onError: function(err) {
-            setError(err.message);
+            console.error('Tus upload error:', err);
+            const error = new Error(err.message);
+            error.videoUid = currentVideoUidRef.current;
+            setError(error);
             setIsUploading(false);
             showNotification('שגיאה בהעלאת הקובץ', 'error');
-            reject(err);
+            uploadRef.current = null;
+            currentVideoUidRef.current = null;
+            reject(error);
           },
           onProgress: function(bytesUploaded, bytesTotal) {
             const percentage = Math.floor((bytesUploaded / bytesTotal) * 100);
             setUploadProgress(percentage);
           },
           onSuccess: function() {
+            console.log('Upload success, passing metadata to callback:', metadata);
             setIsUploading(false);
             setUploadProgress(100);
-            onComplete?.(videoUid);
+            uploadRef.current = null;
+            const videoUid = currentVideoUidRef.current;
+            currentVideoUidRef.current = null;
+            onComplete?.(videoUid, metadata);
             resolve(videoUid);
           }
         });
 
+        uploadRef.current = upload;
         upload.start();
       });
     } catch (err) {
-      setError(err.message);
+      
+      // If we have a videoUid when the error occurs, attach it to the error
+      if (currentVideoUidRef.current) {
+        err.videoUid = currentVideoUidRef.current;
+      }
+      setError(err);
       setIsUploading(false);
+      uploadRef.current = null;
+      currentVideoUidRef.current = null;
       showNotification(`שגיאה בהעלאה: ${err.message}`, 'error');
       throw err;
     }
@@ -98,5 +172,6 @@ export function useTusUpload(auth) {
     uploadProgress,
     isUploading,
     error,
+    abort
   };
 } 

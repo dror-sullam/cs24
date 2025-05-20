@@ -18,6 +18,8 @@ import { showNotification } from '../components/ui/notification';
 import { v4 as uuidv4 } from 'uuid';
 import { useTusUpload } from '../hooks/useTusUpload';
 import CourseDetailsEditModal from '../components/CourseDetailsEditModal';
+import DeleteVideoModal from '../components/DeleteVideoModal';
+import DeleteChapterModal from '../components/DeleteChapterModal';
 
 // Hardcoded endpoints
 const GET_EDIT_COURSE_ENDPOINT = '/functions/v1/get-edit-course-page';
@@ -85,10 +87,20 @@ export default function CourseEditorPage() {
     progress: 0
   });
   
-  const { upload, uploadProgress, isUploading: isTusUploading, error: tusError } = useTusUpload(auth);
+  const [deletedVideos, setDeletedVideos] = useState([]);
+  
+  const { upload, uploadProgress, isUploading: isTusUploading, error: tusError, abort } = useTusUpload(auth);
   
   // Add this near the other state declarations
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Add new state for delete modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  
+  // Add new state for delete chapter modal
+  const [deleteChapterModalOpen, setDeleteChapterModalOpen] = useState(false);
+  const [pendingChapterDelete, setPendingChapterDelete] = useState(null);
   
   /* Use the endpoint to check authorization status and fetch course data */
   useEffect(() => {
@@ -97,7 +109,6 @@ export default function CourseEditorPage() {
       setLoading(true);
       
       if (!auth.session) {
-        console.log('No auth session, setting isAuthorized to false');
         setIsAuthorized(false);
         setIsCheckingAuth(false);
         setLoading(false);
@@ -119,7 +130,6 @@ export default function CourseEditorPage() {
 
         // Parse the response body
         const responseData = await response.json();
-        console.log('Response data:', responseData);
 
         if (!response.ok || responseData.error) {
           console.log('User not authorized or course not found:', responseData.error || 'Unknown error');
@@ -164,7 +174,7 @@ export default function CourseEditorPage() {
                 id: String(episode.id),
                 title: episode.title || '',
                 description: episode.description || '',
-                duration: '00:00', // Not provided in the data
+                episode_len: episode.episode_len || 0,
                 status: episode.video_uid ? 'uploaded' : 'pending',
                 videoUid: episode.video_uid,
                 episodeIndex: episode.episode_index,
@@ -277,11 +287,72 @@ export default function CourseEditorPage() {
       return;
     }
     
+    // Find the chapter being deleted
+    const chapter = chapters.find(ch => ch.id === chapterId);
+    
+    // Count uploaded videos in this chapter
+    const uploadedVideosCount = chapter?.videos.filter(video => video.videoUid).length || 0;
+    
+    // If the chapter has uploaded videos, show confirmation modal
+    if (uploadedVideosCount > 0) {
+      setPendingChapterDelete({ chapterId, chapter, uploadedVideosCount });
+      setDeleteChapterModalOpen(true);
+      return;
+    }
+    
+    // If no uploaded videos, delete immediately
+    performDeleteChapter(chapterId);
+  };
+  
+  // New function to perform the actual chapter deletion
+  const performDeleteChapter = (chapterId) => {
+    // Find the chapter being deleted
+    const chapter = chapters.find(ch => ch.id === chapterId);
+    
+    // Add all videos with UIDs from this chapter to deletedVideos
+    if (chapter) {
+      const videosWithUids = chapter.videos
+        .filter(video => video.videoUid)
+        .map(video => video.videoUid);
+      
+      if (videosWithUids.length > 0) {
+        const newDeletedVideos = [...(Array.isArray(deletedVideos) ? deletedVideos : []), ...videosWithUids];
+        setDeletedVideos(newDeletedVideos);
+      }
+    }
+    
     setChapters(chapters.filter(chapter => chapter.id !== chapterId));
   };
   
   // Delete a video
   const handleDeleteVideo = (chapterId, videoId) => {
+    // Find the video being deleted to get its UID if it exists
+    const chapter = chapters.find(ch => ch.id === chapterId);
+    const video = chapter?.videos.find(v => v.id === videoId);
+    
+    // If the video is uploaded, show confirmation modal
+    if (video?.videoUid) {
+      setPendingDelete({ chapterId, videoId, video });
+      setDeleteModalOpen(true);
+      return;
+    }
+    
+    // If no videoUid, delete immediately
+    performDeleteVideo(chapterId, videoId);
+  };
+  
+  // New function to perform the actual deletion
+  const performDeleteVideo = (chapterId, videoId) => {
+    // Find the video being deleted to get its UID if it exists
+    const chapter = chapters.find(ch => ch.id === chapterId);
+    const video = chapter?.videos.find(v => v.id === videoId);
+    
+    // If the video had a UID, add it to deletedVideos
+    if (video?.videoUid) {
+      const newDeletedVideos = [...(Array.isArray(deletedVideos) ? deletedVideos : []), video.videoUid];
+      setDeletedVideos(newDeletedVideos);
+    }
+    
     setChapters(chapters.map(chapter => {
       if (chapter.id === chapterId) {
         return {
@@ -404,7 +475,7 @@ export default function CourseEditorPage() {
       showNotification('לא ניתן להעלות וידאו כעת, אנא התחבר', 'error');
       return;
     }
-    
+
     try {
       // Get the video that's being uploaded
       const chapterIndex = chapters.findIndex(ch => ch.id === chapterId);
@@ -419,7 +490,7 @@ export default function CourseEditorPage() {
         progress: 0
       });
 
-      await upload(
+      const videoUid = await upload(
         file, 
         { 
           title: video.title, 
@@ -429,36 +500,57 @@ export default function CourseEditorPage() {
           videoId: videoId,
           tutorId: courseData.tutor_id
         }, 
-        async (videoUid) => {
+        async (videoUid, metadata) => {
           const updatedChapters = [...chapters];
           updatedChapters[chapterIndex].videos[videoIndex].status = 'uploaded';
           updatedChapters[chapterIndex].videos[videoIndex].videoUid = videoUid;
+          updatedChapters[chapterIndex].videos[videoIndex].episode_len = metadata?.duration || 0;
+          
           setChapters(updatedChapters);
           showNotification('הוידאו הועלה בהצלחה', 'success');
           
-          
-          // Save the course after successful upload
           await handleSaveCourse();
-          
-          // Refresh course data to get latest state
           refreshCourseData();
         }
       );
 
-    } catch (err) {
-      console.error('שגיאה בתהליך העלאת וידאו:', err, tusError);
-      showNotification(`שגיאה בהעלאת וידאו: ${err.message || (tusError && tusError.message) || 'שגיאה לא ידועה'}`, 'error');
-    } finally {
-      setCurrentUpload({
-        chapterId: null,
-        videoId: null,
-        progress: 0
-      });
+    } catch (error) {
+      
+      // If we have a videoUid from the error, add it to deletedVideos
+      if (error.videoUid) {
+        const newDeletedVideos = [...deletedVideos, error.videoUid];
+        setDeletedVideos(newDeletedVideos);
+        
+        // Save course immediately with the new deletedVideos
+        await handleSaveCourse(newDeletedVideos);
+      }
+
+      // Reset upload state
+      setCurrentUpload(null);
+      
+      // Keep video in pending state
+      setChapters(chapters.map(chapter => {
+        if (chapter.id === chapterId) {
+          return {
+            ...chapter,
+            videos: chapter.videos.map(video => {
+              if (video.id === videoId) {
+                return {
+                  ...video,
+                  status: 'pending',
+                };
+              }
+              return video;
+            })
+          };
+        }
+        return chapter;
+      }));
     }
   };
   
   // Save course content
-  const handleSaveCourse = async () => {
+  const handleSaveCourse = async (deletedVideosOverride) => {
     if (!auth.session || !courseId) return;
     
     try {
@@ -485,24 +577,20 @@ export default function CourseEditorPage() {
             episode_index: videoIndex,
             title: video.title,
             description: video.description || '',
-            video_uid: video.videoUid || null
+            video_uid: video.videoUid || null,
+            episode_len: video.episode_len || null
           }))
         })),
-        // Include thumbnail data at root level if it exists
+        // Use the override if provided, otherwise use the state
+        deleted_video_uids: deletedVideosOverride || deletedVideos,
+        // Include thumbnail data if it exists
         fileBase64: courseData.fileBase64,
         fileName: courseData.fileName,
         fileType: courseData.fileType
       };
       
-      // Add thumbnail data at root level if it exists
-      if (courseData.fileBase64 && courseData.fileName && courseData.fileType) {
-        saveCourseData.fileBase64 = courseData.fileBase64;
-        saveCourseData.fileName = courseData.fileName;
-        saveCourseData.fileType = courseData.fileType;
-      }
-      
       // Call the endpoint to save the course
-      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/functions/v1/save-course`, {
+      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}${SAVE_COURSE_ENDPOINT}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -516,6 +604,9 @@ export default function CourseEditorPage() {
       
       if (response.ok && !responseData.error) {
         showNotification('הקורס נשמר בהצלחה', 'success');
+        
+        // Clear the deleted videos array after successful save
+        setDeletedVideos([]);
         
         // Refresh course data to get updates from the server
         refreshCourseData();
@@ -701,7 +792,7 @@ export default function CourseEditorPage() {
                 id: String(episode.id),
                 title: episode.title || '',
                 description: episode.description || '',
-                duration: '00:00', // Not provided in the data
+                episode_len: episode.episode_len || 0,
                 status: episode.video_uid ? 'uploaded' : 'pending',
                 videoUid: episode.video_uid,
                 episodeIndex: episode.episode_index,
@@ -782,7 +873,7 @@ export default function CourseEditorPage() {
             <Button 
               variant="default" 
               className={`gap-2 ${styles.buttonPrimary}`}
-              onClick={handleSaveCourse}
+              onClick={() => handleSaveCourse()}
               disabled={isSaving || !isAuthorized}
             >
               {isSaving ? (
@@ -939,6 +1030,11 @@ export default function CourseEditorPage() {
                                           <div className="flex items-center space-x-2">
                                             <div className="ms-2">{videoIndex + 1}.</div>
                                             <h4 className="font-medium text-lg">{video.title || 'וידאו ללא כותרת'}</h4>
+                                            {video.episode_len > 0 && (
+                                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                                {Math.floor(video.episode_len / 60)}:{(video.episode_len % 60).toString().padStart(2, '0')}
+                                              </span>
+                                            )}
                                           </div>
                                           
                                           <div className="flex space-x-1">
@@ -1008,6 +1104,46 @@ export default function CourseEditorPage() {
                                                   ></div>
                                                 </div>
                                                 <span className="ml-2 text-sm">{uploadProgress}%</span>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="ml-2 text-red-500 hover:text-red-700"
+                                                  onClick={async () => {
+                                                    try {
+                                                      // Cancel the actual upload and get the videoUid
+                                                      const canceledVideoUid = await abort();
+                                                      
+                                                      // If we got a videoUid from the canceled upload, add it to existing deletedVideos
+                                                      if (canceledVideoUid) {
+                                                        // Create new array with both existing deleted videos and the canceled one
+                                                        const newDeletedVideos = [...new Set([...deletedVideos, canceledVideoUid])];
+                                                        
+                                                        // Update state and save
+                                                        setDeletedVideos(newDeletedVideos);
+                                                        
+                                                        // Save the course with the combined array
+                                                        await handleSaveCourse(newDeletedVideos);
+                                                      } else {
+                                                        // Even if no new videoUid, we should still save with existing deletedVideos
+                                                        if (deletedVideos.length > 0) {
+                                                          await handleSaveCourse(deletedVideos);
+                                                        }
+                                                      }
+                                                    } catch (err) {
+                                                      console.error('Error canceling upload:', err);
+                                                      showNotification('שגיאה בביטול ההעלאה', 'error');
+                                                    } finally {
+                                                      // Reset upload state
+                                                      setCurrentUpload({
+                                                        chapterId: null,
+                                                        videoId: null,
+                                                        progress: 0
+                                                      });
+                                                    }
+                                                  }}
+                                                >
+                                                  <X className="h-4 w-4" />
+                                                </Button>
                                               </div>
                                             </div>
                                           ) : (
@@ -1022,13 +1158,14 @@ export default function CourseEditorPage() {
                                                     handleUploadVideo(chapter.id, video.id, e.target.files[0]);
                                                   }
                                                 }}
+                                                disabled={video.status === 'uploaded' || isUploadingAny}
                                               />
                                               <label
                                                 htmlFor={`file-upload-${video.id}`}
                                                 className={`
                                                   inline-flex items-center px-3 py-1 text-sm
                                                   rounded-md border
-                                                  ${video.status === 'uploaded' 
+                                                  ${(video.status === 'uploaded' || isUploadingAny)
                                                     ? 'bg-blue-50 text-blue-400 border-blue-200 cursor-not-allowed' 
                                                     : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 cursor-pointer'}
                                                 `}
@@ -1124,6 +1261,15 @@ export default function CourseEditorPage() {
                             </>
                           )}
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full flex items-center justify-center gap-1"
+                          onClick={() => navigate(`/course/${courseId}`)}
+                        >
+                          <FileVideo className="h-4 w-4 mr-1" />
+                          צפייה בקורס
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1174,6 +1320,33 @@ export default function CourseEditorPage() {
         courseData={courseData}
         onSave={handleSaveCourseDetails}
         courseType={courseTypeRef.current}
+      />
+
+      {/* Add the DeleteVideoModal */}
+      <DeleteVideoModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        videoTitle={pendingDelete?.video?.title || ''}
+        onConfirm={() => {
+          if (pendingDelete) {
+            performDeleteVideo(pendingDelete.chapterId, pendingDelete.videoId);
+            setPendingDelete(null);
+          }
+        }}
+      />
+
+      {/* Add the DeleteChapterModal */}
+      <DeleteChapterModal
+        open={deleteChapterModalOpen}
+        onOpenChange={setDeleteChapterModalOpen}
+        chapterTitle={pendingChapterDelete?.chapter?.title || ''}
+        uploadedVideosCount={pendingChapterDelete?.uploadedVideosCount || 0}
+        onConfirm={() => {
+          if (pendingChapterDelete) {
+            performDeleteChapter(pendingChapterDelete.chapterId);
+            setPendingChapterDelete(null);
+          }
+        }}
       />
     </div>
   );
