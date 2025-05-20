@@ -5,6 +5,8 @@ import { Briefcase, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
 import { courseStyles } from '../config/courseStyles';
 import { jobChannelMappings } from '../config/courseMappings';
+import useAuth from "../hooks/useAuth";
+import LoginButton from './navbarUtils/LoginButton';
 
 // Add useWindowSize hook at the top of the file
 const useWindowSize = () => {
@@ -39,6 +41,7 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
   const controls = useAnimation();
   const isMounted = useRef(false);
+  const auth = useAuth();
 
   const styles = courseStyles[courseType] || courseStyles.cs;
 
@@ -263,8 +266,33 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
               לא קיימות משרות כרגע
             </div>
           ) : (
-            <div className="h-96 overflow-y-auto pr-1 space-y-3">
-              {jobs.map(job => (
+            <div className="h-96 overflow-y-auto px-3 pb-3 space-y-3">
+              {!auth.session && (
+                <div className={`p-4 flex flex-col text-center gap-4 ${styles.bgLight} rounded-lg`}>
+                  <p className='font-medium ${styles.textColor} break-words'>התחבר כדי לראות את כל המשרות</p>
+                  <LoginButton styles={styles} />
+                </div>
+              )}
+              {auth.session ? jobs.map(job => (
+                <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-medium ${styles.textColor} break-words`}>
+                      {job.title}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
+                      {formatDate(job.date)}
+                    </span>
+                    <Button
+                      className={`text-white ${styles.buttonPrimary} text-sm`}
+                      onClick={() => window.open(job.url, '_blank')}
+                    >
+                      להגשה
+                    </Button>
+                  </div>
+                </Card>
+              )) : jobs.slice(0,2).map(job => (
                 <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-medium ${styles.textColor} break-words`}>
@@ -284,6 +312,29 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
                   </div>
                 </Card>
               ))}
+              {!auth.session && jobs.length > 2 && (
+                <div className="blur-sm pointer-events-none select-none space-y-3">
+                  {jobs.slice(2).map(job => (
+                      <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-medium ${styles.textColor} break-words`}>
+                            {job.title}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
+                            {formatDate(job.date)}
+                          </span>
+                          <Button
+                            className={`text-white ${styles.buttonPrimary} text-sm`}
+                          >
+                            להגשה
+                          </Button>
+                        </div>
+                      </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
