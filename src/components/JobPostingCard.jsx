@@ -5,6 +5,8 @@ import { Briefcase, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
 import { courseStyles } from '../config/courseStyles';
 import { jobChannelMappings } from '../config/courseMappings';
+import useAuth from "../hooks/useAuth";
+import LoginButton from './navbarUtils/LoginButton';
 
 // Add useWindowSize hook at the top of the file
 const useWindowSize = () => {
@@ -37,8 +39,11 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const controls = useAnimation();
   const isMounted = useRef(false);
+  const jobListRef = useRef(null);
+  const auth = useAuth();
 
   const styles = courseStyles[courseType] || courseStyles.cs;
 
@@ -172,13 +177,20 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
     setIsOpen(width >= 1024);
   }, [width]);
 
+  // Scroll handler for job list
+  const handleJobListScroll = () => {
+    if (jobListRef.current) {
+      setIsScrolled(jobListRef.current.scrollTop > 0);
+    }
+  };
+
   return (
     <Card className={`mb-4 border bg-white relative ${styles.cardBorder}`}>
       {/* Bell bubble */}
       <motion.div
         initial={{ rotate: 0, y: 0 }}
         animate={controls}
-        className={`absolute -top-4 -right-4 ${styles.buttonPrimary} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
+        className={`absolute -top-4 -right-4 z-20 ${styles.buttonPrimary} rounded-full p-2 shadow-md border border-gray-200 cursor-pointer`}
         onClick={() => setShowSubscribeModal(true)}
       >
         <Bell className="h-5 w-5 text-white" />
@@ -231,8 +243,8 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
       )}
 
       {/* Card Header with Dropdown Toggle */}
-      <CardHeader 
-        className={width < 1024 ? "cursor-pointer" : ""}
+      <CardHeader
+        className={`relative z-10 bg-white ${isOpen ? 'rounded-t-lg' : 'rounded-lg'} transition-shadow ${width < 1024 ? "cursor-pointer" : ""} ${isScrolled ? 'shadow-[0_2px_4px_rgba(0,0,0,0.1)]' : ''}`}
         onClick={() => width < 1024 && setIsOpen(!isOpen)}
       >
         <div className="flex justify-between items-center w-full">
@@ -253,7 +265,7 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
 
       {/* Dropdown Content */}
       {isOpen && (
-        <CardContent>
+        <CardContent className='pb-0'>
           {isLoading ? (
             <div className="flex justify-center p-8">
               <div className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${styles.iconColor}`}></div>
@@ -263,27 +275,83 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
               לא קיימות משרות כרגע
             </div>
           ) : (
-            <div className="h-96 overflow-y-auto pr-1 space-y-3">
-              {jobs.map(job => (
-                <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
-                  <div className="flex-1 min-w-0">
-                    <h3 className={`font-medium ${styles.textColor} break-words`}>
-                      {job.title}
-                    </h3>
+            <div
+              ref={jobListRef}
+              onScroll={handleJobListScroll}
+              className={`px-3 overflow-y-auto  ${auth.session ? 'pb-9 h-[402px]' : 'lg:h-[402px]'}`}
+            >
+              <div className="space-y-3">
+                {auth.session ? jobs.map(job => (
+                  <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium ${styles.textColor}`}>
+                        {job.title}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
+                        {formatDate(job.date)}
+                      </span>
+                      <Button
+                        className={`text-white ${styles.buttonPrimary} text-sm`}
+                        onClick={() => window.open(job.url, '_blank')}
+                      >
+                        להגשה
+                      </Button>
+                    </div>
+                  </Card>
+                )) : jobs.slice(0,2).map(job => (
+                  <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium ${styles.textColor}`}>
+                        {job.title}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
+                        {formatDate(job.date)}
+                      </span>
+                      <Button
+                        className={`text-white ${styles.buttonPrimary} text-sm`}
+                        onClick={() => window.open(job.url, '_blank')}
+                      >
+                        להגשה
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              {!auth.session && jobs.length > 2 && (
+                <div className='relative py-3'>
+                  <div className="blur pointer-events-none select-none space-y-3">
+                    {jobs.slice(2, 4).map(job => (
+                        <Card className={`rounded-lg ${styles.bgLight} p-4 flex items-center justify-between gap-4`} key={job.id || `job-${job.title}-${job.date}`}>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`font-medium ${styles.textColor}`}>
+                              {job.title}
+                            </h3>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
+                              {formatDate(job.date)}
+                            </span>
+                            <Button
+                              className={`text-white ${styles.buttonPrimary} text-sm`}
+                            >
+                              להגשה
+                            </Button>
+                          </div>
+                        </Card>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.subjectBg} ${styles.textColor}`}>
-                      {formatDate(job.date)}
-                    </span>
-                    <Button
-                      className={`text-white ${styles.buttonPrimary} text-sm`}
-                      onClick={() => window.open(job.url, '_blank')}
-                    >
-                      להגשה
-                    </Button>
+                  <div className={`absolute inset-0 flex items-center justify-center`}>
+                     <div className={`p-4 flex flex-col text-center gap-4 bg-white rounded-lg shadow-lg ${styles.cardBorder} border-2`}>
+                        <p className={`font-medium ${styles.textColor}`}>התחברו כדי לראות את כל המשרות</p>
+                        <LoginButton styles={styles} />
+                     </div>
                   </div>
-                </Card>
-              ))}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
