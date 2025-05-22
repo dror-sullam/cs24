@@ -354,27 +354,27 @@ const ContributorsSection = ({ isMobile, isTablet, loading, contributors }) => {
                   {/* Avatar positions - different positions based on device type */}
                   {(isTablet ? [
                     // iPad positions
-                    { top: '0%', left: '0%', zIndex: 10, delay: 0.3 },
-                    { top: '4%', right: '4%', zIndex: 20, delay: 0.5 },
-                    { top: '14%', right: '70%', zIndex: 30, delay: 0.7 },
-                    { top: '18%', right: '20%', zIndex: 10, delay: 0.9 },
-                    { top: '60%', left: '70%', zIndex: 20, delay: 1.1 },
-                    { top: '65%', left: '15%', zIndex: 30, delay: 1.3 },
-                    { top: '47%', right: '55%', zIndex: 10, delay: 1.5 },
-                    { top: '32%', left: '60%', zIndex: 20, delay: 1.7 },
-                    { top: '45%', left: '60%', zIndex: 30, delay: 1.9 },
-                    { top: '30%', right: '70%', zIndex: 10, delay: 2.1 }
+                    { top: '2%', left: '35%', zIndex: 10, delay: 0.3 },
+                    { top: '7%', right: '10%', zIndex: 20, delay: 0.5 },
+                    { top: '35%', right: '5%', zIndex: 30, delay: 0.7 },
+                    { top: '58%', right: '8%', zIndex: 10, delay: 0.9 },
+                    { top: '72%', left: '40%', zIndex: 20, delay: 1.1 },
+                    { top: '60%', left: '10%', zIndex: 30, delay: 1.3 },
+                    { top: '35%', left: '10%', zIndex: 10, delay: 1.5 },
+                    { top: '15%', left: '10%', zIndex: 20, delay: 1.7 },
+                    { top: '23%', right: '35%', zIndex: 30, delay: 1.9 },
+                    { top: '47%', left: '40%', zIndex: 10, delay: 2.1 }
                   ] : [
                     // Original positions for mobile and desktop
                     { top: '2%', left: '35%', zIndex: 10, delay: 0.3 },
                     { top: '7%', right: '10%', zIndex: 20, delay: 0.5 },
-                    { top: '30%', right: '5%', zIndex: 30, delay: 0.7 },
+                    { top: '35%', right: '5%', zIndex: 30, delay: 0.7 },
                     { top: '58%', right: '8%', zIndex: 10, delay: 0.9 },
-                    { top: '75%', left: '45%', zIndex: 20, delay: 1.1 },
-                    { top: '63%', left: '18%', zIndex: 30, delay: 1.3 },
-                    { top: '40%', left: '10%', zIndex: 10, delay: 1.5 },
+                    { top: '72%', left: '40%', zIndex: 20, delay: 1.1 },
+                    { top: '60%', left: '10%', zIndex: 30, delay: 1.3 },
+                    { top: '35%', left: '10%', zIndex: 10, delay: 1.5 },
                     { top: '15%', left: '10%', zIndex: 20, delay: 1.7 },
-                    { top: '23%', right: '30%', zIndex: 30, delay: 1.9 },
+                    { top: '23%', right: '35%', zIndex: 30, delay: 1.9 },
                     { top: '47%', left: '40%', zIndex: 10, delay: 2.1 }
                   ]).map((position, index) => {
                   const contributor = contributors[index] || { 
@@ -402,11 +402,11 @@ const ContributorsSection = ({ isMobile, isTablet, loading, contributors }) => {
                           rel="noopener noreferrer"
                           className="group relative block"
                         >
-                          <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-blue-200 shadow-md group-hover:shadow-blue-300 group-hover:scale-125 transition-all duration-500 ease-in-out">
+                          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-200 shadow-md group-hover:shadow-blue-300 group-hover:scale-125 transition-all duration-500 ease-in-out">
                             <img 
                               src={contributor.imageUrl} 
                               alt={contributor.name} 
-                              className="w-full h-full object-cover transform scale-125 transition-transform duration-500 ease-in-out" 
+                              className="w-full h-full object-cover transform transition-transform duration-500 ease-in-out" 
                             />
                           </div>
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

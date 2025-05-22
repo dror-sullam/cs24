@@ -9,28 +9,26 @@ const contributors = [
   {
     id: 2,
     name: 'הדר לבסקי',
-    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D35AQHC3CMnbqkcUA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1736860631067?e=1747508400&v=beta&t=pl20JMtioA3w1cwXxFV7oM9cWLM8MK93kW6o3PaSEME',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D35AQHC3CMnbqkcUA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1736860631067?e=1748541600&v=beta&t=9MRErpkdJq-ezCe98yqGI3UdOgBr7RGU_YQgGzPhNk4',
     linkedinUrl: 'https://www.linkedin.com/in/hadar-lavsky-1b9970342/',
   },
   {
-    // make image demo  make anonymous
-
     id: 3,
-    name: ' להוסיף מישו ',
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUz5Ja3FzF7XunaGGuyHoX1S4-rOiFhCV63kb7aDD_OZMcWZBpyoApD1k7EQZ63N8-e3E&usqp=CAU',
-    linkedinUrl: 'https://www.linkedin.com/in/uri-examp',
-  },
-  {
-    id: 4,
     name: 'דרור סולם',
-    imageUrl: 'https://media.licdn.com/dms/image/v2/D5635AQGXW0U7XhrOLA/profile-framedphoto-shrink_200_200/profile-framedphoto-shrink_200_200/0/1660002772504?e=1747508400&v=beta&t=OtarErn3_sDv-AIucdfMsx0ay0ZuUb1vFZZv1zjJLe8',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D03AQGcBcYXYKGaHA/profile-displayphoto-shrink_800_800/B4DZb0H84xHsAc-/0/1747852450294?e=1753315200&v=beta&t=miYqvgylN_utSAsO0ZuXnwleqXy_ajn_tuVpCYQgrvc',
     linkedinUrl: 'https://www.linkedin.com/in/dror-sullam-6b226a1a0/',
   },
   {
+    id: 4,
+    name: 'שלי זינו',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4E03AQGHJiPMoau-Tg/profile-displayphoto-shrink_800_800/B4EZapRuFBHoAg-/0/1746596719490?e=1753315200&v=beta&t=387u6JmuC718Zz9ydlVII5tRoSus54-PwTc0ivu4PEc',
+    linkedinUrl: 'https://www.linkedin.com/in/shely-zino-86924335a/',
+  },
+  {
     id: 5,
-    name: 'להוסיף מישו',
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUz5Ja3FzF7XunaGGuyHoX1S4-rOiFhCV63kb7aDD_OZMcWZBpyoApD1k7EQZ63N8-e3E&usqp=CAU',
-    linkedinUrl: 'https://www.linkedin.com/in/uri-example',
+    name: 'יעל מרגוליס',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4E03AQH-MdSs6wr2mg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1729807591499?e=1753315200&v=beta&t=MupPzYq4Ezec2UYjkbYaxa68TGJTGS29vwsYwScvkNs',
+    linkedinUrl: 'https://www.linkedin.com/in/yael-margulis/',
   },
   {
     id: 6,
@@ -47,7 +45,7 @@ const contributors = [
   {
     id: 8,
     name: 'דניאל שצוב',
-    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D35AQG19zWK3ffFaQ/profile-framedphoto-shrink_800_800/B4DZakrXd5G8Ag-/0/1746519554232?e=1747508400&v=beta&t=gT6bazQkZz8_MqrUBaodqHJ87EtCuAjQ8ePfziUMG9o',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D35AQG19zWK3ffFaQ/profile-framedphoto-shrink_800_800/B4DZakrXd5G8Ag-/0/1746519554232?e=1748541600&v=beta&t=qA8b-r8i6OYEDsoi-x_tzznXcqjqUrwPaZ7A2NvK3zs',
     linkedinUrl: 'https://linkedin.com/in/daniel-shatzov',
   },
   {
@@ -59,7 +57,7 @@ const contributors = [
   {
     id: 10,
     name: 'עדן',
-    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D03AQH-2xlRwuKdJg/profile-displayphoto-shrink_800_800/B4DZXsNwPUG8Ac-/0/1743424784739?e=1752105600&v=beta&t=zXtXCtIl8Uq_RVDuW-nf401ryWHxND3m0oWnTNzp0Co',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/D4D03AQGxIV_duHmH-w/profile-displayphoto-shrink_800_800/B4DZbo1bUBH8Ac-/0/1747663043088?e=1753315200&v=beta&t=je1TQSergWJnTIqEYD3oJbHVEmvQWE1bo30qQuBSX5I',
     linkedinUrl: 'https://www.linkedin.com/in/eden-sitkovetsky-974460238/',
   }
 ];
