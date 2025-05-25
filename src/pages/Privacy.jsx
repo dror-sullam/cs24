@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
+import Layout from '../components/Layout';
 import { courseStyles } from '../config/courseStyles';
 
 const Privacy = () => {
@@ -14,6 +15,7 @@ const Privacy = () => {
   }, []);
 
   return (
+    <Layout>
     <div className="min-h-screen bg-[#f9f9f9]">
       <Navbar courseType={courseType} />
       <div className="container mx-auto px-4 py-8 pt-24" style={{ maxWidth: '800px', direction: 'ltr', textAlign: 'left' }}>
@@ -227,6 +229,7 @@ const Privacy = () => {
         </section>
       </div>
     </div>
+    </Layout>
   );
 };
 

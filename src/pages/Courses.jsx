@@ -1,148 +1,22 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
+import CourseFilters from "../components/CourseFilters";
 import { courseStyles } from "../config/courseStyles";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import StarRating from "../components/StarRating";
 import Loader from "../components/Loader";
+import CourseCard from "../components/LMS/CourseCard";
 
-// Fetch signed thumbnail URL
-async function fetchSignedThumbnail(videoUid) {
-  const endpoint = "https://dmswkhumaemazjerzvbz.supabase.co/functions/v1/get-signed-thumbnail";
-
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({ video_uid: videoUid })
-    });
-
-    console.log('Response status:', res.status);
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: res.statusText }));
-      throw new Error(err.error || res.statusText);
-    }
-
-    const { thumbnail_url } = await res.json();
-    return thumbnail_url;
-  } catch (error) {
-    console.error('Error in fetchSignedThumbnail:', error);
-    return null;
-  }
-}
-
-const CourseCard = ({ course }) => {
-  const navigate = useNavigate();
-  const [signedThumbnailUrl, setSignedThumbnailUrl] = useState(null);
-  
-  // Calculate average rating if available
-  const averageRating = course.ratings 
-    ? (course.ratings.reduce((a, b) => a + b, 0) / course.ratings.length).toFixed(1)
-    : null;
-
-  // Only fetch signed thumbnail if no custom thumbnail_url exists
-  useEffect(() => {
-    console.log('CourseCard useEffect - Course:', {
-      id: course.id,
-      title: course.video_title,
-      thumbnail_url: course.thumbnail_url,
-      video_uid: course.video_uid
-    });
-
-    if (!course.thumbnail_url && course.video_uid) {
-      console.log('Fetching signed thumbnail for video_uid:', course.video_uid);
-      fetchSignedThumbnail(course.video_uid)
-        .then(url => {
-          console.log('Received signed URL:', url);
-          if (url) {
-            const finalUrl = `${url}?time=${course.thumbnail || 1}s`;
-            console.log('Setting signed thumbnail URL with time:', finalUrl);
-            setSignedThumbnailUrl(finalUrl);
-          }
-        })
-        .catch(error => console.error('Error fetching signed thumbnail:', error));
-    }
-  }, [course.video_uid, course.thumbnail_url, course.thumbnail]);
-
-  const displayUrl = course.thumbnail_url || signedThumbnailUrl;
-  console.log('CourseCard render - Using thumbnail URL:', displayUrl);
-
-  return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-      <div className="relative h-48">
-        <img
-          src={displayUrl}
-          alt={course.video_title}
-          className="w-full h-full object-cover"
-          onError={(e) => console.error('Image failed to load:', displayUrl)}
-          onLoad={() => console.log('Image loaded successfully:', displayUrl)}
-        />
-        {averageRating && (
-          <div className="absolute top-0 right-0 bg-gray-800 bg-opacity-80 text-yellow-400 px-3 py-1 m-2 rounded-md shadow-md">
-            <StarRating rating={parseFloat(averageRating)} />
-          </div>
-        )}
-
-        {course.has_access ? (
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-            <span className="text-white text-lg font-semibold">צפה עכשיו</span>
-          </div>
-        ) : (
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-            <span className="text-white text-lg font-semibold">למידע נוסף</span>
-          </div>
-        )}
-      </div>
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">{course.video_title}</h3>
-        <p className="text-gray-600 mb-3">{course.course_name}</p>
-        <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg mb-4">
-          <div className="flex items-center space-x-2">
-            <svg
-              className="h-5 w-5 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            <span className="text-gray-700">
-              מרצה: {course.tutor_name}
-            </span>
-          </div>
-        </div>
-        <button
-          className={`w-full py-2 px-4 rounded-md transition-colors duration-300 ${
-            course.has_access 
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-600 text-white hover:bg-gray-700'
-          }`}
-          onClick={() => navigate(`/course/${course.id}`)}
-        >
-          {course.has_access ? 'צפה עכשיו' : 'למידע נוסף'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const YearSection = ({ year, courses }) => (
+const YearSection = ({ year, courses, courseType }) => (
   <div className="mb-12">
     <h2 className="text-3xl font-bold text-gray-800 mb-6">{year}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {courses.map((course) => (
         <CourseCard 
           key={course.id} 
           course={course}
+          courseType={courseType}
         />
       ))}
     </div>
@@ -150,14 +24,29 @@ const YearSection = ({ year, courses }) => (
 );
 
 const Courses = () => {
-  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedDegrees, setSelectedDegrees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [coursesData, setCoursesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const styles = courseStyles.cs;
+  const [courseType, setCourseType] = useState('cs');
+  const [activeFilters, setActiveFilters] = useState({});
+  const [activeSort, setActiveSort] = useState('rating');
+  const styles = courseStyles[courseType] || courseStyles.cs;
   const navigate = useNavigate();
   const [userAccess, setUserAccess] = useState([]);
+
+  // Helper function to convert degree name to key
+  const degreeToKey = (degreeName) => degreeName?.replace(/\s+/g, '_') || 'אחר';
+  
+  // Helper function to convert degree key back to display name
+  const keyToDegree = (degreeKey) => degreeKey?.replace(/_/g, ' ') || 'אחר';
+
+  useEffect(() => {
+    // Get courseType from localStorage
+    const storedCourseType = localStorage.getItem('courseType') || 'cs';
+    setCourseType(storedCourseType);
+  }, []);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -187,11 +76,12 @@ const Courses = () => {
         // Store user access information
         setUserAccess(user_access || []);
         
-        // Group courses by year
+        // Group courses by degree
         const groupedCourses = courses.reduce((acc, course) => {
-          const year = course.year || 1; // Default to year 1 if not specified
-          if (!acc[`year${year}`]) {
-            acc[`year${year}`] = [];
+          const degree = course.degree_name || 'אחר'; // Default to 'אחר' if no degree specified
+          const degreeKey = degreeToKey(degree); // Convert to key format
+          if (!acc[degreeKey]) {
+            acc[degreeKey] = [];
           }
           
           // Add has_access property to each course
@@ -200,9 +90,9 @@ const Courses = () => {
             has_access: user_access?.includes(course.id)
           };
           
-          acc[`year${year}`].push(courseWithAccess);
+          acc[degreeKey].push(courseWithAccess);
           return acc;
-        }, { year1: [], year2: [], year3: [] });
+        }, {});
 
         setCoursesData(groupedCourses);
       } catch (err) {
@@ -216,145 +106,200 @@ const Courses = () => {
     fetchCourses();
   }, []);
 
-  const filteredCourses = {
-    year1: coursesData.year1?.filter(course =>
+  // Get all courses as a flat array for filtering
+  const allCourses = Object.values(coursesData).flat();
+
+  // Get unique degrees from coursesData for buttons
+  const availableDegrees = Object.keys(coursesData);
+
+  // Apply filters and sorting
+  const getFilteredAndSortedCourses = (courses) => {
+    let filtered = courses;
+
+    // Apply search query
+    if (searchQuery) {
+      filtered = filtered.filter(course =>
       course.video_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.course_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.tutor_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [],
-    year2: coursesData.year2?.filter(course =>
-      course.video_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.course_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.tutor_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [],
-    year3: coursesData.year3?.filter(course =>
-      course.video_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.course_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.tutor_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || []
+      );
+    }
+
+    // Apply filters
+    Object.entries(activeFilters).forEach(([filterId, values]) => {
+      if (values.length === 0) return;
+
+      filtered = filtered.filter(course => {
+        switch (filterId) {
+          case 'course_name':
+            return values.includes(course.course_name);
+          case 'degree_name':
+            return values.includes(course.degree_name);
+          case 'course_year':
+            return values.includes(course.course_year?.toString());
+          case 'tutor_name':
+            return values.includes(course.tutor_name);
+          case 'price_range':
+            const price = course.sale_price || course.price || 0;
+            return values.some(range => {
+              switch (range) {
+                case 'free': return price === 0;
+                case 'low': return price > 0 && price <= 100;
+                case 'medium': return price > 100 && price <= 500;
+                case 'high': return price > 500;
+                default: return false;
+              }
+            });
+          case 'rating':
+            const avgRating = course.ratings 
+              ? course.ratings.reduce((a, b) => a + b, 0) / course.ratings.length
+              : 0;
+            return values.some(rating => {
+              switch (rating) {
+                case '5': return avgRating >= 4.5;
+                case '4': return avgRating >= 4;
+                case '3': return avgRating >= 3;
+                default: return false;
+              }
+            });
+          case 'access':
+            return values.some(access => {
+              switch (access) {
+                case 'owned': return course.has_access;
+                case 'available': return !course.has_access;
+                default: return false;
+              }
+            });
+          default:
+            return true;
+        }
+      });
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (activeSort) {
+        case 'rating':
+          const avgA = a.ratings ? a.ratings.reduce((sum, r) => sum + r, 0) / a.ratings.length : 0;
+          const avgB = b.ratings ? b.ratings.reduce((sum, r) => sum + r, 0) / b.ratings.length : 0;
+          return avgB - avgA; // Higher rating first
+        case 'price-low':
+          const priceA = a.sale_price || a.price || 0;
+          const priceB = b.sale_price || b.price || 0;
+          return priceA - priceB; // Lower price first
+        case 'price-high':
+          const priceA2 = a.sale_price || a.price || 0;
+          const priceB2 = b.sale_price || b.price || 0;
+          return priceB2 - priceA2; // Higher price first
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
   };
+
+  const filteredCourses = {};
+  availableDegrees.forEach(degreeKey => {
+    filteredCourses[degreeKey] = getFilteredAndSortedCourses(coursesData[degreeKey] || []);
+  });
 
   if (loading) {
     return (
+      <Layout>
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader />
           <p className="mt-4 text-gray-600">טוען קורסים...</p>
         </div>
       </div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
+      <Layout>
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center text-red-600">
           <p>שגיאה בטעינת הקורסים</p>
           <p className="text-sm mt-2">{error}</p>
         </div>
       </div>
+      </Layout>
     );
   }
 
   const renderCourses = () => {
-    if (selectedYear === "all") {
+    if (selectedDegrees.length === 0) {
       return (
         <>
-          {filteredCourses.year1.length > 0 && (
+          {availableDegrees.map(degreeKey => (
+            filteredCourses[degreeKey]?.length > 0 && (
             <YearSection 
-              year="שנה א'" 
-              courses={filteredCourses.year1}
-            />
-          )}
-          {filteredCourses.year2.length > 0 && (
-            <YearSection 
-              year="שנה ב'" 
-              courses={filteredCourses.year2}
-            />
-          )}
-          {filteredCourses.year3.length > 0 && (
-            <YearSection 
-              year="שנה ג'" 
-              courses={filteredCourses.year3}
-            />
-          )}
+                key={degreeKey}
+                year={keyToDegree(degreeKey)}
+                courses={filteredCourses[degreeKey]}
+                courseType={courseType}
+              />
+            )
+          ))}
         </>
       );
     }
 
-    const yearMap = {
-      year1: "שנה א'",
-      year2: "שנה ב'",
-      year3: "שנה ג'",
-    };
-
-    return filteredCourses[selectedYear]?.length > 0 ? (
+    return (
+      <>
+        {selectedDegrees.map(degreeKey => (
+          filteredCourses[degreeKey]?.length > 0 && (
       <YearSection
-        year={yearMap[selectedYear]}
-        courses={filteredCourses[selectedYear]}
-      />
-    ) : (
-      <div className="text-center py-12">
-        <p className="text-xl text-gray-600">לא נמצאו קורסים</p>
-      </div>
+              key={degreeKey}
+              year={keyToDegree(degreeKey)}
+              courses={filteredCourses[degreeKey]}
+              courseType={courseType}
+            />
+          )
+        ))}
+      </>
     );
   };
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-b ${styles.bgGradient}`}
-      dir="rtl"
-    >
-      <Navbar courseType="cs" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between"></div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="bg-white shadow-md">
+    <Layout>
+      <div className={`bg-gradient-to-b ${styles.bgGradient}`} dir="rtl">
+        <Navbar courseType={courseType} />
+        
+        <CourseFilters
+          courses={selectedDegrees.length === 0 ? allCourses : allCourses.filter(course => selectedDegrees.includes(degreeToKey(course.degree_name)))}
+          onFilterChange={setActiveFilters}
+          onSortChange={setActiveSort}
+          activeFilters={activeFilters}
+          activeSort={activeSort}
+        >
+          {/* Degree Filter Buttons */}
+          <div className="bg-white shadow-md mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <div className="flex space-x-4">
+                <div className="flex flex-wrap gap-2">
+                  {availableDegrees.map(degreeKey => (
               <button
-                onClick={() => setSelectedYear("all")}
-                className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                  selectedYear === "all"
+                      key={degreeKey}
+                      onClick={() => {
+                        if (selectedDegrees.includes(degreeKey)) {
+                          setSelectedDegrees(selectedDegrees.filter(d => d !== degreeKey));
+                        } else {
+                          setSelectedDegrees([...selectedDegrees, degreeKey]);
+                        }
+                      }}
+                      className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-300 ${
+                        selectedDegrees.includes(degreeKey)
                     ? styles.buttonPrimary
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                כל השנים
+                      {keyToDegree(degreeKey)}
               </button>
-              <button
-                onClick={() => setSelectedYear("year1")}
-                className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                  selectedYear === "year1"
-                    ? styles.buttonPrimary
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                שנה א'
-              </button>
-              <button
-                onClick={() => setSelectedYear("year2")}
-                className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                  selectedYear === "year2"
-                    ? styles.buttonPrimary
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                שנה ב'
-              </button>
-              <button
-                onClick={() => setSelectedYear("year3")}
-                className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                  selectedYear === "year3"
-                    ? styles.buttonPrimary
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                שנה ג'
-              </button>
+                  ))}
             </div>
             <div className="relative w-full md:w-64">
               <input
@@ -387,56 +332,9 @@ const Courses = () => {
       <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">{renderCourses()}</div>
       </div>
-
-      <style jsx>{`
-        @keyframes slide {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          25% {
-            transform: translateX(-10px);
-          }
-          75% {
-            transform: translateX(10px);
-          }
-        }
-        .animate-slide {
-          animation: slide 4s ease-in-out infinite;
-        }
-        @keyframes tilt {
-          0%,
-          50%,
-          100% {
-            transform: rotate(0deg);
-          }
-          25% {
-            transform: rotate(1deg);
-          }
-          75% {
-            transform: rotate(-1deg);
-          }
-        }
-        .animate-tilt {
-          animation: tilt 10s infinite linear;
-        }
-        @keyframes gradient {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        .animate-gradient {
-          background-size: 200% auto;
-          animation: gradient 8s ease infinite;
-        }
-      `}</style>
+        </CourseFilters>
     </div>
+    </Layout>
   );
 };
 
