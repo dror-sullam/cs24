@@ -56,6 +56,42 @@ export function useTusUpload(auth) {
   };
 
   const upload = async (file, metadata = {}, onComplete) => {
+    // Remove file size validation (no limit)
+    // const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB in bytes
+    // if (file.size > MAX_FILE_SIZE) {
+    //   const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    //   const error = new Error(`הקובץ גדול מדי (${fileSizeMB}MB). הגודל המקסימלי המותר הוא 2GB`);
+    //   setError(error);
+    //   showNotification(`הקובץ גדול מדי (${fileSizeMB}MB). הגודל המקסימלי המותר הוא 2GB`, 'error');
+    //   throw error;
+    // }
+
+    // Add file type validation - only allow video files
+    const allowedVideoTypes = [
+      'video/mp4',
+      'video/mpeg',
+      'video/quicktime',
+      'video/x-msvideo', // .avi
+      'video/x-ms-wmv',  // .wmv
+      'video/webm',
+      'video/ogg',
+      'video/3gpp',
+      'video/x-flv'
+    ];
+    
+    if (!allowedVideoTypes.includes(file.type)) {
+      const error = new Error(`סוג קובץ לא נתמך. אנא העלה קובץ וידאו (MP4, AVI, MOV, וכו')`);
+      setError(error);
+      showNotification(`סוג קובץ לא נתמך. אנא העלה קובץ וידאו (MP4, AVI, MOV, וכו')`, 'error');
+      throw error;
+    }
+
+    if (!auth || !auth.session) {
+      const error = new Error('לא ניתן להעלות וידאו כעת, אנא התחבר');
+      setError(error);
+      throw error;
+    }
+
     console.log('Starting upload process for file:', file.name);
     setIsUploading(true);
     setUploadProgress(0);
@@ -116,6 +152,7 @@ export function useTusUpload(auth) {
         const upload = new tus.Upload(file, {
           endpoint: uploadUrl,
           retryDelays: [0, 1000, 3000, 5000],
+          chunkSize: 5 * 1024 * 1024, // 5MB chunks - safe for Cloudflare Stream Free/Pro
           metadata: {
             filename: file.name,
             filetype: file.type,
@@ -124,11 +161,30 @@ export function useTusUpload(auth) {
           headers: {},
           onError: function(err) {
             console.error('Tus upload error:', err);
-            const error = new Error(err.message);
+            
+            // Provide more specific error messages based on error type
+            let errorMessage = 'שגיאה בהעלאת הקובץ';
+            let userMessage = 'שגיאה בהעלאת הקובץ';
+            
+            if (err.message.includes('CORS') || err.message.includes('cross-origin')) {
+              errorMessage = 'CORS error - upload blocked by browser security policy';
+              userMessage = 'שגיאה בהעלאה: הגישה נחסמה על ידי הדפדפן. אנא פנה לתמיכה טכנית.';
+            } else if (err.message.includes('413') || err.message.includes('too large') || err.message.includes('Content Too Large')) {
+              errorMessage = 'Chunk size too large - exceeds Cloudflare Stream limit';
+              userMessage = 'שגיאה בהעלאה: גודל הקטע גדול מדי. הבעיה תתוקן אוטומטית - נסה שוב.';
+            } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+              errorMessage = 'Network error during upload';
+              userMessage = 'שגיאת רשת בהעלאה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
+            } else if (err.message.includes('timeout')) {
+              errorMessage = 'Upload timeout';
+              userMessage = 'זמן ההעלאה פג. אנא נסה שוב.';
+            }
+            
+            const error = new Error(errorMessage);
             error.videoUid = currentVideoUidRef.current;
             setError(error);
             setIsUploading(false);
-            showNotification('שגיאה בהעלאת הקובץ', 'error');
+            showNotification(userMessage, 'error');
             uploadRef.current = null;
             currentVideoUidRef.current = null;
             reject(error);
