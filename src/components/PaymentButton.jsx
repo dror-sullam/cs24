@@ -92,7 +92,7 @@ export default function PaymentButton({ videoId, courseName, className }) {
         <button 
           onClick={handlePayment} 
           disabled={loading || !termsAccepted}
-          className={`w-full bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`}
+          className={`w-full bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`}
         >
           {loading ? (
             <>
@@ -119,26 +119,26 @@ export default function PaymentButton({ videoId, courseName, className }) {
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="הכנס קוד קופון (אופציונלי)"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 transition border-2 border-gray-400 rounded-lg focus:border-indigo-500  outline-none"
           />
         </div>
         
         {/* Terms of Service Checkbox */}
-        <div className="flex items-start space-x-2 rtl:space-x-reverse">
+        <div className="flex items-center gap-1">
           <input
             type="checkbox"
             id="terms"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="accent-indigo-600 focus:ring-indigo-500"
           />
-          <label htmlFor="terms" className="text-sm text-gray-600">
+          <label htmlFor="terms" className="text-sm text-gray-700">
             אני מסכים ל
-            <a href="/terms" target="_blank" className="text-blue-600 hover:text-blue-700 font-medium">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-600 hover:text-indigo-700 ml-1">
               תנאי השימוש
             </a>
-            ו
-            <a href="/privacy" target="_blank" className="text-blue-600 hover:text-blue-700 font-medium">
+            ול
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-600 hover:text-indigo-700">
               מדיניות הפרטיות
             </a>
           </label>

@@ -39,6 +39,7 @@ const CourseDetails = () => {
     comment: ''
   });
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [isMobileEpisodesListExpanded, setIsMobileEpisodesListExpanded] = useState(false);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -81,9 +82,13 @@ const CourseDetails = () => {
           episodes_watched: data.episodes_watched || []
         });
 
-        // Auto-expand first topic if user has access
+        // Auto-expand first topic AND set first episode if user has access
         if (data.has_access && titlesWithWatchedStatus.length > 0) {
           setExpandedTopics([titlesWithWatchedStatus[0].id]);
+          const firstEpisode = titlesWithWatchedStatus[0]?.episodes?.[0] || null;
+          if (firstEpisode) {
+            setActiveEpisode(firstEpisode);
+          }
         }
 
       } catch (err) {
@@ -124,7 +129,7 @@ const CourseDetails = () => {
             <div className="space-y-3">
               <Link
                 to="/courses"
-                className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="block w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
               >
                 חזרה לקורסים
               </Link>
@@ -199,11 +204,15 @@ const CourseDetails = () => {
   };
 
   const toggleTopic = (topicId) => {
-    setExpandedTopics((prev) =>
-      prev.includes(topicId)
-        ? prev.filter((id) => id !== topicId)
-        : [...prev, topicId]
-    );
+    setExpandedTopics((prevExpanded) => {
+      // If the clicked topic is already the one expanded, collapse it.
+      if (prevExpanded.length === 1 && prevExpanded[0] === topicId) {
+        return [];
+      } else {
+        // Otherwise, expand the clicked topic (and implicitly collapse any other).
+        return [topicId];
+      }
+    });
   };
 
   // Calculate average rating
@@ -277,16 +286,16 @@ const CourseDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 pb-8 pt-24">
         {/* Back Button */}
         <button
           onClick={() => navigate("/courses")}
           className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
         >
-          <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 ml-2 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           חזרה לקורסים
@@ -294,84 +303,12 @@ const CourseDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Course Header */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.title}</h1>
-                  <p className="text-lg text-gray-600 mb-3">{course.course_name}</p>
-                  <div className="flex items-center text-gray-500 mb-4">
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    מרצה: {course.tutor_name}
-                  </div>
-                  {course.description && (
-                    <p className="text-gray-700 leading-relaxed">{course.description}</p>
-                  )}
-                </div>
-                
-                {/* Course Stats */}
-                <div className="flex flex-col items-end space-y-2 mr-6">
-                  {averageRating > 0 && (
-                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
-                      <svg className="w-4 h-4 text-yellow-500 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span className="text-sm font-medium text-yellow-700">{averageRating}</span>
-                    </div>
-                  )}
-                  <div className="text-sm text-gray-500">
-                    {getAllEpisodes().length} שיעורים
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {course.has_access && (
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">התקדמות בקורס</span>
-                    <span className="text-sm text-gray-500">{Math.round(courseProgress)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${courseProgress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Access Status */}
-              {course.has_access ? (
-                <div className="flex items-center text-green-700 bg-green-50 px-4 py-2 rounded-lg">
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  יש לך גישה לקורס זה
-                </div>
-              ) : (
-                <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      {course.sale_price < course.price && (
-                        <span className="text-gray-500 line-through">₪{course.price}</span>
-                      )}
-                      <span className="text-2xl font-bold text-blue-600">₪{course.sale_price}</span>
-                    </div>
-                  </div>
-                  <PaymentButton videoId={courseId} courseName={course.title} />
-                </div>
-              )}
-            </div>
-
+          <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Video Player */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
               {course.has_access ? (
                 <div>
-                  <div className="relative bg-black" style={{ paddingTop: "56.25%" }}>
+                  <div className="relative bg-black">
                     {activeEpisode ? (
                       <CourseVideoPlayer
                         courseId={activeEpisode.video_uid}
@@ -410,15 +347,6 @@ const CourseDetails = () => {
                       </div>
                     )}
                   </div>
-                  
-                  {activeEpisode && (
-                    <div className="p-6 border-t">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{activeEpisode.title}</h3>
-                      {activeEpisode.description && (
-                        <p className="text-gray-600">{activeEpisode.description}</p>
-                      )}
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="relative bg-gray-800" style={{ paddingTop: "56.25%" }}>
@@ -429,7 +357,7 @@ const CourseDetails = () => {
                       className="absolute inset-0 w-full h-full object-cover opacity-50"
                     />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center backdrop-blur-lg">
                     <div className="text-center text-white">
                       <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,8 +372,372 @@ const CourseDetails = () => {
               )}
             </div>
 
+            {/* Sidebar - Episodes List - Mobile - Signed In */}
+            {course.has_access && (
+              <div className="lg:hidden lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
+                  <h2 className="text-lg font-semibold text-white">
+                    תוכן הקורס
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
+                    <svg 
+                      className={`text-white p-1 w-6 h-6 transform transition-transform ${
+                        isMobileEpisodesListExpanded ? '-rotate-180' : ''
+                      }`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                
+                {isMobileEpisodesListExpanded && (
+                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
+                    {course?.titles?.map((title) => {
+                      const isExpanded = expandedTopics.includes(title.id);
+                      const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
+                      const totalEpisodes = title.episodes?.length || 0;
+
+                          return (
+                            <div key={title.id}>
+                              {/* Title Header */}
+                              <div
+                                className={`p-4 border-t cursor-pointer ${
+                                  isExpanded ? 'bg-white' : ''
+                                }`}
+                                onClick={() => toggleTopic(title.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <svg
+                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                        isExpanded ? '-rotate-90' : ''
+                                      }`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <div>
+                                      <h3 className="font-medium text-gray-900">{title.title}</h3>
+                                      <p className="text-sm text-gray-500">
+                                        {totalEpisodes} שיעורים
+                                        {completedEpisodes > 0 && ` • ${completedEpisodes} הושלמו`}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Episodes */}
+                              {isExpanded && (
+                                <div className="bg-gray-50 max-h-72 overflow-y-auto">
+                                  {(title.episodes || []).map((episode) => {
+                                    const isActive = activeEpisode?.id === episode.id;
+                                    const durationStr = episode.episode_len 
+                                      ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                      : "";
+
+                                return (
+                                  <div
+                                    key={episode.id}
+                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                      isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
+                                    } ${!course?.has_access ? 'opacity-60' : ''}`}
+                                    onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center flex-1">
+                                        {course?.has_access ? (
+                                          <button
+                                            onClick={(e) => handleCheckboxClick(e, episode.id)}
+                                            className="ml-3 focus:outline-none"
+                                          >
+                                            {episode.completed ? (
+                                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                              </div>
+                                            ) : (
+                                              <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                                            )}
+                                          </button>
+                                        ) : (
+                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3">
+                                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                          </div>
+                                        )}
+                                        <div className="flex-1">
+                                          <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                            {episode.episode_index + 1}. {episode.title}
+                                          </h4>
+                                          {episode.description && (
+                                            <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {durationStr && (
+                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                          {durationStr}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+              )}
+
+                {!course?.has_access && (
+                  <div className="p-4 border-t bg-gray-50">
+                    <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
+                    onClick={() => {
+                      const courseHeaderSection = document.getElementById('course-header-section');
+                      if (courseHeaderSection) {
+                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                  >
+                      רכוש גישה לקורס
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            )}
+
+            {/* Course Header */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex justify-start items-center gap-3 mb-3">
+                    <h1 className="text-2xl font-bold text-gray-900">{course.title}</h1>
+                    {/* Course Stats */}
+                    {averageRating > 0 && (
+                      <div className="flex gap-1 justify-center items-center bg-yellow-50 px-3 py-1 rounded-full">
+                        <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-sm font-medium text-yellow-600">{averageRating}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-start items-center gap-3 mb-3">
+                    <p className="text-lg text-gray-600">{course.course_name}</p>
+                    {!course.has_access && (
+                      <div className="py-1 px-3 rounded-md font-medium text-sm text-white bg-indigo-700 text-nowrap">
+                        {getAllEpisodes().length} שיעורים
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center text-gray-500 mb-4">
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    מרצה: {course.tutor_name}
+                  </div>
+                  {course.description && (
+                    <p className="text-gray-700 leading-relaxed">{course.description}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              {course.has_access && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">התקדמות בקורס</span>
+                    <span className="text-sm text-gray-500">{Math.round(courseProgress)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${courseProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Access Status */}
+              {!course.has_access && (
+                <div className="flex items-center justify-between flex-col lg:flex-row bg-gradient-to-t from-indigo-50 to-whiet border-4 border-indigo-600 p-4 rounded-xl">
+                  <div>
+                    <div className="flex flex-col p-8">
+                      <span className="text-6xl font-bold text-indigo-600">₪{course.sale_price === null ? course.price : course.sale_price}</span>
+                      {course.sale_price && (
+                        <span className="text-gray-400 text-xl line-through">₪{course.price}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div id="course-header-section">
+                    <PaymentButton videoId={courseId} courseName={course.title} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar - Episodes List - Mobile - Signed Out */}
+            {!course.has_access && (
+              <div className="lg:hidden lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
+                  <h2 className="text-lg font-semibold text-white">
+                    תוכן הקורס
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
+                    <svg 
+                      className={`text-white p-1 w-6 h-6 transform transition-transform ${
+                        isMobileEpisodesListExpanded ? '-rotate-180' : ''
+                      }`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                
+                {isMobileEpisodesListExpanded && (
+                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
+                    {course?.titles?.map((title) => {
+                      const isExpanded = expandedTopics.includes(title.id);
+                      const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
+                      const totalEpisodes = title.episodes?.length || 0;
+
+                          return (
+                            <div key={title.id}>
+                              {/* Title Header */}
+                              <div
+                                className={`p-4 border-t cursor-pointer ${
+                                  isExpanded ? 'bg-white' : ''
+                                }`}
+                                onClick={() => toggleTopic(title.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <svg
+                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                        isExpanded ? '-rotate-90' : ''
+                                      }`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <div>
+                                      <h3 className="font-medium text-gray-900">{title.title}</h3>
+                                      <p className="text-sm text-gray-500">
+                                        {totalEpisodes} שיעורים
+                                        {completedEpisodes > 0 && ` • ${completedEpisodes} הושלמו`}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Episodes */}
+                              {isExpanded && (
+                                <div className="bg-gray-50 max-h-72 overflow-y-auto">
+                                  {(title.episodes || []).map((episode) => {
+                                    const isActive = activeEpisode?.id === episode.id;
+                                    const durationStr = episode.episode_len 
+                                      ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                      : "";
+
+                                return (
+                                  <div
+                                    key={episode.id}
+                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                      isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
+                                    } ${!course?.has_access ? 'opacity-60' : ''}`}
+                                    onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center flex-1">
+                                        {course?.has_access ? (
+                                          <button
+                                            onClick={(e) => handleCheckboxClick(e, episode.id)}
+                                            className="ml-3 focus:outline-none"
+                                          >
+                                            {episode.completed ? (
+                                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                              </div>
+                                            ) : (
+                                              <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                                            )}
+                                          </button>
+                                        ) : (
+                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3">
+                                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                          </div>
+                                        )}
+                                        <div className="flex-1">
+                                          <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                            {episode.episode_index + 1}. {episode.title}
+                                          </h4>
+                                          {episode.description && (
+                                            <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {durationStr && (
+                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                          {durationStr}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+              )}
+
+                {!course?.has_access && (
+                  <div className="p-4 border-t bg-gray-50">
+                    <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
+                    onClick={() => {
+                      const courseHeaderSection = document.getElementById('course-header-section');
+                      if (courseHeaderSection) {
+                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                  >
+                      רכוש גישה לקורס
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            )}
+
             {/* Feedback Section */}
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-white rounded-lg shadow-md">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold text-gray-900">משובים</h2>
               </div>
@@ -477,16 +769,16 @@ const CourseDetails = () => {
                         <textarea
                           value={feedbackForm.comment}
                           onChange={(e) => setFeedbackForm(prev => ({ ...prev, comment: e.target.value }))}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                           rows="3"
                           placeholder="שתף את חווייתך מהקורס..."
                         />
                       </div>
-                      <div className="flex space-x-3">
+                      <div className="flex gap-3">
                         <button
                           onClick={handleFeedbackSubmit}
                           disabled={submittingFeedback}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
                         >
                           {submittingFeedback ? 'שולח...' : 'שלח משוב'}
                         </button>
@@ -501,34 +793,36 @@ const CourseDetails = () => {
                   </div>
                 )}
 
-                {course?.feedback?.filter(f => f.comment)?.length > 0 ? (
-                  course.feedback
-                    .filter(f => f.comment)
-                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                    .map((feedback) => (
-                      <div key={feedback.id} className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center">
-                            <div className="flex">
-                              {[...Array(feedback.rating)].map((_, i) => (
-                                <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                              ))}
+                {!showFeedbackForm && (
+                  course?.feedback?.filter(f => f.comment)?.length > 0 ? (
+                    course.feedback
+                      .filter(f => f.comment)
+                      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                      .map((feedback) => (
+                        <div key={feedback.id} className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center">
+                              <div className="flex">
+                                {[...Array(feedback.rating)].map((_, i) => (
+                                  <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ))}
+                              </div>
                             </div>
+                            <span className="text-sm text-gray-500">{formatDate(feedback.created_at)}</span>
                           </div>
-                          <span className="text-sm text-gray-500">{formatDate(feedback.created_at)}</span>
+                          <p className="text-gray-700">{feedback.comment}</p>
                         </div>
-                        <p className="text-gray-700">{feedback.comment}</p>
-                      </div>
-                    ))
-                ) : (
-                  <div className="p-12 text-center">
-                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <p className="text-gray-500">אין עדיין משובים לקורס זה</p>
-                  </div>
+                      ))
+                  ) : (
+                    <div className="p-12 text-center">
+                      <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      <p className="text-gray-500">אין עדיין משובים לקורס זה</p>
+                    </div>
+                  )
                 )}
               </div>
 
@@ -536,7 +830,7 @@ const CourseDetails = () => {
                 <div className="p-6 border-t">
                   <button
                     onClick={() => setShowFeedbackForm(true)}
-                    className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                   >
                     הוסף משוב
                   </button>
@@ -545,16 +839,17 @@ const CourseDetails = () => {
             </div>
           </div>
 
-          {/* Sidebar - Episodes List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm sticky top-4">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  תוכן הקורס ({getAllEpisodes().length} שיעורים)
+          {/* Sidebar - Episodes List - Desktop */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
+              <div className="flex justify-between p-3 bg-indigo-700">
+                <h2 className="text-lg font-semibold text-white">
+                  תוכן הקורס
                 </h2>
+                <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
               </div>
               
-              <div className="max-h-96 overflow-y-auto">
+              <div className="flex-1 max-h-96 overflow-y-auto overflow-x-hidden">
                 {course?.titles?.map((title) => {
                   const isExpanded = expandedTopics.includes(title.id);
                   const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
@@ -564,16 +859,16 @@ const CourseDetails = () => {
                     <div key={title.id}>
                       {/* Title Header */}
                       <div
-                        className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                          isExpanded ? 'bg-blue-50' : ''
+                        className={`p-4 border-t cursor-pointer ${
+                          isExpanded ? 'bg-white' : ''
                         }`}
                         onClick={() => toggleTopic(title.id)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <svg
-                              className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform ${
-                                isExpanded ? 'rotate-90' : ''
+                              className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                isExpanded ? '-rotate-90' : ''
                               }`}
                               fill="none"
                               stroke="currentColor"
@@ -594,7 +889,7 @@ const CourseDetails = () => {
 
                       {/* Episodes */}
                       {isExpanded && (
-                        <div className="bg-gray-50">
+                        <div className="bg-gray-50 max-h-72 overflow-y-auto">
                           {(title.episodes || []).map((episode) => {
                             const isActive = activeEpisode?.id === episode.id;
                             const durationStr = episode.episode_len 
@@ -604,8 +899,8 @@ const CourseDetails = () => {
                             return (
                               <div
                                 key={episode.id}
-                                className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100 ${
-                                  isActive ? 'bg-blue-100 border-r-4 border-blue-500' : ''
+                                className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                  isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
                                 } ${!course?.has_access ? 'opacity-60' : ''}`}
                                 onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
                               >
@@ -634,7 +929,7 @@ const CourseDetails = () => {
                                       </div>
                                     )}
                                     <div className="flex-1">
-                                      <h4 className={`font-medium ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
+                                      <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
                                         {episode.episode_index + 1}. {episode.title}
                                       </h4>
                                       {episode.description && (
@@ -660,7 +955,14 @@ const CourseDetails = () => {
 
               {!course?.has_access && (
                 <div className="p-4 border-t bg-gray-50">
-                  <button className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                  <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
+                    onClick={() => {
+                      const courseHeaderSection = document.getElementById('course-header-section');
+                      if (courseHeaderSection) {
+                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                  >
                     רכוש גישה לקורס
                   </button>
                 </div>
