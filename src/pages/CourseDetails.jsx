@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { showNotification } from "../components/ui/notification";
 import PaymentButton from "../components/PaymentButton";
 import { supabase } from "../lib/supabase";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../components/Footer";
 import CourseVideoPlayer from "../components/CourseVideoPlayer";
 import StarRating from "../components/StarRating";
@@ -33,6 +33,7 @@ const CourseDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedTopics, setExpandedTopics] = useState([]);
+  const [expandedQuestions, setExpandedQuestions] = useState([]);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState({
     rating: 5,
@@ -40,6 +41,34 @@ const CourseDetails = () => {
   });
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [isMobileEpisodesListExpanded, setIsMobileEpisodesListExpanded] = useState(false);
+
+  const answerVariants = {
+    expanded: { opacity: 1, height: "auto", transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } },
+    collapsed: { opacity: 0, height: 0, transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } }
+  };
+
+  const questions = [
+    {
+      id: 1,
+      question: "האם אני צריך ניסיון קודם כדי להשתתף בקורס?",
+      answer: "לא, אין צורך בניסיון קודם. הקורס בנוי בצורה הדרגתית ומתחיל מהבסיס, כך שגם מי שמתחיל מאפס יוכל לעקוב ולהבין."
+    },
+    {
+      id: 2,
+      question: "מה קורה אם אני מפספס שיעור או לא עומד בקצב?",
+      answer: "אין בעיה! הקורס זמין אונליין ואתה יכול לצפות בתכנים בזמן שנוח לך. המטרה היא ללמוד בקצב שלך."
+    },
+    {
+      id: 3,
+      question: "האם הקורס בחינם?",
+      answer: "רוב הקורסים זמינים לצפייה חינמית, אבל ייתכן שחלק מהתכנים המתקדמים או תעודת הסיום ידרשו תשלום."
+    },
+    {
+      id: 4,
+      question: "איך נראית ההערכה בקורס?",
+      answer: "ברוב הקורסים יש תרגולים, מבחנים קצרים (quiz), ומטלות הגשה. כל אלה נועדו לעזור לך להבין אם החומר יושב לך טוב בראש."
+    },
+  ]
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -215,6 +244,18 @@ const CourseDetails = () => {
     });
   };
 
+  const toggleQuestion = (questionId) => {
+    setExpandedQuestions((prevExpanded) => {
+      // If the clicked topic is already the one expanded, collapse it.
+      if (prevExpanded.length === 1 && prevExpanded[0] === questionId) {
+        return [];
+      } else {
+        // Otherwise, expand the clicked topic (and implicitly collapse any other).
+        return [questionId];
+      }
+    });
+  };
+
   // Calculate average rating
   const averageRating = course?.feedback?.length > 0
     ? (course.feedback.reduce((acc, f) => acc + f.rating, 0) / course.feedback.length).toFixed(1)
@@ -377,13 +418,13 @@ const CourseDetails = () => {
               <div className="lg:hidden lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
                 <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                     תוכן הקורס
                   </h2>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-white whitespace-nowrap">{getAllEpisodes().length} שיעורים</h2>
                     <svg 
-                      className={`text-white p-1 w-6 h-6 transform transition-transform ${
+                      className={`text-white p-1 w-6 h-6 flex-shrink-0 transform transition-transform ${
                         isMobileEpisodesListExpanded ? '-rotate-180' : ''
                       }`}
                       fill="none" 
@@ -411,10 +452,10 @@ const CourseDetails = () => {
                                 }`}
                                 onClick={() => toggleTopic(title.id)}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center">
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center min-w-0 flex-1">
                                     <svg
-                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                      className={`w-4 h-4 text-gray-400 ml-2 flex-shrink-0 transform transition-transform scale-x-[-1] ${
                                         isExpanded ? '-rotate-90' : ''
                                       }`}
                                       fill="none"
@@ -423,9 +464,9 @@ const CourseDetails = () => {
                                     >
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                    <div>
-                                      <h3 className="font-medium text-gray-900">{title.title}</h3>
-                                      <p className="text-sm text-gray-500">
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="font-medium text-gray-900 break-words">{title.title}</h3>
+                                      <p className="text-sm text-gray-500 break-words">
                                         {totalEpisodes} שיעורים
                                         {completedEpisodes > 0 && ` • ${completedEpisodes} הושלמו`}
                                       </p>
@@ -435,9 +476,18 @@ const CourseDetails = () => {
                               </div>
 
                               {/* Episodes */}
-                              {isExpanded && (
-                                <div className="bg-gray-50 max-h-72 overflow-y-auto">
-                                  {(title.episodes || []).map((episode) => {
+                              <AnimatePresence initial={false}>
+                                {isExpanded && (
+                                  <motion.div
+                                    key="episodes"
+                                    variants={answerVariants}
+                                    initial="collapsed"
+                                    animate="expanded"
+                                    exit="collapsed"
+                                    style={{ overflow: 'hidden' }}
+                                  >
+                                    <div className="bg-gray-50">
+                                      {(title.episodes || []).map((episode) => {
                                     const isActive = activeEpisode?.id === episode.id;
                                     const durationStr = episode.episode_len 
                                       ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
@@ -451,12 +501,12 @@ const CourseDetails = () => {
                                     } ${!course?.has_access ? 'opacity-60' : ''}`}
                                     onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
                                   >
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center flex-1">
+                                    <div className="flex items-center justify-between w-full min-w-0">
+                                      <div className="flex items-center min-w-0 flex-1">
                                         {course?.has_access ? (
                                           <button
                                             onClick={(e) => handleCheckboxClick(e, episode.id)}
-                                            className="ml-3 focus:outline-none"
+                                            className="ml-3 focus:outline-none flex-shrink-0"
                                           >
                                             {episode.completed ? (
                                               <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
@@ -469,14 +519,14 @@ const CourseDetails = () => {
                                             )}
                                           </button>
                                         ) : (
-                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3">
+                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
                                             <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                             </svg>
                                           </div>
                                         )}
-                                        <div className="flex-1">
-                                          <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                        <div className="min-w-0 flex-1">
+                                          <h4 className={`font-medium break-words ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
                                             {episode.episode_index + 1}. {episode.title}
                                           </h4>
                                           {episode.description && (
@@ -485,7 +535,7 @@ const CourseDetails = () => {
                                         </div>
                                       </div>
                                       {durationStr && (
-                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded flex-shrink-0 ml-2">
                                           {durationStr}
                                         </span>
                                       )}
@@ -493,8 +543,10 @@ const CourseDetails = () => {
                                   </div>
                                 );
                               })}
-                            </div>
-                          )}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                         </div>
                       );
                     })}
@@ -505,9 +557,9 @@ const CourseDetails = () => {
                   <div className="p-4 border-t bg-gray-50">
                     <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
                     onClick={() => {
-                      const courseHeaderSection = document.getElementById('course-header-section');
-                      if (courseHeaderSection) {
-                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const paymentButton = document.getElementById('payment-button');
+                      if (paymentButton) {
+                        paymentButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       }
                     }}
                   >
@@ -582,7 +634,7 @@ const CourseDetails = () => {
                       )}
                     </div>
                   </div>
-                  <div id="course-header-section">
+                  <div id="payment-button">
                     <PaymentButton videoId={courseId} courseName={course.title} />
                   </div>
                 </div>
@@ -594,13 +646,13 @@ const CourseDetails = () => {
               <div className="lg:hidden lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
                 <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                     תוכן הקורס
                   </h2>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-white whitespace-nowrap">{getAllEpisodes().length} שיעורים</h2>
                     <svg 
-                      className={`text-white p-1 w-6 h-6 transform transition-transform ${
+                      className={`text-white p-1 w-6 h-6 flex-shrink-0 transform transition-transform ${
                         isMobileEpisodesListExpanded ? '-rotate-180' : ''
                       }`}
                       fill="none" 
@@ -628,10 +680,10 @@ const CourseDetails = () => {
                                 }`}
                                 onClick={() => toggleTopic(title.id)}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center">
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center min-w-0 flex-1">
                                     <svg
-                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                      className={`w-4 h-4 text-gray-400 ml-2 flex-shrink-0 transform transition-transform scale-x-[-1] ${
                                         isExpanded ? '-rotate-90' : ''
                                       }`}
                                       fill="none"
@@ -640,9 +692,9 @@ const CourseDetails = () => {
                                     >
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                    <div>
-                                      <h3 className="font-medium text-gray-900">{title.title}</h3>
-                                      <p className="text-sm text-gray-500">
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="font-medium text-gray-900 break-words">{title.title}</h3>
+                                      <p className="text-sm text-gray-500 break-words">
                                         {totalEpisodes} שיעורים
                                         {completedEpisodes > 0 && ` • ${completedEpisodes} הושלמו`}
                                       </p>
@@ -652,66 +704,77 @@ const CourseDetails = () => {
                               </div>
 
                               {/* Episodes */}
-                              {isExpanded && (
-                                <div className="bg-gray-50 max-h-72 overflow-y-auto">
-                                  {(title.episodes || []).map((episode) => {
-                                    const isActive = activeEpisode?.id === episode.id;
-                                    const durationStr = episode.episode_len 
-                                      ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
-                                      : "";
-
-                                return (
-                                  <div
-                                    key={episode.id}
-                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
-                                      isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
-                                    } ${!course?.has_access ? 'opacity-60' : ''}`}
-                                    onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
+                              <AnimatePresence initial={false}>
+                                {isExpanded && (
+                                  <motion.div
+                                    key="episodes"
+                                    variants={answerVariants}
+                                    initial="collapsed"
+                                    animate="expanded"
+                                    exit="collapsed"
+                                    style={{ overflow: 'hidden' }}
                                   >
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center flex-1">
-                                        {course?.has_access ? (
-                                          <button
-                                            onClick={(e) => handleCheckboxClick(e, episode.id)}
-                                            className="ml-3 focus:outline-none"
-                                          >
-                                            {episode.completed ? (
-                                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    <div className="bg-gray-50">
+                                      {(title.episodes || []).map((episode) => {
+                                        const isActive = activeEpisode?.id === episode.id;
+                                        const durationStr = episode.episode_len 
+                                          ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                          : "";
+
+                                    return (
+                                      <div
+                                        key={episode.id}
+                                        className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                          isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
+                                        } ${!course?.has_access ? 'opacity-60' : ''}`}
+                                        onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
+                                      >
+                                        <div className="flex items-center justify-between w-full min-w-0">
+                                          <div className="flex items-center min-w-0 flex-1">
+                                            {course?.has_access ? (
+                                              <button
+                                                onClick={(e) => handleCheckboxClick(e, episode.id)}
+                                                className="ml-3 focus:outline-none flex-shrink-0"
+                                              >
+                                                {episode.completed ? (
+                                                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                  </div>
+                                                ) : (
+                                                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                                                )}
+                                              </button>
+                                            ) : (
+                                              <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                                                <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
                                               </div>
-                                            ) : (
-                                              <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
                                             )}
-                                          </button>
-                                        ) : (
-                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3">
-                                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
+                                            <div className="min-w-0 flex-1">
+                                              <h4 className={`font-medium break-words ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                                {episode.episode_index + 1}. {episode.title}
+                                              </h4>
+                                              {episode.description && (
+                                                <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                              )}
+                                            </div>
                                           </div>
-                                        )}
-                                        <div className="flex-1">
-                                          <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
-                                            {episode.episode_index + 1}. {episode.title}
-                                          </h4>
-                                          {episode.description && (
-                                            <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                          {durationStr && (
+                                            <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded flex-shrink-0 ml-2">
+                                              {durationStr}
+                                            </span>
                                           )}
                                         </div>
                                       </div>
-                                      {durationStr && (
-                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                                          {durationStr}
-                                        </span>
-                                      )}
+                                    );
+                                  })}
                                     </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                         </div>
                       );
                     })}
@@ -722,9 +785,9 @@ const CourseDetails = () => {
                   <div className="p-4 border-t bg-gray-50">
                     <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
                     onClick={() => {
-                      const courseHeaderSection = document.getElementById('course-header-section');
-                      if (courseHeaderSection) {
-                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const paymentButton = document.getElementById('payment-button');
+                      if (paymentButton) {
+                        paymentButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       }
                     }}
                   >
@@ -837,16 +900,91 @@ const CourseDetails = () => {
                 </div>
               )}
             </div>
+
+            {/* Q&A - Signed Out */}
+            {!course.has_access && (
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
+                  <div className="flex justify-between items-center p-3 bg-indigo-700">
+                    <h2 className="text-lg font-semibold text-white">
+                      שאלות ותשובות
+                    </h2>
+                  </div>
+                  
+                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
+                    {questions.map((question) => {
+                      const isExpanded = expandedQuestions.includes(question.id);
+                          return (
+                            <div key={question.id}>
+                              {/* Title Header */}
+                              <div
+                                className={`p-4 border-t cursor-pointer ${
+                                  isExpanded ? 'bg-white' : ''
+                                }`}
+                                onClick={() => toggleQuestion(question.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <svg
+                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                        isExpanded ? '-rotate-90' : ''
+                                      }`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <div>
+                                      <h3 className="font-medium text-gray-900">{question.question}</h3>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Answers */}
+                              <AnimatePresence initial={false}>
+                                {isExpanded && (
+                                  <motion.div
+                                    key="answer"
+                                    variants={answerVariants}
+                                    initial="collapsed"
+                                    animate="expanded"
+                                    exit="collapsed"
+                                    style={{ overflow: 'hidden' }}
+                                  >
+                                    <div className="bg-gray-50">
+                                      <div className="p-4 border-t border-gray-200">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center flex-1">
+                                            <div className="flex-1">
+                                              <p className="text-sm text-gray-500">{question.answer}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+                      </div>
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* Sidebar - Episodes List - Desktop */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
-              <div className="flex justify-between p-3 bg-indigo-700">
-                <h2 className="text-lg font-semibold text-white">
+              <div className="flex justify-between items-center p-3 bg-indigo-700">
+                <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                   תוכן הקורס
                 </h2>
-                <h2 className="text-lg font-semibold text-white">{getAllEpisodes().length} שיעורים</h2>
+                <h2 className="text-lg font-semibold text-white whitespace-nowrap flex-shrink-0">{getAllEpisodes().length} שיעורים</h2>
               </div>
               
               <div className="flex-1 max-h-96 overflow-y-auto overflow-x-hidden">
@@ -864,10 +1002,10 @@ const CourseDetails = () => {
                         }`}
                         onClick={() => toggleTopic(title.id)}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center min-w-0 flex-1">
                             <svg
-                              className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                              className={`w-4 h-4 text-gray-400 ml-2 flex-shrink-0 transform transition-transform scale-x-[-1] ${
                                 isExpanded ? '-rotate-90' : ''
                               }`}
                               fill="none"
@@ -876,9 +1014,9 @@ const CourseDetails = () => {
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            <div>
-                              <h3 className="font-medium text-gray-900">{title.title}</h3>
-                              <p className="text-sm text-gray-500">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-medium text-gray-900 break-words">{title.title}</h3>
+                              <p className="text-sm text-gray-500 break-words">
                                 {totalEpisodes} שיעורים
                                 {completedEpisodes > 0 && ` • ${completedEpisodes} הושלמו`}
                               </p>
@@ -888,66 +1026,77 @@ const CourseDetails = () => {
                       </div>
 
                       {/* Episodes */}
-                      {isExpanded && (
-                        <div className="bg-gray-50 max-h-72 overflow-y-auto">
-                          {(title.episodes || []).map((episode) => {
-                            const isActive = activeEpisode?.id === episode.id;
-                            const durationStr = episode.episode_len 
-                              ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
-                              : "";
+                      <AnimatePresence initial={false}>
+                        {isExpanded && (
+                          <motion.div
+                            key="episodes"
+                            variants={answerVariants}
+                            initial="collapsed"
+                            animate="expanded"
+                            exit="collapsed"
+                            style={{ overflow: 'hidden' }}
+                          >
+                            <div className="bg-gray-50">
+                              {(title.episodes || []).map((episode) => {
+                                const isActive = activeEpisode?.id === episode.id;
+                                const durationStr = episode.episode_len 
+                                  ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                  : "";
 
-                            return (
-                              <div
-                                key={episode.id}
-                                className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
-                                  isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
-                                } ${!course?.has_access ? 'opacity-60' : ''}`}
-                                onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center flex-1">
-                                    {course?.has_access ? (
-                                      <button
-                                        onClick={(e) => handleCheckboxClick(e, episode.id)}
-                                        className="ml-3 focus:outline-none"
-                                      >
-                                        {episode.completed ? (
-                                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                return (
+                                  <div
+                                    key={episode.id}
+                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                      isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
+                                    } ${!course?.has_access ? 'opacity-60' : ''}`}
+                                    onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
+                                  >
+                                    <div className="flex items-center justify-between w-full min-w-0">
+                                      <div className="flex items-center min-w-0 flex-1">
+                                        {course?.has_access ? (
+                                          <button
+                                            onClick={(e) => handleCheckboxClick(e, episode.id)}
+                                            className="ml-3 focus:outline-none flex-shrink-0"
+                                          >
+                                            {episode.completed ? (
+                                              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                              </div>
+                                            ) : (
+                                              <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
+                                            )}
+                                          </button>
+                                        ) : (
+                                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                             </svg>
                                           </div>
-                                        ) : (
-                                          <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
                                         )}
-                                      </button>
-                                    ) : (
-                                      <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center ml-3">
-                                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
+                                        <div className="min-w-0 flex-1">
+                                          <h4 className={`font-medium break-words ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                            {episode.episode_index + 1}. {episode.title}
+                                          </h4>
+                                          {episode.description && (
+                                            <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                          )}
+                                        </div>
                                       </div>
-                                    )}
-                                    <div className="flex-1">
-                                      <h4 className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
-                                        {episode.episode_index + 1}. {episode.title}
-                                      </h4>
-                                      {episode.description && (
-                                        <p className="text-sm text-gray-500 line-clamp-1">{episode.description}</p>
+                                      {durationStr && (
+                                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded flex-shrink-0 ml-2">
+                                          {durationStr}
+                                        </span>
                                       )}
                                     </div>
                                   </div>
-                                  {durationStr && (
-                                    <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                                      {durationStr}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   );
                 })}
@@ -957,9 +1106,9 @@ const CourseDetails = () => {
                 <div className="p-4 border-t bg-gray-50">
                   <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
                     onClick={() => {
-                      const courseHeaderSection = document.getElementById('course-header-section');
-                      if (courseHeaderSection) {
-                        courseHeaderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const paymentButton = document.getElementById('payment-button');
+                      if (paymentButton) {
+                        paymentButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       }
                     }}
                   >
