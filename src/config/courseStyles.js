@@ -104,6 +104,40 @@ const courseStyles = {
     logoEnd: '#881337',
     arrowColor: 'text-rose-500 hover:bg-rose-50'
   },
+  courses: {
+    buttonPrimary: 'bg-indigo-800 text-white hover:bg-indigo-700',
+    buttonSecondary: 'bg-white text-indigo-800 hover:bg-indigo-100',
+    buttonThird: 'bg-white text-indigo-600 hover:bg-indigo-100',
+    buttonMissing: 'bg-indigo-800 text-white',
+    buttonLoginGradient: 'from-indigo-600 to-indigo-800',
+    buttonAverageBg: 'bg-indigo-500',
+    buttonAverageRingColor: 'ring-indigo-800',
+    jobRequestModalGradient: 'from-indigo-600 to-indigo-900',
+    bgGradient: 'from-indigo-50 to-white',
+    textColor: 'text-indigo-950',
+    textSecondary: 'text-indigo-600 hover: text-indigo-700',
+    cardBorder: 'border-indigo-200',
+    cardBorderStrong: 'border-indigo-600',
+    cardBg: 'from-indigo-800 to-indigo-700',
+    iconColor: 'text-indigo-700',
+    iconColorReverse:'md bg-indigo-600 hover:bg-indigo-700 text-white',
+    linksIconBg: 'bg-indigo-50',
+    linksIconColor: 'text-indigo-600',
+    bgLight: 'bg-indigo-50',
+    subjectBg: 'bg-indigo-100',
+    starColor: 'text-indigo-400',
+    TLBg: 'from-indigo-700 via-indigo-800 to-indigo-900',
+    shadowGlow: 'rgba(79, 70, 229, 0.3)',
+    shadowGlowHover: 'rgba(79, 70, 229, 0.5)',
+    fillColor: '#4f46e5',
+    eventBg: 'bg-indigo-500', // Added for event background
+    editBg: 'bg-indigo-300',
+    background: "#a5b4fc",
+    contactBg: 'bg-indigo-300 text-white hover:bg-indigo-400',
+    ringColor: 'ring-indigo-600',
+    logoStart: '#4f46e5',
+    logoEnd: '#312e81'
+  },
 };
 
 const courseTypeOptions = [

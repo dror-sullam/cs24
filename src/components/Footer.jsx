@@ -1,22 +1,31 @@
 import { Link } from 'react-router-dom';
 
-const Footer = () => {
+const Footer = ({ whiteText = false }) => {
+    // Define color classes based on the whiteText prop
+    const linkColorClass = whiteText 
+        ? "text-white hover:text-gray-300" 
+        : "text-gray-500 hover:text-gray-900";
+    
+    const copyrightColorClass = whiteText 
+        ? "text-gray-300" 
+        : "text-gray-400";
+
     return (
       <footer>
           <div class="max-w-screen-xl px-4 pb-12 mx-auto space-y-8 overflow-hidden sm:px-6 lg:px-8">
               <nav class="flex flex-wrap justify-center -mx-5 -my-2">
                   <div class="px-5 py-2">
-                      <Link to="/about" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                      <Link to="/about" className={`text-base leading-6 ${linkColorClass}`}>
                           אודות
                       </Link>
                   </div>
                   <div class="px-5 py-2">
-                      <Link to="/terms" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                      <Link to="/terms" className={`text-base leading-6 ${linkColorClass}`}>
                           תנאי שימוש
                       </Link>
                   </div>
                   <div class="px-5 py-2">
-                      <Link to="/privacy" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                      <Link to="/privacy" className={`text-base leading-6 ${linkColorClass}`}>
                           מדיניות פרטיות
                       </Link>
                   </div>
@@ -47,7 +56,7 @@ const Footer = () => {
                       </svg>
                   </a>
               </div> */}
-              <p class="mt-8 text-base leading-6 text-center text-gray-400">
+              <p class={`mt-8 text-base leading-6 text-center ${copyrightColorClass}`}>
                 © 2025 כל הזכויות שמורות לדניאל זיו
               </p>
           </div>
