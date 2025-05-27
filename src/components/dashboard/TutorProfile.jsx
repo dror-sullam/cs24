@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Save, Edit, Trash2, Loader, Plus } from 'lucide-react';
+import { Save, Edit, Trash2, Loader, Plus, ImagePlus, X } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { supabase } from '../../lib/supabase';
 import { showNotification } from '../../components/ui/notification';
 import LoaderComponent from '../Loader';
 
+// Function to convert file to base64
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64String = reader.result.split(',')[1];
+      resolve(base64String);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [profileImageFile, setProfileImageFile] = useState(null);
   const [tutorProfileData, setTutorProfileData] = useState({
     name: '',
     mail: '',
@@ -20,7 +34,10 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
     education: [],
     grades: [],
     selections: [],
-    events: []
+    events: [],
+    profilePictureBase64: null,
+    profilePictureName: null,
+    profilePictureType: null
   });
 
   // Initialize tutorProfileData with current data
@@ -37,7 +54,10 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
         education: dashboardData.tutor_profile.education || [],
         grades: dashboardData.tutor_profile.grades || [],
         selections: dashboardData.tutor_profile.selections || [],
-        events: dashboardData.tutor_profile.events || []
+        events: dashboardData.tutor_profile.events || [],
+        profilePictureBase64: null,
+        profilePictureName: null,
+        profilePictureType: null
       });
     }
   }, [dashboardData]);
@@ -73,6 +93,37 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
     course_id: ''
   });
 
+  // Handle profile image change
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const base64String = await fileToBase64(file);
+        setProfileImageFile(file);
+        setTutorProfileData(prev => ({
+          ...prev,
+          profilePictureBase64: base64String,
+          profilePictureName: file.name,
+          profilePictureType: file.type
+        }));
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        showNotification('שגיאה בטעינת התמונה', 'error');
+      }
+    }
+  };
+
+  // Handle removing profile image
+  const handleRemoveProfileImage = () => {
+    setProfileImageFile(null);
+    setTutorProfileData(prev => ({
+      ...prev,
+      profilePictureBase64: null,
+      profilePictureName: null,
+      profilePictureType: null
+    }));
+  };
+
   // Handle profile update
   const handleTutorProfileUpdate = async () => {
     try {
@@ -93,7 +144,12 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
             grades: tutorProfileData.grades,
             events: tutorProfileData.events,
             selections: tutorProfileData.selections,
-            coupons: tutorProfileData.coupons
+            coupons: tutorProfileData.coupons,
+            ...(tutorProfileData.profilePictureBase64 ? {
+              profilePictureBase64: tutorProfileData.profilePictureBase64,
+              profilePictureName: tutorProfileData.profilePictureName,
+              profilePictureType: tutorProfileData.profilePictureType
+            } : {})
           }
         }
       });
@@ -361,6 +417,48 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
+            {/* Profile Image */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-medium mb-4">תמונת פרופיל</h3>
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <img
+                    src={profileImageFile ? URL.createObjectURL(profileImageFile) : dashboardData.tutor_profile.profile_image_url}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  {isEditingProfile && (
+                    <>
+                      <input
+                        id="profile-image-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfileImageChange}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => document.getElementById('profile-image-input').click()}
+                        className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 text-white hover:bg-blue-700 transition-colors"
+                      >
+                        <ImagePlus size={16} />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {isEditingProfile && profileImageFile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveProfileImage}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X size={16} className="mr-2" />
+                    הסר תמונה
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Basic Information */}
             <div className="p-4 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-medium mb-4">פרטים אישיים</h3>
