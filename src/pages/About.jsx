@@ -43,6 +43,20 @@ const About = () => {
       window.removeEventListener('resize', checkDeviceType);
     };
   }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader />
+            <p className="mt-8 text-gray-600">טוען מידע...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-r from-blue-50 to-white">

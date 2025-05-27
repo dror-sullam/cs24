@@ -860,6 +860,14 @@ export default function CourseEditorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white" dir="rtl">
+        {isSaving && (
+        <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <LoaderComponent />
+            <p className="text-gray-600 text-lg font-medium mt-4">שומר שינויים...</p>
+          </div>
+        </div>
+      )}
       <Navbar courseType={courseTypeRef.current} />
 
       <div className="container mx-auto pt-24 pb-16 px-4">
@@ -882,17 +890,8 @@ export default function CourseEditorPage() {
               onClick={() => handleSaveCourse()}
               disabled={isSaving || !isAuthorized}
             >
-              {isSaving ? (
-                <>
-                  <LoaderComponent />
-                  שומר...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  שמירת קורס
-                </>
-              )}
+              <Save className="h-4 w-4" />
+              שמירת קורס
             </Button>
           </div>
 
@@ -1226,7 +1225,7 @@ export default function CourseEditorPage() {
                       </div>
                       <div>
                         <h3 className="font-bold text-lg">{courseData.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{courseData.description}</p>
+                        <p className="text-sm text-gray-600 mt-1 ">{courseData.description}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="bg-gray-100 p-2 rounded-md">
@@ -1271,7 +1270,7 @@ export default function CourseEditorPage() {
                           variant="outline" 
                           size="sm" 
                           className="w-full flex items-center justify-center gap-1"
-                          onClick={() => navigate(`/course/${courseId}`)}
+                          onClick={() => navigate(`/courses/${courseId}`)}
                         >
                           <FileVideo className="h-4 w-4 mr-1" />
                           צפייה בקורס

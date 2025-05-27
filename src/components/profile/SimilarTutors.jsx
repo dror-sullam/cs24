@@ -1,17 +1,13 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { ChevronLeft, ChevronRight, Users, Star } from "lucide-react"
 import { Link } from "react-router-dom"
 import image from "../../config/user-profile.png"
-
-const TutorComponent = ({ tutors, styles, courseType }) => {
+const TutorComponent = ({ tutors, styles }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(3)
   const carouselRef = useRef(null)
-  const { id, tutorName } = useParams()
-  const displayName = decodeURIComponent(tutorName.replace(/-/g, " "))
+  const { id, courseType } = useParams()
   const sectionKey = courseType + "Tutors"
   const sectionTutors = tutors[sectionKey] || []
   const [tutorData, setTutorData] = useState(null)
@@ -55,10 +51,10 @@ const TutorComponent = ({ tutors, styles, courseType }) => {
 
   useEffect(() => {
     const foundTutor = sectionTutors.find(
-      tutor => tutor.id === Number(id) && tutor.name === displayName
+      tutor => tutor.id === Number(id)
     )
     setTutorData(foundTutor || null)
-  }, [id, tutorName, courseType, sectionTutors, displayName]);
+  }, [id, courseType, sectionTutors]);
 
   const isMobile = visibleCount === 1
 
@@ -83,7 +79,7 @@ const TutorComponent = ({ tutors, styles, courseType }) => {
   const display = isMobile ? tutors : tutors.slice(currentIndex, currentIndex + visibleCount)
 
   return (
-    <section className="relative md:max-w-[65rem] max-w-3xl mx-auto py-8 overflow-hidden" dir="rtl">
+    <section className="relative mt-6 md:max-w-[65rem] max-w-3xl mx-auto py-8 overflow-hidden" dir="rtl">
       {tutors.length > 0 && (
         <div className="relative mx-auto -mt-8 ">
           <div className="flex items-center gap-3 border-b pb-6 mb-6 ">
@@ -98,9 +94,13 @@ const TutorComponent = ({ tutors, styles, courseType }) => {
             disabled={!isMobile && currentIndex === 0}
             className={`absolute top-1/2 transform -translate-y-1/2 z-10 mt-8
           ${isMobile ? "left-2 p-1" : "left-0 p-2"} rounded-full bg-white shadow-md transition
-          ${!isMobile && currentIndex === 0 ? "text-gray-300 cursor-not-allowed" : "text-blue-500 hover:bg-blue-50"}`}
+          ${
+            !isMobile && currentIndex === 0
+              ? "text-gray-300 cursor-not-allowed"
+              : `${styles.arrowColor}`
+          } ${(isMobile || tutors.length <= 3) ? "hidden" : ""}`}
           >
-            <ChevronLeft className={isMobile ? "hidden w-4 h-4" : "w-6 h-6 "} />
+            <ChevronLeft className="w-6 h-6" />
           </button>
 
           {/* Cards container */}
@@ -157,7 +157,7 @@ const TutorComponent = ({ tutors, styles, courseType }) => {
 
                   {/* view profile btn */}
                   <Link
-                    to={`/tutors/${courseType}/${tutor.id}/${tutor.name.replace(/\s+/g, "-").toLowerCase()}`}
+                    to={`/tutors/${courseType}/${tutor.id}`}
                     className={`${styles.buttonSecondary} mt-auto mx-auto px-4 py-1.5 rounded-full text-sm block `}
                   >
                     צפייה בפרופיל
@@ -176,10 +176,10 @@ const TutorComponent = ({ tutors, styles, courseType }) => {
           ${
             !isMobile && currentIndex + visibleCount >= tutors.length
               ? "text-gray-300 cursor-not-allowed"
-              : "text-blue-500 hover:bg-blue-50"
-          }`}
+              : `${styles.arrowColor}`
+          } ${(isMobile || tutors.length <= 3) ? "hidden" : ""}`}
           >
-            <ChevronRight className={isMobile ? "hidden w-4 h-4" : "w-6 h-6"} />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";
 import CourseFilters from "../components/CourseFilters";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Loader from "../components/Loader";
 import CourseCard from "../components/LMS/CourseCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const YearSection = ({ year, courses, courseType }) => (
   <div className="mb-12">
@@ -35,6 +36,31 @@ const Courses = () => {
   const styles = courseStyles[courseType] || courseStyles.cs;
   const navigate = useNavigate();
   const [userAccess, setUserAccess] = useState([]);
+  
+  // Refs and state for Keep Watching scroll
+  const scrollContainerRef = useRef(null);
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(true);
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      // Show both buttons if there's enough content to scroll
+      const hasScrollableContent = scrollWidth > clientWidth;
+      setShowLeftButton(hasScrollableContent);
+      setShowRightButton(hasScrollableContent && scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -250 : 250;
+      scrollContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Helper function to convert degree name to key
   const degreeToKey = (degreeName) => degreeName?.replace(/\s+/g, '_') || 'אחר';
@@ -210,7 +236,7 @@ const Courses = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader />
-          <p className="mt-4 text-gray-600">טוען קורסים...</p>
+          <p className="mt-8 text-gray-600">טוען קורסים...</p>
         </div>
       </div>
       </Layout>
@@ -231,35 +257,88 @@ const Courses = () => {
   }
 
   const renderCourses = () => {
-    if (selectedDegrees.length === 0) {
-      return (
-        <>
-          {availableDegrees.map(degreeKey => (
-            filteredCourses[degreeKey]?.length > 0 && (
-            <YearSection 
-                key={degreeKey}
-                year={keyToDegree(degreeKey)}
-                courses={filteredCourses[degreeKey]}
-                courseType={courseType}
-              />
-            )
-          ))}
-        </>
-      );
-    }
+    // Get all purchased courses across all degrees
+    const purchasedCourses = Object.values(filteredCourses)
+      .flat()
+      .filter(course => course.has_access);
 
     return (
       <>
-        {selectedDegrees.map(degreeKey => (
-          filteredCourses[degreeKey]?.length > 0 && (
-      <YearSection
-              key={degreeKey}
-              year={keyToDegree(degreeKey)}
-              courses={filteredCourses[degreeKey]}
-              courseType={courseType}
-            />
-          )
-        ))}
+        {/* Keep Watching Section */}
+        {purchasedCourses.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">המשך צפייה</h2>
+            <div className="relative mr-4">
+              {/* Scroll Buttons */}
+              {showLeftButton && (
+                <button
+                  onClick={() => scroll('left')}
+                  className="hidden md:flex absolute -left-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
+              {showRightButton && (
+                <button
+                  onClick={() => scroll('right')}
+                  className="hidden md:flex absolute -right-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+              
+              {/* Scrollable container */}
+              <div className="group">
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex overflow-x-auto pb-4 scroll-smooth scrollbar-hide -mr-4"
+                  onScroll={handleScroll}
+                >
+                  {purchasedCourses.map((course) => (
+                    <div key={course.id} className="flex-none w-[85%] sm:w-1/2 lg:w-1/3 mr-6 ml-2">
+                      <CourseCard 
+                        course={course}
+                        courseType={courseType}
+                        hidePriceInfo={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Regular Course Sections */}
+        {selectedDegrees.length === 0 ? (
+          <>
+            {availableDegrees.map(degreeKey => (
+              filteredCourses[degreeKey]?.length > 0 && (
+                <YearSection 
+                  key={degreeKey}
+                  year={keyToDegree(degreeKey)}
+                  courses={filteredCourses[degreeKey]}
+                  courseType={courseType}
+                />
+              )
+            ))}
+          </>
+        ) : (
+          <>
+            {selectedDegrees.map(degreeKey => (
+              filteredCourses[degreeKey]?.length > 0 && (
+                <YearSection
+                  key={degreeKey}
+                  year={keyToDegree(degreeKey)}
+                  courses={filteredCourses[degreeKey]}
+                  courseType={courseType}
+                />
+              )
+            ))}
+          </>
+        )}
       </>
     );
   };
@@ -277,7 +356,7 @@ const Courses = () => {
           activeSort={activeSort}
         >
           {/* Degree Filter Buttons */}
-          <div className="bg-white shadow-md mb-8">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-md mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
                 <div className="flex flex-wrap gap-2">

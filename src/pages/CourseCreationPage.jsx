@@ -12,7 +12,8 @@ import useAuth from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { showNotification } from '../components/ui/notification';
 import { useNavigate } from 'react-router-dom';
-
+import Loader from '../components/Loader';
+import Layout from '../components/Layout';
 // Hardcoded upload config endpoint
 const UPLOAD_CONFIG_ENDPOINT = '/functions/v1/get-upload-page';
 
@@ -313,6 +314,19 @@ export default function CourseCreationPage() {
 
     setIsButtonEnabled(enabled);
   }, [loading, auth.session, isCheckingAuth, isAuthorized, title, description, thumbnail, price, selectedDegree, selectedCourse]);
+
+  if (loading || isCheckingAuth) {
+    return (
+      <Layout>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader />
+          <p className="mt-8 text-gray-600">טוען קורסים...</p>
+        </div>
+      </div>
+      </Layout>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white" dir="rtl">

@@ -315,7 +315,7 @@ const CourseManagement = ({
                         ערוך
                       </Button>
                       <Button
-                        onClick={() => navigate(`/course/${course.video_id}`)}
+                        onClick={() => navigate(`/courses/${course.video_id}`)}
                         className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                         size="sm"
                       >

@@ -112,8 +112,8 @@ const DraggableInstitutions = () => {
             key={index}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + (index * 0.03), duration: 0.2 }}
-            whileHover={{ scale: 1.05, y: -5 }}
+            transition={{ delay: 0.1 + (index * 0.03), duration: 0.1 }}
+            whileHover={{ scale: 0.9, y: -5 }}
             className={`flex-shrink-0 flex flex-col items-center bg-white rounded-lg shadow-sm border border-blue-50 hover:shadow-md hover:border-blue-200 transition-all duration-300 ${isMobile ? 'p-6' : 'p-3 w-24'} relative`}
             style={isMobile ? calculateMobileWidth() : {}}
           >

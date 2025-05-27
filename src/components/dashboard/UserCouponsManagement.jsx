@@ -287,23 +287,48 @@ const UserCouponsManagement = ({
                   
                   <div>
                     <label className="block text-sm font-medium mb-1">קורסים</label>
-                    <select
-                      multiple
-                      value={selectedCoursesForCoupon}
-                      onChange={(e) => {
-                        const values = Array.from(e.target.selectedOptions, option => option.value);
-                        setSelectedCoursesForCoupon(values);
-                      }}
-                      className="w-full p-2 border rounded"
-                      size="5"
-                    >
+                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded p-2">
                       {tutorCourses.map(course => (
-                        <option key={course.video_course_id} value={course.video_course_id}>
-                          {course.title}
-                        </option>
+                        <div key={course.video_course_id} className="flex items-center gap-2 hover:bg-gray-50 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            id={`course-${course.video_course_id}`}
+                            checked={selectedCoursesForCoupon.includes(course.video_course_id.toString())}
+                            onChange={(e) => {
+                              const courseId = course.video_course_id.toString();
+                              if (e.target.checked) {
+                                setSelectedCoursesForCoupon([...selectedCoursesForCoupon, courseId]);
+                              } else {
+                                setSelectedCoursesForCoupon(selectedCoursesForCoupon.filter(id => id !== courseId));
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <label htmlFor={`course-${course.video_course_id}`} className="text-sm cursor-pointer flex-1">
+                            {course.title}
+                          </label>
+                        </div>
                       ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">בחר קורסים (החזק Ctrl/Cmd לחיפוש מרובה)</p>
+                    </div>
+                    <div className="flex justify-between mt-2">
+                      <p className="text-xs text-gray-500">בחר את הקורסים שברצונך להחיל עליהם את הקופון</p>
+                      <div className="space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCoursesForCoupon(tutorCourses.map(c => c.video_course_id.toString()))}
+                          className="text-xs ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          בחר הכל
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCoursesForCoupon([])}
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          נקה הכל
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   
                   <div>
@@ -355,14 +380,7 @@ const UserCouponsManagement = ({
                       className="bg-blue-600"
                       disabled={!newCouponCode || !newCouponDiscount || !newCouponExpiry || !selectedCoursesForCoupon || !newMaxUsesPerPerson || !newCouponCount || isLoading}
                     >
-                      {isLoading ? (
-                        <>
-                          <LoaderComponent />
-                          יוצר קופון...
-                        </>
-                      ) : (
-                        'צור קופון'
-                      )}
+                      צור קופון
                     </Button>
                   </div>
                 </div>

@@ -145,7 +145,7 @@ const CourseFilters = ({
             className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
           />
 
-          <div className="fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 z-40 flex pt-16">
             <DialogPanel
               transition
               className="relative mr-auto flex size-full max-w-xs transform flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl transition duration-300 ease-in-out data-closed:-translate-x-full"
@@ -206,19 +206,19 @@ const CourseFilters = ({
                                   type="checkbox"
                                   checked={option.checked}
                                   onChange={(e) => handleFilterChange(section.id, option.value, e.target.checked)}
-                                  className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                  className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-white indeterminate:border-indigo-600 indeterminate:bg-white hover:border-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                 />
                                 <svg
                                   fill="none"
                                   viewBox="0 0 14 14"
-                                  className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25"
+                                  className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-indigo-600 group-has-[:checked]:opacity-100 group-hover:opacity-50"
                                 >
                                   <path
                                     d="M3 8L6 11L11 3.5"
                                     strokeWidth={2}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    className="opacity-0 group-has-checked:opacity-100"
+                                    className="opacity-0 group-has-[:checked]:opacity-100 group-hover:opacity-50"
                                   />
                                   <path
                                     d="M3 7H11"
@@ -264,6 +264,7 @@ const CourseFilters = ({
                 </div>
 
                 <MenuItems
+                  modal={false}
                   transition
                   className="absolute left-0 z-10 mt-2 w-40 origin-top-left rounded-md bg-white shadow-2xl ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                 >
@@ -352,19 +353,19 @@ const CourseFilters = ({
                                   type="checkbox"
                                   checked={option.checked}
                                   onChange={(e) => handleFilterChange(section.id, option.value, e.target.checked)}
-                                  className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                  className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-white indeterminate:border-indigo-600 indeterminate:bg-white hover:border-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                 />
                                 <svg
                                   fill="none"
                                   viewBox="0 0 14 14"
-                                  className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25"
+                                  className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-indigo-600 group-has-disabled:stroke-gray-950/25"
                                 >
                                   <path
                                     d="M3 8L6 11L11 3.5"
                                     strokeWidth={2}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    className="opacity-0 group-has-checked:opacity-100"
+                                    className="opacity-0 group-has-[:checked]:opacity-100 group-hover:opacity-50"
                                   />
                                   <path
                                     d="M3 7H11"

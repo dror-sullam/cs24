@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Star, Heart, ShoppingCart, Clock } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Star, Heart, ShoppingCart, Clock, Play } from "lucide-react";
 import { courseStyles } from "../../config/courseStyles";
 
-const CourseCard = ({ course, courseType = 'cs' }) => {
+const CourseCard = ({ course, courseType = 'cs', hidePriceInfo = false }) => {
   const navigate = useNavigate();
   const styles = courseStyles[courseType] || courseStyles.cs;
   const [isLiked, setIsLiked] = useState(false);
@@ -27,6 +27,14 @@ const CourseCard = ({ course, courseType = 'cs' }) => {
   // Check if course is on sale
   const isOnSale = course.sale_price && course.sale_price < course.price;
   const daysLeft = getDaysLeft(course.on_sale_expiration);
+  // Calculate discount percentage
+  const getDiscountPercentage = () => {
+    if (!isOnSale || !course.price || !course.sale_price) return 0;
+    const discount = ((course.price - course.sale_price) / course.price) * 100;
+    return Math.round(discount);
+  };
+  
+  const discountPercentage = getDiscountPercentage();
 
   // Format price display
   const formatPrice = (price) => {
@@ -87,11 +95,11 @@ const CourseCard = ({ course, courseType = 'cs' }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
       <div className="relative">
         <div 
-          className="block cursor-pointer"
-          onClick={() => navigate(`/course/${course.id}`)}
+          className="block cursor-pointer border-b border-gray-200 rounded-b-lg"
+          onClick={() => navigate(`/courses/${course.id}`)}
         >
           {displayUrl ? (
             <img 
@@ -109,10 +117,10 @@ const CourseCard = ({ course, courseType = 'cs' }) => {
           </div>
         </div>
         
-        {/* Sale badge */}
-        {isOnSale && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold">
-            מבצע!
+        {/* Sale badge - only show if not purchased and not hiding price info */}
+        {!course.has_access && !hidePriceInfo && isOnSale && (
+          <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+            {discountPercentage}% הנחה{daysLeft ? ` | נותרו ${daysLeft} ימים` : ''}
           </div>
         )}
       </div>
@@ -139,66 +147,61 @@ const CourseCard = ({ course, courseType = 'cs' }) => {
         </div>
 
         <h4 className="mb-2 text-lg font-semibold line-clamp-2 flex-1">
-          <a 
-            href="#" 
+          <Link 
+            to={`/courses/${course.id}`}
             className="text-gray-900 hover:text-gray-700 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(`/course/${course.id}`);
-            }}
           >
             {course.video_title}
-          </a>
+          </Link>
         </h4>
 
-        <small className="text-gray-600 mb-3">מרצה: {course.tutor_name}</small>
+        <div className="text-gray-600 mb-3 font-semibold text-lj">מרצה: {course.tutor_name}</div>
 
         <div className="mt-auto">
           {averageRating && (
             <div className="mb-3 flex items-baseline">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <span className="text-yellow-500 mx-1 font-medium">{averageRating}</span>
-              <span className="text-gray-600">({course.ratings?.length || 0})</span>
+              <span className="text-yellow-500 mx-1 font-medium text-lg">{averageRating}</span>
+              <span className="text-gray-600 text-base">({course.ratings?.length || 0})</span>
             </div>
           )}
 
-          {/* Sale countdown */}
-          {isOnSale && daysLeft !== null && daysLeft > 0 && (
-            <div className="flex items-center text-red-600 text-sm">
-              <Clock className="w-4 h-4 ml-1" />
-              <span>נותרו {daysLeft} ימים למבצע</span>
-            </div>
-          )}
         </div>
       </div>
 
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h5 className="text-xl font-semibold text-gray-900 mb-0 ml-2">
-              {priceInfo.current}
-            </h5>
-            {priceInfo.isOnSale && priceInfo.original && (
-              <span className="text-sm text-gray-500 line-through">
-                {priceInfo.original}
-              </span>
-            )}
-          </div>
-          <div>
+          {!course.has_access && !hidePriceInfo && (
+            <div className="flex items-center space-x-2">
+              <h5 className="text-xl font-bold text-gray-600 mb-0 ml-2">
+                {priceInfo.current}
+              </h5>
+              {priceInfo.isOnSale && priceInfo.original && (
+                <span className="text-sm text-gray-500 line-through">
+                  {priceInfo.original}
+                </span>
+              )}
+            </div>
+          )}
+          <div className={!course.has_access && !hidePriceInfo ? "" : "w-full"}>
             <button
-              onClick={() => navigate(`/course/${course.id}`)}
+              onClick={() => navigate(`/courses/${course.id}`)}
               className={`inline-flex items-center transition-colors font-medium ${
                 course.has_access 
                   ? 'text-green-600 hover:text-green-700' 
                   : `${styles.textSecondary} hover:${styles.textColor}`
-              }`}
+              } ${course.has_access || hidePriceInfo ? "w-full justify-center" : ""}`}
             >
-              <ShoppingCart className="w-4 h-4 ml-2" />
-              {course.has_access ? 'צפה עכשיו' : 'הירשם לקורס'}
+              {course.has_access ? (
+                <Play className="w-4 h-4 ml-2" />
+              ) : (
+                <ShoppingCart className="w-4 h-4 ml-2" />
+              )}
+              {course.has_access ? 'המשך צפייה' : 'קנה עכשיו'}
             </button>
           </div>
         </div>

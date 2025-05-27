@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Edit, Trash2, Loader, Plus, ImagePlus, X } from 'lucide-react';
+import { Save, Edit, Trash2, Loader, Plus, ImagePlus, X, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { supabase } from '../../lib/supabase';
@@ -400,20 +400,51 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
 
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <LoaderComponent />
+            <p className="text-gray-600 text-lg font-medium mt-4">שומר שינויים...</p>
+          </div>
+        </div>
+      )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>פרופיל מרצה</CardTitle>
             <CardDescription>עריכת פרטי המרצה והפרופיל הציבורי שלך</CardDescription>
           </div>
+          <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsEditingProfile(!isEditingProfile)}
+            onClick={() => {
+              if (isEditingProfile) {
+                handleTutorProfileUpdate();
+              } else {
+                setIsEditingProfile(true);
+              }
+            }}
             disabled={isLoading}
           >
             {isEditingProfile ? <Save size={18} /> : <Edit size={18} />}
           </Button>
+          <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => {
+                // Get the first selection's degree name to determine the department
+                const department = dashboardData.tutor_profile.selections?.[0]?.degree_name?.toLowerCase().includes('מחשב') ? 'cs' :
+                                 dashboardData.tutor_profile.selections?.[0]?.degree_name?.toLowerCase().includes('חשמל') ? 'ee' :
+                                 dashboardData.tutor_profile.selections?.[0]?.degree_name?.toLowerCase().includes('תעשייה') ? 'ie' : 'cs';
+                window.open(`/tutors/${department}/${dashboardData.tutor_profile.id}`, '_blank');
+              }}
+            >
+              <ExternalLink size={16} />
+              צפה בפרופיל
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -1016,7 +1047,7 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
             </div>
 
             {isEditingProfile && (
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end mt-4 gap-4">
                 <Button
                   onClick={() => setIsEditingProfile(false)}
                   className="bg-gray-200 text-gray-800 mr-2"
@@ -1028,14 +1059,7 @@ const TutorProfile = ({ dashboardData, isLoading: parentLoading }) => {
                   className="bg-blue-600"
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <>
-                      <LoaderComponent />
-                      שומר שינויים...
-                    </>
-                  ) : (
-                    'שמור שינויים'
-                  )}
+                  שמור שינויים
                 </Button>
               </div>
             )}

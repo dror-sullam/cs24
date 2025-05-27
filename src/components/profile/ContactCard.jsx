@@ -34,22 +34,22 @@ const ContactCard = ({ tutor, styles }) => {
   };
   return (
     <section
-            className={`bg-white ${styles.cardBorder} p-2 md:p-6 `}
+            className={`bg-white ${styles.cardBorder} p-0 md:p-6 w-full`}
           >
-    <div className="max-w-4xl mx-auto p-6 w-full">
+    <div className="max-w-4xl mx-auto px-2 py-4 md:p-6 w-full">
       <h2
         className={`text-2xl font-bold text-center mb-6 w-full mx-auto ${styles.textColor}`}
       >
         יצירת קשר
       </h2>
 
-      <div className="bg-gray-100 shadow-md rounded-xl border border-gray-200 flex flex-col md:flex-row justify-between p-6">
+      <div className="bg-gray-100 shadow-md rounded-xl border border-gray-200 flex flex-col md:flex-row justify-between p-4 md:p-6">
         {/* פרטי קשר */}
-        <div className="md:w-1/2 md:pl-6 text-right">
+        <div className="md:w-1/2 md:pl-6 text-right w-full">
           <h3 className="font-bold mb-4">פרטי קשר</h3>
           <div className="flex items-center mb-2 text-gray-700">
             <Mail className="ml-2" size={18} />
-            <span className="ml-2">
+            <span className="ml-2 ">
               {tutor.mail || "israel.israeli@gmail.com"}
             </span>
           </div>
@@ -64,7 +64,7 @@ const ContactCard = ({ tutor, styles }) => {
         </div>
 
         {/* פנייה בוואטסאפ */}
-        <div className="md:w-1/2 mb-6 md:mb-0">
+        <div className="md:w-1/2 mb-6 md:mb-0 w-full">
           <h3 className="font-bold mb-4 mt-4 md:mt-0">פנייה בוואטסאפ</h3>
           <p className="text-sm text-gray-600 mb-4">
             בחר מקצוע רלוונטי, ותוכל לפנות בקלות דרך WhatsApp.
@@ -76,14 +76,14 @@ const ContactCard = ({ tutor, styles }) => {
           >
             <option value="">בחר מקצוע</option>
             {tutor.subjects?.map((subject, idx) => (
-              <option key={idx} value={subject}>
+              <option key={idx} value={subject.course_name}>
                 {subject.course_name}
               </option>
             ))}
           </select>
           <a
-            href={`https://wa.me/972${tutor.phone}?text=${encodeURIComponent(
-              `שלום, אני מתעניין במקצוע ${selectedSubject}.`
+            href={`https://wa.me/${tutor.phone.replace(/^0/, '972')}?text=${encodeURIComponent(
+              `היי, אשמח לשמוע פרטים על שיעורים פרטיים לגבי קורס ${selectedSubject}.`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
