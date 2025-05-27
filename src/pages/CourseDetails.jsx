@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { showNotification } from "../components/ui/notification";
@@ -41,6 +41,11 @@ const CourseDetails = () => {
   });
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [isMobileEpisodesListExpanded, setIsMobileEpisodesListExpanded] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  // Refs for episode list containers
+  const mobileEpisodesListRef = useRef(null);
+  const desktopEpisodesListRef = useRef(null);
 
   const answerVariants = {
     expanded: { opacity: 1, height: "auto", transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } },
@@ -131,6 +136,22 @@ const CourseDetails = () => {
     fetchCourseDetails();
   }, [courseId]);
 
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    // Check initial size
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -145,7 +166,7 @@ const CourseDetails = () => {
   if (error || !course) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
+        <Navbar courseType="courses" />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-sm p-8 max-w-md w-full text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -171,7 +192,7 @@ const CourseDetails = () => {
             </div>
           </div>
         </div>
-        <Footer />
+        <Footer whiteText={isLargeScreen} />
       </div>
     );
   }
@@ -234,11 +255,49 @@ const CourseDetails = () => {
 
   const toggleTopic = (topicId) => {
     setExpandedTopics((prevExpanded) => {
+      const isCurrentlyExpanded = prevExpanded.includes(topicId);
+      
       // If the clicked topic is already the one expanded, collapse it.
       if (prevExpanded.length === 1 && prevExpanded[0] === topicId) {
         return [];
       } else {
         // Otherwise, expand the clicked topic (and implicitly collapse any other).
+        // Auto-scroll to the topic header after a short delay to allow animation
+        setTimeout(() => {
+          // Determine which container is currently visible and get the appropriate topic element
+          let scrollContainer = null;
+          let topicElement = null;
+          
+          // Check if we're on desktop (large screen)
+          if (window.innerWidth >= 1024) {
+            // Desktop - use desktop container
+            scrollContainer = desktopEpisodesListRef.current;
+            if (scrollContainer) {
+              topicElement = scrollContainer.querySelector(`[data-topic-id="${topicId}"]`);
+            }
+          } else {
+            // Mobile - use mobile container
+            scrollContainer = mobileEpisodesListRef.current;
+            if (scrollContainer) {
+              topicElement = scrollContainer.querySelector(`[data-topic-id="${topicId}"]`);
+            }
+          }
+          
+          if (topicElement && scrollContainer) {
+            const topicRect = topicElement.getBoundingClientRect();
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const scrollTop = scrollContainer.scrollTop;
+            
+            // Calculate the position to scroll to (topic header at the top of container)
+            const targetScrollTop = scrollTop + (topicRect.top - containerRect.top);
+            
+            scrollContainer.scrollTo({
+              top: targetScrollTop,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+        
         return [topicId];
       }
     });
@@ -327,16 +386,26 @@ const CourseDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
-      <Navbar />
+    <div className="min-h-screen relative">
+      {/* Fixed SVG Background */}
+      <div 
+        className="fixed bottom-0 left-0 w-full hidden lg:h-full lg:block pointer-events-none -z-10"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg id="visual" viewBox="0 0 900 600" width="900" height="600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><rect x="0" y="0" width="900" height="600" fill="#ffffff"></rect><path d="M0 505L21.5 501.5C43 498 86 491 128.8 477.3C171.7 463.7 214.3 443.3 257.2 444.7C300 446 343 469 385.8 476.7C428.7 484.3 471.3 476.7 514.2 461.3C557 446 600 423 642.8 424.2C685.7 425.3 728.3 450.7 771.2 454.5C814 458.3 857 440.7 878.5 431.8L900 423L900 601L878.5 601C857 601 814 601 771.2 601C728.3 601 685.7 601 642.8 601C600 601 557 601 514.2 601C471.3 601 428.7 601 385.8 601C343 601 300 601 257.2 601C214.3 601 171.7 601 128.8 601C86 601 43 601 21.5 601L0 601Z" fill="#4338ca" stroke-linecap="round" stroke-linejoin="miter"></path></svg>')}")`,
+          backgroundSize: '100% auto',
+          backgroundPosition: 'bottom center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      <Navbar courseType="courses" />
       
-      <div className="max-w-7xl mx-auto px-4 pb-8 pt-24">
+      <div className="max-w-7xl mx-auto px-4 pb-8 pt-[88px]">
         {/* Back Button */}
         <button
           onClick={() => navigate("/courses")}
-          className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          className="mb-5 py-1 pl-4 pr-2 gap-1 rounded-full flex justify-center items-center bg-indigo-700 hover:bg-indigo-800 text-white transition-colors"
         >
-          <svg className="w-5 h-5 ml-2 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           חזרה לקורסים
@@ -346,7 +415,7 @@ const CourseDetails = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Video Player */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="rounded-lg overflow-hidden">
               {course.has_access ? (
                 <div>
                   <div className="relative bg-black">
@@ -413,11 +482,11 @@ const CourseDetails = () => {
               )}
             </div>
 
-            {/* Sidebar - Episodes List - Mobile - Signed In */}
+            {/* Sidebar - Episodes List - Mobile - Purchased */}
             {course.has_access && (
               <div className="lg:hidden lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
+              <div className="bg-white rounded-lg sticky top-24 flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center p-3 bg-indigo-700 cursor-pointer" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
                   <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                     תוכן הקורס
                   </h2>
@@ -437,8 +506,8 @@ const CourseDetails = () => {
                 </div>
                 
                 {isMobileEpisodesListExpanded && (
-                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
-                    {course?.titles?.map((title) => {
+                  <div className={`flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden border-l-2 border-r-2 border-b-2 ${course?.has_access && 'rounded-b-lg'} border-gray-200`} data-episodes-container ref={mobileEpisodesListRef}>
+                    {course?.titles?.map((title, index) => {
                       const isExpanded = expandedTopics.includes(title.id);
                       const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
                       const totalEpisodes = title.episodes?.length || 0;
@@ -447,10 +516,11 @@ const CourseDetails = () => {
                             <div key={title.id}>
                               {/* Title Header */}
                               <div
-                                className={`p-4 border-t cursor-pointer ${
+                                className={`p-4 cursor-pointer ${index > 0 ? 'border-t-2' : ''} ${
                                   isExpanded ? 'bg-white' : ''
                                 }`}
                                 onClick={() => toggleTopic(title.id)}
+                                data-topic-id={title.id}
                               >
                                 <div className="flex items-center justify-between w-full">
                                   <div className="flex items-center min-w-0 flex-1">
@@ -496,7 +566,7 @@ const CourseDetails = () => {
                                 return (
                                   <div
                                     key={episode.id}
-                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                    className={`p-4 border-t-2 border-gray-200 cursor-pointer hover:bg-gray-100 ${
                                       isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
                                     } ${!course?.has_access ? 'opacity-60' : ''}`}
                                     onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
@@ -552,27 +622,12 @@ const CourseDetails = () => {
                     })}
                   </div>
               )}
-
-                {!course?.has_access && (
-                  <div className="p-4 border-t bg-gray-50">
-                    <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
-                    onClick={() => {
-                      const paymentButton = document.getElementById('payment-button');
-                      if (paymentButton) {
-                        paymentButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
-                    }}
-                  >
-                      רכוש גישה לקורס
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
             )}
 
             {/* Course Header */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
               <div className="flex justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex justify-start items-center gap-3 mb-3">
@@ -641,11 +696,11 @@ const CourseDetails = () => {
               )}
             </div>
 
-            {/* Sidebar - Episodes List - Mobile - Signed Out */}
+            {/* Sidebar - Episodes List - Mobile - Not Purchased */}
             {!course.has_access && (
               <div className="lg:hidden lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center p-3 bg-indigo-700" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
+              <div className="bg-white rounded-lg sticky top-24 flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center p-3 bg-indigo-700 cursor-pointer" onClick={() => setIsMobileEpisodesListExpanded(!isMobileEpisodesListExpanded)}>
                   <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                     תוכן הקורס
                   </h2>
@@ -665,8 +720,8 @@ const CourseDetails = () => {
                 </div>
                 
                 {isMobileEpisodesListExpanded && (
-                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
-                    {course?.titles?.map((title) => {
+                  <div className={`flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden border-l-2 border-r-2 border-b-2 ${course?.has_access && 'rounded-b-lg'} border-gray-200`} data-episodes-container ref={mobileEpisodesListRef}>
+                    {course?.titles?.map((title, index) => {
                       const isExpanded = expandedTopics.includes(title.id);
                       const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
                       const totalEpisodes = title.episodes?.length || 0;
@@ -675,10 +730,11 @@ const CourseDetails = () => {
                             <div key={title.id}>
                               {/* Title Header */}
                               <div
-                                className={`p-4 border-t cursor-pointer ${
+                                className={`p-4 cursor-pointer ${index > 0 ? 'border-t-2' : ''} ${
                                   isExpanded ? 'bg-white' : ''
                                 }`}
                                 onClick={() => toggleTopic(title.id)}
+                                data-topic-id={title.id}
                               >
                                 <div className="flex items-center justify-between w-full">
                                   <div className="flex items-center min-w-0 flex-1">
@@ -724,7 +780,7 @@ const CourseDetails = () => {
                                     return (
                                       <div
                                         key={episode.id}
-                                        className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                        className={`p-4 border-t-2 border-gray-200 cursor-pointer hover:bg-gray-100 ${
                                           isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
                                         } ${!course?.has_access ? 'opacity-60' : ''}`}
                                         onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
@@ -782,8 +838,8 @@ const CourseDetails = () => {
               )}
 
                 {!course?.has_access && (
-                  <div className="p-4 border-t bg-gray-50">
-                    <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
+                  <div className="p-4 border-l-2 border-r-2 border-b-2 rounded-b-lg border-gray-200 bg-gray-50">
+                    <button className="w-full relative overflow-hidden bg-amber-300 text-amber-700 font-bold px-4 py-3 rounded-lg transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5" 
                     onClick={() => {
                       const paymentButton = document.getElementById('payment-button');
                       if (paymentButton) {
@@ -791,8 +847,9 @@ const CourseDetails = () => {
                       }
                     }}
                   >
-                      רכוש גישה לקורס
-                    </button>
+                    <span className="relative z-10">רכוש גישה לקורס</span>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-500"></div>
+                  </button>
                   </div>
                 )}
               </div>
@@ -800,12 +857,12 @@ const CourseDetails = () => {
             )}
 
             {/* Feedback Section */}
-            <div className="bg-white rounded-lg shadow-md">
-              <div className="p-6 border-b">
+            <div className="bg-white rounded-lg border-2 border-gray-200">
+              <div className="p-3 border-b-2">
                 <h2 className="text-xl font-semibold text-gray-900">משובים</h2>
               </div>
               
-              <div className="divide-y max-h-96 overflow-y-auto">
+              <div className="divide-y-2 max-h-96 overflow-y-auto">
                 {showFeedbackForm && (
                   <div className="p-6">
                     <div className="space-y-4">
@@ -890,7 +947,7 @@ const CourseDetails = () => {
               </div>
 
               {!course?.has_user_feedback && course?.has_access && !showFeedbackForm && (
-                <div className="p-6 border-t">
+                <div className="p-6 border-t-2">
                   <button
                     onClick={() => setShowFeedbackForm(true)}
                     className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -901,12 +958,12 @@ const CourseDetails = () => {
               )}
             </div>
 
-            {/* Q&A - Signed Out */}
+            {/* Q&A - Not Purchased */}
             {!course.has_access && (
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
-                  <div className="flex justify-between items-center p-3 bg-indigo-700">
-                    <h2 className="text-lg font-semibold text-white">
+                <div className="bg-white rounded-lg border-2 border-gray-200 sticky top-24 flex flex-col overflow-hidden">
+                  <div className="flex justify-between items-center p-3">
+                    <h2 className="text-lg font-semibold">
                       שאלות ותשובות
                     </h2>
                   </div>
@@ -918,7 +975,7 @@ const CourseDetails = () => {
                             <div key={question.id}>
                               {/* Title Header */}
                               <div
-                                className={`p-4 border-t cursor-pointer ${
+                                className={`p-4 border-t-2 cursor-pointer ${
                                   isExpanded ? 'bg-white' : ''
                                 }`}
                                 onClick={() => toggleQuestion(question.id)}
@@ -954,7 +1011,7 @@ const CourseDetails = () => {
                                     style={{ overflow: 'hidden' }}
                                   >
                                     <div className="bg-gray-50">
-                                      <div className="p-4 border-t border-gray-200">
+                                      <div className="p-4 border-t-2 border-gray-200">
                                         <div className="flex items-center justify-between">
                                           <div className="flex items-center flex-1">
                                             <div className="flex-1">
@@ -979,7 +1036,7 @@ const CourseDetails = () => {
 
           {/* Sidebar - Episodes List - Desktop */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md sticky top-24 flex flex-col overflow-hidden">
+            <div className="bg-white rounded-lg  sticky top-24 flex flex-col overflow-hidden">
               <div className="flex justify-between items-center p-3 bg-indigo-700">
                 <h2 className="text-lg font-semibold text-white min-w-0 flex-1 break-words">
                   תוכן הקורס
@@ -987,8 +1044,8 @@ const CourseDetails = () => {
                 <h2 className="text-lg font-semibold text-white whitespace-nowrap flex-shrink-0">{getAllEpisodes().length} שיעורים</h2>
               </div>
               
-              <div className="flex-1 max-h-96 overflow-y-auto overflow-x-hidden">
-                {course?.titles?.map((title) => {
+              <div className={`flex-1 max-h-96 overflow-y-auto overflow-x-hidden border-l-2 border-r-2 border-b-2 ${course?.has_access && 'rounded-b-lg'} border-gray-200`} data-episodes-container ref={desktopEpisodesListRef}>
+                {course?.titles?.map((title, index) => {
                   const isExpanded = expandedTopics.includes(title.id);
                   const completedEpisodes = title.episodes?.filter(ep => ep.completed)?.length || 0;
                   const totalEpisodes = title.episodes?.length || 0;
@@ -997,10 +1054,11 @@ const CourseDetails = () => {
                     <div key={title.id}>
                       {/* Title Header */}
                       <div
-                        className={`p-4 border-t cursor-pointer ${
+                        className={`p-4 cursor-pointer ${index > 0 ? 'border-t-2' : ''} ${
                           isExpanded ? 'bg-white' : ''
                         }`}
                         onClick={() => toggleTopic(title.id)}
+                        data-topic-id={title.id}
                       >
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center min-w-0 flex-1">
@@ -1046,7 +1104,7 @@ const CourseDetails = () => {
                                 return (
                                   <div
                                     key={episode.id}
-                                    className={`p-4 border-t border-gray-200 cursor-pointer hover:bg-gray-100 ${
+                                    className={`p-4 border-t-2 border-gray-200 cursor-pointer hover:bg-gray-100 ${
                                       isActive ? 'bg-gray-100 shadow-[inset_-4px_0_0_0_#6366f1]' : ''
                                     } ${!course?.has_access ? 'opacity-60' : ''}`}
                                     onClick={() => course?.has_access ? handleEpisodeClick(episode) : null}
@@ -1103,8 +1161,8 @@ const CourseDetails = () => {
               </div>
 
               {!course?.has_access && (
-                <div className="p-4 border-t bg-gray-50">
-                  <button className="w-full bg-gradient-to-b from-amber-300 to-amber-400 text-amber-700 font-bold px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors" 
+                <div className="p-4 border-l-2 border-r-2 border-b-2 rounded-b-lg border-gray-200 bg-gray-50 ">
+                  <button className="w-full relative overflow-hidden bg-amber-300 text-amber-700 font-bold px-4 py-3 rounded-lg transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5" 
                     onClick={() => {
                       const paymentButton = document.getElementById('payment-button');
                       if (paymentButton) {
@@ -1112,7 +1170,8 @@ const CourseDetails = () => {
                       }
                     }}
                   >
-                    רכוש גישה לקורס
+                    <span className="relative z-10">רכוש גישה לקורס</span>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-500"></div>
                   </button>
                 </div>
               )}
@@ -1121,7 +1180,7 @@ const CourseDetails = () => {
         </div>
       </div>
 
-      <Footer />
+      <Footer whiteText={isLargeScreen} />
     </div>
   );
 };

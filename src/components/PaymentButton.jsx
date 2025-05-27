@@ -92,7 +92,7 @@ export default function PaymentButton({ videoId, courseName, className }) {
         <button 
           onClick={handlePayment} 
           disabled={loading || !termsAccepted}
-          className={`w-full bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`}
+          className={`w-full bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition text-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`}
         >
           {loading ? (
             <>
@@ -124,7 +124,7 @@ export default function PaymentButton({ videoId, courseName, className }) {
         </div>
         
         {/* Terms of Service Checkbox */}
-        <div className="flex items-center gap-1">
+        <div className="flex justify-center items-center gap-3 lg:gap-1">
           <input
             type="checkbox"
             id="terms"
@@ -137,6 +137,7 @@ export default function PaymentButton({ videoId, courseName, className }) {
             <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-600 hover:text-indigo-700 ml-1">
               תנאי השימוש
             </a>
+            <br className="block sm:hidden" />
             ול
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-600 hover:text-indigo-700">
               מדיניות הפרטיות
