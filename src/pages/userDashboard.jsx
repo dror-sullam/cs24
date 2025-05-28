@@ -33,6 +33,7 @@ const UserDashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isTutor, setIsTutor] = useState(false);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   // Function to handle tab changes with URL parameters
   const handleTabChange = (tabName) => {
@@ -56,66 +57,69 @@ const UserDashboard = () => {
       return;
     }
 
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("get-dashboard");
-        
-        if (error) {
-          console.error('Error fetching dashboard data:', error);
-          showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
-          return;
-        }
-        
-        console.log('Dashboard data:', data);
-        
-        // Calculate total revenue from paid purchases
-        const totalRevenue = data.my_courses?.reduce((total, course) => {
-          const paidPurchases = course.purchasers?.filter(p => p.paid) || [];
-          return total + paidPurchases.reduce((sum, p) => sum + p.amount, 0);
-        }, 0) || 0;
+    // Only fetch data if we haven't loaded it yet
+    if (!hasLoadedData) {
+      const fetchDashboardData = async () => {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase.functions.invoke("get-dashboard");
+          
+          if (error) {
+            console.error('Error fetching dashboard data:', error);
+            showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
+            return;
+          }
+          
+          console.log('Dashboard data:', data);
+          
+          // Calculate total revenue from paid purchases
+          const totalRevenue = data.my_courses?.reduce((total, course) => {
+            const paidPurchases = course.purchasers?.filter(p => p.paid) || [];
+            return total + paidPurchases.reduce((sum, p) => sum + p.amount, 0);
+          }, 0) || 0;
 
-        // Calculate total students (unique purchasers)
-        const uniqueStudents = new Set();
-        data.my_courses?.forEach(course => {
-          course.purchasers?.forEach(p => {
-            if (p.customer_email) uniqueStudents.add(p.customer_email);
+          // Calculate total students (unique purchasers)
+          const uniqueStudents = new Set();
+          data.my_courses?.forEach(course => {
+            course.purchasers?.forEach(p => {
+              if (p.customer_email) uniqueStudents.add(p.customer_email);
+            });
           });
-        });
 
-        // Calculate total spent for students (from access data)
-        const totalSpent = data.access?.reduce((total, course) => {
-          // This would need actual purchase amount data - for now using 0
-          return total + 0;
-        }, 0) || 0;
+          // Calculate total spent for students (from access data)
+          const totalSpent = data.access?.reduce((total, course) => {
+            return total + 0;
+          }, 0) || 0;
 
-        // Calculate total watch time from analytics (only for tutors)
-        const totalWatchTime = data.is_tutor ? data.my_courses?.reduce((total, course) => {
-          const courseWatchTime = course.analytics?.reduce((sum, session) => sum + (session.minutes || 0), 0) || 0;
-          return total + courseWatchTime;
-        }, 0) || 0 : 0;
+          // Calculate total watch time from analytics (only for tutors)
+          const totalWatchTime = data.is_tutor ? data.my_courses?.reduce((total, course) => {
+            const courseWatchTime = course.analytics?.reduce((sum, session) => sum + (session.minutes || 0), 0) || 0;
+            return total + courseWatchTime;
+          }, 0) || 0 : 0;
 
-        // Set dashboard data with calculated fields
-        setDashboardData({
-          ...data,
-          total_revenue: totalRevenue,
-          total_students: uniqueStudents.size,
-          total_spent: totalSpent,
-          total_watch_time: totalWatchTime
-        });
-        
-        // Set tutor state
-        setIsTutor(data.is_tutor);
-      } catch (error) {
-        console.error('Error in dashboard data fetching:', error);
-        showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          // Set dashboard data with calculated fields
+          setDashboardData({
+            ...data,
+            total_revenue: totalRevenue,
+            total_students: uniqueStudents.size,
+            total_spent: totalSpent,
+            total_watch_time: totalWatchTime
+          });
+          
+          // Set tutor state
+          setIsTutor(data.is_tutor);
+          setHasLoadedData(true);
+        } catch (error) {
+          console.error('Error in dashboard data fetching:', error);
+          showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchDashboardData();
-  }, [user, loading, isAuthenticated, navigate]);
+      fetchDashboardData();
+    }
+  }, [user, loading, isAuthenticated, navigate, hasLoadedData]);
 
   if (loading || isLoading) {
     return (

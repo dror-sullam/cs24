@@ -185,7 +185,6 @@ const groupSubjectsByDegree = (subjects) => {
         fallback();
         return;
       }
-      console.log(tutorProfile)
       const { data: newDegreeId, error: degreeError } = await supabase.rpc(
         'get_degree_id_by_details',
         {
@@ -277,12 +276,13 @@ const groupSubjectsByDegree = (subjects) => {
       >
         <path fill={styles.background} fillOpacity="0.49" d={backgroundPath} />
       </svg>
-      { isDevMode && <Navbar courseType={courseType} /> }
+      <Navbar courseType={courseType} /> 
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
+        className="mt-24"
       >
         <ProfileCard styles={styles} tutorData={tutorData} />
       </motion.div>

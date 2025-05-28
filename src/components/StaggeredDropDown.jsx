@@ -14,7 +14,6 @@ const StaggeredDropDown = ({ open, setOpen, courseType = 'cs' }) => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setOpen(false);
-    navigate("/");
   };
 
   const handleDashboard = () => {

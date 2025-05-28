@@ -4,6 +4,7 @@ import { showNotification } from './ui/notification';
 import { supabase } from '../lib/supabase';
 
 const AuthCallback = () => {
+  const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
   const [status, setStatus] = useState('מעבד את ההתחברות...');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -13,11 +14,11 @@ const AuthCallback = () => {
       try {
         // Get the authorization code and state from the URL
         const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+        let code = urlParams.get('code');
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
-        const accessToken = urlParams.get('access_token');
-        const idToken = urlParams.get('id_token');
+        let accessToken = urlParams.get('access_token');
+        let idToken = urlParams.get('id_token');
 
         // Check for direct token authentication (from Google OAuth implicit flow)
         if (idToken && accessToken) {
@@ -39,7 +40,8 @@ const AuthCallback = () => {
             if (data.session) {
               setStatus('התחברות הושלמה בהצלחה!');
               showNotification('התחברת בהצלחה!', 'success');
-              navigate('/');
+              sessionStorage.removeItem('redirectAfterLogin'); 
+              navigate(redirectPath);
               return;
             }
           } catch (tokenError) {
@@ -51,17 +53,23 @@ const AuthCallback = () => {
         if (error) {
           throw new Error(`Authentication error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`);
         }
-
-        if (!code) {
-          throw new Error('חסר קוד אימות בכתובת');
+        if (!code && (window.location.hash.includes('access_token') || window.location.hash.includes('id_token'))) {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          accessToken = hashParams.get('access_token');
+          idToken = hashParams.get('id_token');
+        }
+  
+        if (!code && !accessToken && !idToken) {
+          throw new Error('חסר קוד אימות או טוקנים בכתובת');
         }
 
         // Check if we're already authenticated
         setStatus('בודק אם המשתמש כבר מחובר...');
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          showNotification('כבר מחובר למערכת!', 'success');
-          navigate('/');
+          //showNotification('כבר מחובר למערכת!', 'success');
+          sessionStorage.removeItem('redirectAfterLogin'); 
+          navigate(redirectPath);
           return;
         }
 
@@ -98,7 +106,8 @@ const AuthCallback = () => {
             showNotification('התחברת בהצלחה!', 'success');
             
             // Navigate to home page
-            navigate('/');
+            sessionStorage.removeItem('redirectAfterLogin'); 
+            navigate(redirectPath);
           } else {
             setStatus('מנסה שוב לאמת את ההרשאות...');
             
@@ -110,7 +119,8 @@ const AuthCallback = () => {
               const { data: { session: retrySession } } = await supabase.auth.getSession();
               if (retrySession) {
                 showNotification('התחברת בהצלחה!', 'success');
-                navigate('/');
+                sessionStorage.removeItem('redirectAfterLogin'); 
+                navigate(redirectPath);
               } else if (attempts < maxAttempts) {
                 setStatus(`מנסה שוב לאמת את ההרשאות... (ניסיון ${attempts + 1}/${maxAttempts})`);
                 setTimeout(checkSession, 1000 * attempts); // Increasing delay
@@ -118,7 +128,7 @@ const AuthCallback = () => {
                 setStatus('לא ניתן לאמת את ההרשאות. מנסה לרענן את הדף...');
                 setError('לא ניתן לאמת את ההרשאות לאחר מספר ניסיונות');
                 setTimeout(() => {
-                  navigate('/');
+                  navigate(redirectPath);
                 }, 2000);
               }
             };

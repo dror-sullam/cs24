@@ -39,18 +39,8 @@ const Courses = () => {
   
   // Refs and state for Keep Watching scroll
   const scrollContainerRef = useRef(null);
-  const [showLeftButton, setShowLeftButton] = useState(false);
-  const [showRightButton, setShowRightButton] = useState(true);
 
-  const handleScroll = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      // Show both buttons if there's enough content to scroll
-      const hasScrollableContent = scrollWidth > clientWidth;
-      setShowLeftButton(hasScrollableContent);
-      setShowRightButton(hasScrollableContent && scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
+
 
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
@@ -270,34 +260,29 @@ const Courses = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6">המשך צפייה</h2>
             <div className="relative mr-4">
               {/* Scroll Buttons */}
-              {showLeftButton && (
-                <button
-                  onClick={() => scroll('left')}
-                  className="hidden md:flex absolute -left-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              )}
-              {showRightButton && (
-                <button
-                  onClick={() => scroll('right')}
-                  className="hidden md:flex absolute -right-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              )}
+              <button
+                onClick={() => scroll('left')}
+                className="hidden md:flex absolute -left-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                className="hidden md:flex absolute -right-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
               
               {/* Scrollable container */}
               <div className="group">
                 <div 
                   ref={scrollContainerRef}
                   className="flex overflow-x-auto pb-4 scroll-smooth scrollbar-hide -mr-4"
-                  onScroll={handleScroll}
                 >
                   {purchasedCourses.map((course) => (
-                    <div key={course.id} className="flex-none w-[85%] sm:w-1/2 lg:w-1/3 mr-6 ml-2">
+                    <div key={course.id} className="flex-none w-[80%] sm:w-1/2 lg:w-[31%] mr-3 sm:mr-6 sm:ml-2">
                       <CourseCard 
                         course={course}
                         courseType={courseType}
@@ -359,7 +344,7 @@ const Courses = () => {
           <div className="bg-white border border-gray-200 rounded-lg shadow-md mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start w-full md:w-auto">
                   {availableDegrees.map(degreeKey => (
               <button
                       key={degreeKey}
