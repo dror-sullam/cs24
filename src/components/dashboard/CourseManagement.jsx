@@ -33,68 +33,6 @@ const CourseManagement = ({
     setTutorCourses(initialTutorCourses || []);
   }, [initialTutorCourses]);
 
-  const handleCourseEditChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentEditingCourse(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleCancelCourseEdit = () => {
-    setCurrentEditingCourse(null);
-    setIsEditingCourse(false);
-  };
-
-  const handleSaveCourseEdit = async () => {
-    if (!currentEditingCourse) return;
-    
-    try {
-      setIsLoading(true);
-      
-      // Prepare update data
-      const updateData = {
-        title: currentEditingCourse.editTitle,
-        description: currentEditingCourse.editDescription,
-        shown: currentEditingCourse.editShown
-      };
-      
-      // Call Supabase to update the course
-      const { error } = await supabase
-        .from('video_courses')
-        .update(updateData)
-        .eq('id', currentEditingCourse.video_course_id);
-        
-      if (error) {
-        console.error('Error updating course:', error);
-        showNotification('שגיאה בעדכון הקורס', 'error');
-        return;
-      }
-      
-      // Update local state
-      setTutorCourses(prevCourses => 
-        prevCourses.map(course => 
-          course.video_course_id === currentEditingCourse.video_course_id
-            ? { 
-                ...course, 
-                title: updateData.title,
-                description: updateData.description,
-                shown: updateData.shown
-              } 
-            : course
-        )
-      );
-      
-      setIsEditingCourse(false);
-      setCurrentEditingCourse(null);
-      showNotification('הקורס עודכן בהצלחה', 'success');
-    } catch (error) {
-      console.error('Error updating course:', error);
-      showNotification('שגיאה בעדכון הקורס', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Fetch user access list for a specific course
   const fetchUserAccessList = async (courseId) => {
@@ -250,7 +188,7 @@ const CourseManagement = ({
           </div>
           <Button
             onClick={() => navigate('/create-course')}
-            className="bg-blue-600"
+            className="bg-blue-600 text-white"
           >
             <Plus size={16} className="mr-2" />
             העלה קורס חדש
@@ -347,7 +285,7 @@ const CourseManagement = ({
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">עדיין אין לך קורסים בפלטפורמה</p>
               <Button
-                onClick={() => navigate('/UploadPage')}
+                onClick={() => navigate('/create-course')}
                 className="bg-blue-600"
               >
                 התחל ליצור קורס
