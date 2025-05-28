@@ -154,10 +154,12 @@ const CourseDetails = () => {
 
   if (loading) {
     return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader />
           <p className="mt-4 text-gray-600">טוען פרטי הקורס...</p>
         </div>
+      </div>
     );
   }
 
