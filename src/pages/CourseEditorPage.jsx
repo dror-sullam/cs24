@@ -50,16 +50,18 @@ export default function CourseEditorPage() {
     status: 'draft'
   });
   
-  // Course content structure
+  // Initial chapters state
   const [chapters, setChapters] = useState([
     {
-      id: uuidv4(),
+      tempId: `temp_${uuidv4()}`,
+      isNew: true,
       title: 'פרק 1: מבוא לקורס',
       description: 'סקירה כללית של נושאי הקורס',
       isEditing: false,
       videos: [
         {
-          id: uuidv4(),
+          tempId: `temp_${uuidv4()}`,
+          isNew: true,
           title: 'הקדמה והצגת הקורס',
           description: 'היכרות עם המרצה ומבנה הקורס',
           duration: '05:30',
@@ -244,7 +246,8 @@ export default function CourseEditorPage() {
   // Add a new chapter
   const handleAddChapter = () => {
     const newChapter = {
-      id: uuidv4(),
+      tempId: `temp_${uuidv4()}`,  // Temporary ID for React keys
+      isNew: true,                 // Flag to indicate this needs a DB ID
       title: `פרק ${chapters.length + 1}`,
       description: '',
       isEditing: true,
@@ -252,15 +255,16 @@ export default function CourseEditorPage() {
     };
     
     setChapters([...chapters, newChapter]);
-    setEditingChapterId(newChapter.id);
+    setEditingChapterId(newChapter.tempId);
   };
   
   // Add a new video to a chapter
   const handleAddVideo = (chapterId) => {
     const updatedChapters = chapters.map(chapter => {
-      if (chapter.id === chapterId) {
+      if ((chapter.id || chapter.tempId) === chapterId) {
         const newVideo = {
-          id: uuidv4(),
+          tempId: `temp_${uuidv4()}`,  // Temporary ID for React keys
+          isNew: true,                 // Flag to indicate this needs a DB ID
           title: `סרטון ${chapter.videos.length + 1}`,
           description: '',
           duration: '00:00',
@@ -277,7 +281,9 @@ export default function CourseEditorPage() {
     });
     
     setChapters(updatedChapters);
-    const newVideoId = updatedChapters.find(c => c.id === chapterId)?.videos.slice(-1)[0]?.id;
+    const newVideoId = updatedChapters
+      .find(c => (c.id || c.tempId) === chapterId)
+      ?.videos.slice(-1)[0]?.tempId;
     if (newVideoId) {
       setEditingVideoId(newVideoId);
     }
@@ -573,11 +579,11 @@ export default function CourseEditorPage() {
           shown: courseData.status === 'published' ? 1 : 0
         },
         video_titles: chapters.map((chapter, chapterIndex) => ({
-          id: parseInt(chapter.id) || null,
+          id: chapter.isNew ? null : chapter.id, // Only send real DB IDs
           title: chapter.title,
           title_index: chapterIndex,
           video_episodes: chapter.videos.map((video, videoIndex) => ({
-            id: parseInt(video.id) || null,
+            id: video.isNew ? null : video.id, // Only send real DB IDs
             episode_index: videoIndex,
             title: video.title,
             description: video.description || '',
@@ -585,9 +591,7 @@ export default function CourseEditorPage() {
             episode_len: video.episode_len || null
           }))
         })),
-        // Use the override if provided, otherwise use the state
         deleted_video_uids: deletedVideosOverride || deletedVideos,
-        // Include thumbnail data if it exists
         fileBase64: courseData.fileBase64,
         fileName: courseData.fileName,
         fileType: courseData.fileType
@@ -789,12 +793,14 @@ export default function CourseEditorPage() {
             const sortedEpisodes = [...episodes].sort((a, b) => a.episode_index - b.episode_index);
             
             return {
-              id: String(title.id),
+              id: String(title.id), // This is now a real DB ID
+              isNew: false,        // Mark as existing DB record
               title: title.title || 'פרק ללא כותרת',
               description: '', // Not provided in the data
               isEditing: false,
               videos: sortedEpisodes.map(episode => ({
-                id: String(episode.id),
+                id: String(episode.id), // This is now a real DB ID
+                isNew: false,          // Mark as existing DB record
                 title: episode.title || '',
                 description: episode.description || '',
                 episode_len: episode.episode_len || 0,
@@ -963,13 +969,13 @@ export default function CourseEditorPage() {
                     <div className="space-y-6 px-6 pb-6">
                       {chapters.map((chapter, chapterIndex) => (
                         <div 
-                          key={chapter.id} 
+                          key={chapter.id || chapter.tempId} 
                           className="mb-5 bg-white rounded-lg shadow-sm p-4 border border-blue-100"
                         >
-                          {editingChapterId === chapter.id ? (
+                          {editingChapterId === chapter.id || editingChapterId === chapter.tempId ? (
                             <ChapterEditForm 
                               chapter={chapter}
-                              onSave={(title, description) => handleSaveChapterEdit(chapter.id, title, description)}
+                              onSave={(title, description) => handleSaveChapterEdit(chapter.id || chapter.tempId, title, description)}
                               onCancel={handleCancelChapterEdit}
                             />
                           ) : (
@@ -985,7 +991,7 @@ export default function CourseEditorPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleEditChapter(chapter.id)}
+                                    onClick={() => handleEditChapter(chapter.id || chapter.tempId)}
                                     disabled={loading || isUploadingAny}
                                   >
                                     <Pencil className="h-4 w-4" />
@@ -993,7 +999,7 @@ export default function CourseEditorPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleMoveChapter(chapter.id, 'up')}
+                                    onClick={() => handleMoveChapter(chapter.id || chapter.tempId, 'up')}
                                     disabled={chapterIndex === 0 || loading || isUploadingAny}
                                   >
                                     <ChevronUp className="h-4 w-4" />
@@ -1001,7 +1007,7 @@ export default function CourseEditorPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleMoveChapter(chapter.id, 'down')}
+                                    onClick={() => handleMoveChapter(chapter.id || chapter.tempId, 'down')}
                                     disabled={chapterIndex === chapters.length - 1 || loading || isUploadingAny}
                                   >
                                     <ChevronDown className="h-4 w-4" />
@@ -1009,7 +1015,7 @@ export default function CourseEditorPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleDeleteChapter(chapter.id)}
+                                    onClick={() => handleDeleteChapter(chapter.id || chapter.tempId)}
                                     disabled={chapters.length <= 1 || loading || isUploadingAny}
                                   >
                                     <Trash className="h-4 w-4 text-red-500" />
@@ -1021,13 +1027,13 @@ export default function CourseEditorPage() {
                               <div className="mt-4 space-y-3">
                                 {chapter.videos.map((video, videoIndex) => (
                                   <div
-                                    key={video.id}
+                                    key={video.id || video.tempId}
                                     className="mb-2 p-3 bg-white rounded-md shadow-sm border border-blue-50 hover:border-blue-200 transition-colors"
                                   >
-                                    {editingVideoId === video.id ? (
+                                    {editingVideoId === video.id || editingVideoId === video.tempId ? (
                                       <VideoEditForm
                                         video={video}
-                                        onSave={(title, description) => handleSaveVideoEdit(chapter.id, video.id, title, description)}
+                                        onSave={(title, description) => handleSaveVideoEdit(chapter.id || chapter.tempId, video.id || video.tempId, title, description)}
                                         onCancel={handleCancelVideoEdit}
                                       />
                                     ) : (
@@ -1047,7 +1053,7 @@ export default function CourseEditorPage() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleEditVideo(chapter.id, video.id)}
+                                              onClick={() => handleEditVideo(chapter.id || chapter.tempId, video.id || video.tempId)}
                                               disabled={loading || isUploadingAny}
                                             >
                                               <Pencil className="h-4 w-4" />
@@ -1055,7 +1061,7 @@ export default function CourseEditorPage() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleMoveVideo(chapter.id, video.id, 'up')}
+                                              onClick={() => handleMoveVideo(chapter.id || chapter.tempId, video.id || video.tempId, 'up')}
                                               disabled={videoIndex === 0 || loading || isUploadingAny}
                                             >
                                               <ChevronUp className="h-4 w-4" />
@@ -1063,7 +1069,7 @@ export default function CourseEditorPage() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleMoveVideo(chapter.id, video.id, 'down')}
+                                              onClick={() => handleMoveVideo(chapter.id || chapter.tempId, video.id || video.tempId, 'down')}
                                               disabled={videoIndex === chapter.videos.length - 1 || loading || isUploadingAny}
                                             >
                                               <ChevronDown className="h-4 w-4" />
@@ -1071,7 +1077,7 @@ export default function CourseEditorPage() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleDeleteVideo(chapter.id, video.id)}
+                                              onClick={() => handleDeleteVideo(chapter.id || chapter.tempId, video.id || video.tempId)}
                                               disabled={loading || isUploadingAny}
                                             >
                                               <Trash className="h-4 w-4 text-red-500" />
@@ -1153,18 +1159,18 @@ export default function CourseEditorPage() {
                                             <div>
                                               <input
                                                 type="file"
-                                                id={`file-upload-${video.id}`}
+                                                id={`file-upload-${video.id || video.tempId}`}
                                                 className="hidden"
                                                 accept="video/*"
                                                 onChange={(e) => {
                                                   if (e.target.files && e.target.files[0]) {
-                                                    handleUploadVideo(chapter.id, video.id, e.target.files[0]);
+                                                    handleUploadVideo(chapter.id || chapter.tempId, video.id || video.tempId, e.target.files[0]);
                                                   }
                                                 }}
                                                 disabled={video.status === 'uploaded' || isUploadingAny}
                                               />
                                               <label
-                                                htmlFor={`file-upload-${video.id}`}
+                                                htmlFor={`file-upload-${video.id || video.tempId}`}
                                                 className={`
                                                   inline-flex items-center px-3 py-1 text-sm
                                                   rounded-md border
@@ -1189,7 +1195,7 @@ export default function CourseEditorPage() {
                                 ))}
                                 
                                 <Button 
-                                  onClick={() => handleAddVideo(chapter.id)}
+                                  onClick={() => handleAddVideo(chapter.id || chapter.tempId)}
                                   className="w-full border border-dashed border-blue-200 hover:bg-blue-50/50 py-2 rounded-md flex items-center justify-center gap-2 text-blue-600"
                                   disabled={loading || isUploadingAny}
                                 >

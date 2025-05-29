@@ -1,22 +1,19 @@
-import sha256 from 'crypto-js/sha256';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { supabase } from '../lib/supabase';
 
 /**
- * Generate a fingerprint string from device/browser properties
+ * Generate a stable fingerprint using FingerprintJS and store it in localStorage
  */
-export function generateFingerprint() {
-  const props = [
-    navigator.userAgent,
-    navigator.language,
-    navigator.platform,
-    navigator.hardwareConcurrency || 'unknown',
-    window.screen.width,
-    window.screen.height,
-    new Date().getTimezoneOffset(),
-    navigator.cookieEnabled ? 'cookies-enabled' : 'cookies-disabled',
-    navigator.doNotTrack || 'unknown'
-  ];
-  return sha256(props.join('|')).toString();
+export async function getOrCreateFingerprint() {
+  const stored = localStorage.getItem('fingerprint');
+  if (stored) return stored;
+
+  const fp = await FingerprintJS.load();
+  const result = await fp.get();
+  const id = result.visitorId;
+
+  localStorage.setItem('fingerprint', id);
+  return id;
 }
 
 /**
@@ -34,9 +31,9 @@ export function getOrCreateDeviceId() {
 /**
  * Returns a stable fingerprint + device ID payload for use in any API
  */
-export function getDevicePayload() {
+export async function getDevicePayload() {
   return {
-    fingerprint: generateFingerprint(),
+    fingerprint: await getOrCreateFingerprint(),
     deviceId: getOrCreateDeviceId()
   };
 }
@@ -48,4 +45,4 @@ export async function getAuthToken() {
   const { data: { session }, error } = await supabase.auth.getSession();
   if (error || !session) throw new Error("Not authenticated");
   return session.access_token;
-} 
+}

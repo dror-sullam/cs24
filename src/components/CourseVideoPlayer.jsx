@@ -4,7 +4,7 @@ import { Stream } from "@cloudflare/stream-react";
 import { getDevicePayload } from "../utils/deviceFingerprint";
 
 async function getPlaybackToken(videoUID) {
-  const devicePayload = getDevicePayload();
+  const devicePayload = await getDevicePayload();
   
   const { data, error } = await supabase.functions.invoke('signed-token', {
     body: { 
