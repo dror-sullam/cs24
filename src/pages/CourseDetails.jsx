@@ -690,7 +690,7 @@ const CourseDetails = () => {
                     </div>
                   </div>
                   <div id="payment-button">
-                    <PaymentButton videoId={courseId} courseName={course.title} />
+                    <PaymentButton videoId={courseId} courseName={course.course_name} tutorName={course.tutor_name} totalPrice={course.sale_price === null ? course.price : course.sale_price} />
                   </div>
                 </div>
               )}

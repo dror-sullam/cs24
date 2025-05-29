@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { showNotification } from '../components/ui/notification';
+import useAuth from '../hooks/useAuth';
 
-export default function PaymentButton({ videoId, courseName, className }) {
+export default function PaymentButton({ videoId, courseName, tutorName, totalPrice, className }) {
+  const {user} = useAuth();
   const [loading, setLoading] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const [couponCode, setCouponCode] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const backgroundConfig = {
+    backgroundColor: '#4f46e5', // Main background color
+    patternColor: '%23ffffff',  // Pattern color (URL encoded)
+    shadowColor: 'rgba(55, 48, 163, 0.8)' // Shadow color
+  };
 
   const handlePayment = async () => {
     if (!termsAccepted) {
@@ -147,21 +154,63 @@ export default function PaymentButton({ videoId, courseName, className }) {
       </div>
 
       {paymentUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-3xl mx-4 relative">
-            <button 
+        <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+          <div className="w-full max-w-3xl mx-20">
+            {/* <button 
               onClick={closePayment}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </button> */}
             <iframe 
               src={paymentUrl}
-              className="w-full h-[600px] border-0"
+              className="w-full h-[551px] rounded-lg outline outline-8 outline-indigo-600"
               allow="payment"
             />
+          </div>
+          <div className="flex-1 h-full justify-center items-center hidden lg:flex" style={{
+            backgroundColor: backgroundConfig.backgroundColor,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='110' height='110' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='${backgroundConfig.patternColor}' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            boxShadow: `inset -20px 0 40px ${backgroundConfig.shadowColor}`
+          }}>
+            <div className="flex flex-col">
+              <div className="flex flex-col gap-6 justify-center items-center bg-white pt-12 pb-6 px-12 rounded-t-lg shadow-lg">
+                <h2 className="text-2xl font-bold">פרטי ההזמנה:</h2>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">מייל:</label>
+                  <input 
+                    type="text" 
+                    value={user?.email || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם הקורס:</label>
+                  <input 
+                    type="text" 
+                    value={courseName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם המרצה:</label>
+                  <input 
+                    type="text" 
+                    value={tutorName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <img src="/secure-payment-banner.webp" className="w-48" />
+              </div>
+              <div className="bg-amber-400 px-12 py-4 text-white font-bold rounded-b-lg">
+                <h2 className="text-amber-800 text-xl">סך הכל: ₪{totalPrice}</h2>
+              </div>
+            </div>
           </div>
         </div>
       )}
