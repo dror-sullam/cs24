@@ -1,16 +1,63 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { showNotification } from '../components/ui/notification';
+import useAuth from '../hooks/useAuth';
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function PaymentButton({ videoId, courseName, className }) {
+export default function PaymentButton({ videoId, courseName, tutorName, totalPrice, className }) {
+  const {user} = useAuth();
   const [loading, setLoading] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const [couponCode, setCouponCode] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const backgroundConfig = {
+    backgroundColor: '#4f46e5', // Main background color
+    patternColor: '%23ffffff',  // Pattern color (URL encoded)
+    shadowColor: 'rgba(55, 48, 163, 0.8)' // Shadow color
+  };
+
+  const [expandedQuestions, setExpandedQuestions] = useState([]);
+  const answerVariants = {
+    expanded: { opacity: 1, height: "auto", transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } },
+    collapsed: { opacity: 0, height: 0, transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } }
+  };
+  const questions = [
+    {
+      id: 1,
+      question: "איך מתבצעת הרכישה באתר?",
+      answer: "פשוט מאוד – בוחרים קורס, לוחצים על כפתור הרכישה וממלאים פרטי תשלום מאובטחים. תוך רגע תקבלו גישה מלאה לקורס באזור האישי שלכם באתר או בדף הקורסים הכללי"
+    },
+    {
+      id: 2,
+      question: "האם הרכישה באתר מאובטחת?",
+      answer: "בוודאי. אנחנו משתמשים בפרוטוקול אבטחה מתקדם (SSL) ובשירות סליקה מאובטח ברמה הגבוהה ביותר. המידע שלך לא נשמר אצלנו ולא נחשף לאף גורם אחר"
+    },
+    {
+      id: 3,
+      question: "מה עושים אם יש תקלה או בעיה בגישה?",
+      answer: "יש לנו צוות תמיכה שזמין עבורך! ניתן לפנות ל-cs24.hit@gmail.com ואנו נחזור אליך בהקדם האפשרי כדי לפתור את בעיה"
+    },
+    {
+      id: 4,
+      question: "אם אני מחליף מחשב או נכנס מהטלפון – הגישה עדיין נשמרת?",
+      answer: "כן. הקורסים זמינים מכל מכשיר – מחשב, טלפון או טאבלט. הקורס זמין לצפייה עד 3 מכשירים שונים, במידה ועברת את המכסה, נוכל להגדיל במקרה הצורך"
+    }
+  ];
+  const toggleQuestion = (questionId) => {
+    setExpandedQuestions((prevExpanded) => {
+      // If the clicked topic is already the one expanded, collapse it.
+      if (prevExpanded.length === 1 && prevExpanded[0] === questionId) {
+        return [];
+      } else {
+        // Otherwise, expand the clicked topic (and implicitly collapse any other).
+        return [questionId];
+      }
+    });
+  };
 
   const handlePayment = async () => {
     if (!termsAccepted) {
-      alert('יש לאשר את תנאי השימוש כדי להמשיך');
+      showNotification('יש לאשר את תנאי השימוש כדי להמשיך', 'error');
       return;
     }
 
@@ -19,7 +66,7 @@ export default function PaymentButton({ videoId, courseName, className }) {
     // 1. ensure we're logged in
     const { data: { session }, error: sessErr } = await supabase.auth.getSession();
     if (sessErr || !session) {
-      alert('יש להתחבר כדי לבצע רכישה');
+      showNotification('יש להתחבר כדי לבצע רכישה', 'error');
       setLoading(false);
       return;
     }
@@ -147,21 +194,259 @@ export default function PaymentButton({ videoId, courseName, className }) {
       </div>
 
       {paymentUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-3xl mx-4 relative">
-            <button 
+        <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+          <div className="flex-1 flex flex-col px-10 py-10 lg:px-20 lg:py-10 overflow-y-auto h-full gap-8">
+
+            {/* Back Button */}
+
+            <button
               onClick={closePayment}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              className="py-1 pl-4 pr-2 gap-1 rounded-full inline-flex justify-center items-center bg-indigo-700 hover:bg-indigo-800 text-white transition-colors w-fit"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
               </svg>
+              ביטול
             </button>
-            <iframe 
+
+            {/* Payment iframe */}
+
+            <iframe
               src={paymentUrl}
-              className="w-full h-[600px] border-0"
+              className="shrink-0 w-full h-[755px] md:h-[551px] lg:h-[717px] rounded-lg outline outline-8 outline-indigo-600"
               allow="payment"
             />
+
+            {/* Order Details - Mobile */}
+
+            <div className="flex flex-col lg:hidden">
+              <div className="flex flex-col gap-6 justify-center items-center bg-white pt-6 pb-6 px-12 rounded-t-lg border-2 border-gray-200">
+                <h2 className="text-2xl font-bold">פרטי ההזמנה:</h2>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">מייל:</label>
+                  <input 
+                    type="text" 
+                    value={user?.email || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם הקורס:</label>
+                  <input 
+                    type="text" 
+                    value={courseName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם המרצה:</label>
+                  <input 
+                    type="text" 
+                    value={tutorName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <img src="/secure-payment-banner.webp" className="w-48" />
+              </div>
+              <div className="bg-amber-400 px-12 py-4 text-white font-bold rounded-b-lg">
+                <h2 className="text-amber-800 text-xl">סך הכל: ₪{totalPrice}</h2>
+              </div>
+            </div>
+
+            {/* Q&A  - Mobile */}
+
+            <div className="lg:hidden">
+                <div className="bg-white rounded-lg border-2 border-gray-200 flex flex-col overflow-hidden">
+                  <div className="flex justify-between items-center p-3">
+                    <h2 className="text-lg font-semibold">
+                      שאלות ותשובות
+                    </h2>
+                  </div>
+                  
+                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
+                    {questions.map((question) => {
+                      const isExpanded = expandedQuestions.includes(question.id);
+                          return (
+                            <div key={question.id}>
+                              {/* Title Header */}
+                              <div
+                                className={`p-4 border-t-2 cursor-pointer ${
+                                  isExpanded ? 'bg-white' : ''
+                                }`}
+                                onClick={() => toggleQuestion(question.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <svg
+                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                        isExpanded ? '-rotate-90' : ''
+                                      }`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <div>
+                                      <h3 className="font-medium text-gray-900">{question.question}</h3>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Answers */}
+                              <AnimatePresence initial={false}>
+                                {isExpanded && (
+                                  <motion.div
+                                    key="answer"
+                                    variants={answerVariants}
+                                    initial="collapsed"
+                                    animate="expanded"
+                                    exit="collapsed"
+                                    style={{ overflow: 'hidden' }}
+                                  >
+                                    <div className="bg-gray-50">
+                                      <div className="p-4 border-t-2 border-gray-200">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center flex-1">
+                                            <div className="flex-1">
+                                              <p className="text-sm text-gray-500">{question.answer}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+                      </div>
+                </div>
+              </div>
+          </div>
+          <div className="flex-1 h-full flex-col items-center hidden overflow-y-auto lg:flex gap-10" style={{
+            backgroundColor: backgroundConfig.backgroundColor,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='110' height='110' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='${backgroundConfig.patternColor}' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            boxShadow: `inset -20px 0 40px ${backgroundConfig.shadowColor}`
+          }}>
+
+
+            {/* Order Details - Desktop */}
+
+            <div className="flex flex-col">
+              <div className="flex flex-col gap-6 justify-center items-center bg-white mt-16 pt-6 pb-6 px-12 rounded-t-lg shadow-lg">
+                <h2 className="text-2xl font-bold">פרטי ההזמנה:</h2>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">מייל:</label>
+                  <input 
+                    type="text" 
+                    value={user?.email || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם הקורס:</label>
+                  <input 
+                    type="text" 
+                    value={courseName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-lg font-medium">שם המרצה:</label>
+                  <input 
+                    type="text" 
+                    value={tutorName || ''} 
+                    className="text-lg border-2 border-gray-200 bg-gray-100 outline-none rounded-lg px-2 py-1 text-gray-600"
+                    readOnly
+                  />
+                </div>
+                <img src="/secure-payment-banner.webp" className="w-48" />
+              </div>
+              <div className="bg-amber-400 px-12 py-4 text-white font-bold rounded-b-lg">
+                <h2 className="text-amber-800 text-xl">סך הכל: ₪{totalPrice}</h2>
+              </div>
+            </div>
+
+            {/* Q&A - Desktop */}
+
+            <div className="w-[351px] mb-16">
+                <div className="bg-white rounded-lg border-2 border-gray-200 flex flex-col overflow-hidden">
+                  <div className="flex justify-between items-center p-3">
+                    <h2 className="text-lg font-semibold">
+                      שאלות ותשובות
+                    </h2>
+                  </div>
+                  
+                  <div className="flex-1 min-h-0 max-h-96 overflow-y-auto overflow-x-hidden">
+                    {questions.map((question) => {
+                      const isExpanded = expandedQuestions.includes(question.id);
+                          return (
+                            <div key={question.id}>
+                              {/* Title Header */}
+                              <div
+                                className={`p-4 border-t-2 cursor-pointer ${
+                                  isExpanded ? 'bg-white' : ''
+                                }`}
+                                onClick={() => toggleQuestion(question.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <svg
+                                      className={`w-4 h-4 text-gray-400 ml-2 transform transition-transform scale-x-[-1] ${
+                                        isExpanded ? '-rotate-90' : ''
+                                      }`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <div>
+                                      <h3 className="font-medium text-gray-900">{question.question}</h3>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Answers */}
+                              <AnimatePresence initial={false}>
+                                {isExpanded && (
+                                  <motion.div
+                                    key="answer"
+                                    variants={answerVariants}
+                                    initial="collapsed"
+                                    animate="expanded"
+                                    exit="collapsed"
+                                    style={{ overflow: 'hidden' }}
+                                  >
+                                    <div className="bg-gray-50">
+                                      <div className="p-4 border-t-2 border-gray-200">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center flex-1">
+                                            <div className="flex-1">
+                                              <p className="text-sm text-gray-500">{question.answer}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+                      </div>
+                </div>
+              </div>
           </div>
         </div>
       )}

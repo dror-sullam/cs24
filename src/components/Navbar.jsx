@@ -47,7 +47,7 @@ const NavLeftSection = ({ styles, courseType }) => {
   const auth = useAuth();
 
   return (
-    <div className="flex items-center gap-4 ml-6">
+    <div className={`flex items-center gap-4 ${auth.session && 'ml-6'}`}>
       {auth.session ? (
         <Avatar courseType={courseType} />
       ) : (

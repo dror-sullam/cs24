@@ -17,7 +17,7 @@ const YearSection = ({ year, courses, courseType }) => (
         <CourseCard 
           key={course.id} 
           course={course}
-          courseType={courseType}
+          courseType={"courses"}
         />
       ))}
     </div>
@@ -33,7 +33,7 @@ const Courses = () => {
   const [courseType, setCourseType] = useState('cs');
   const [activeFilters, setActiveFilters] = useState({});
   const [activeSort, setActiveSort] = useState('rating');
-  const styles = courseStyles[courseType] || courseStyles.cs;
+  const styles = courseStyles["courses"] || courseStyles.cs;
   const navigate = useNavigate();
   const [userAccess, setUserAccess] = useState([]);
   
@@ -285,7 +285,7 @@ const Courses = () => {
                     <div key={course.id} className="flex-none w-[80%] sm:w-1/2 lg:w-[31%] mr-3 sm:mr-6 sm:ml-2">
                       <CourseCard 
                         course={course}
-                        courseType={courseType}
+                        courseType={"courses"}
                         hidePriceInfo={true}
                       />
                     </div>
@@ -305,7 +305,7 @@ const Courses = () => {
                   key={degreeKey}
                   year={keyToDegree(degreeKey)}
                   courses={filteredCourses[degreeKey]}
-                  courseType={courseType}
+                  courseType={"courses"}
                 />
               )
             ))}
@@ -318,7 +318,7 @@ const Courses = () => {
                   key={degreeKey}
                   year={keyToDegree(degreeKey)}
                   courses={filteredCourses[degreeKey]}
-                  courseType={courseType}
+                  courseType={"courses"}
                 />
               )
             ))}
@@ -331,7 +331,7 @@ const Courses = () => {
   return (
     <Layout>
       <div className={`bg-gradient-to-b ${styles.bgGradient}`} dir="rtl">
-        <Navbar courseType={courseType} />
+        <Navbar courseType="courses" />
         
         <CourseFilters
           courses={selectedDegrees.length === 0 ? allCourses : allCourses.filter(course => selectedDegrees.includes(degreeToKey(course.degree_name)))}
