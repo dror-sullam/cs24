@@ -26,34 +26,32 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFe
   const [showReviews, setShowReviews] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [showAllSubjects, setShowAllSubjects] = useState(false);
 
   const MAX_COMMENT_LENGTH = 200; // Maximum character limit for comments
   const userIsAdmin = user && isAdmin(user.email);
-
   const styles = courseStyles[courseType] || courseStyles.cs;
-
   const hasUserFeedback = tutor.has_user_feedback;
-
   const reviewsWithComments = tutor.feedback?.filter(fb => fb.comment?.trim()) || [];
   const isDevMode = process.env.REACT_APP_DEV?.toLowerCase() === 'true';
 
+  // Sort all reviews by date, newest first
   const sortedReviews = [...reviewsWithComments].sort((a, b) => {
     return new Date(b.created_at) - new Date(a.created_at);
   });
+
+  // Only show delete button if has_user_feedback is true AND we have a valid user_feedback_id
+  const showDeleteButton = tutor.has_user_feedback && tutor.user_feedback_id;
+
+  // Get the user's feedback using the ID and make sure it's the most recent one
+  const userFeedback = showDeleteButton 
+    ? sortedReviews.find(fb => fb.id === tutor.user_feedback_id)
+    : null;
 
   const displayedReviews = showAllReviews 
     ? sortedReviews 
     : sortedReviews.slice(0, 1);
 
-  // Only show delete button if has_user_feedback is true AND we have a valid user_feedback_id
-  const showDeleteButton = tutor.has_user_feedback && tutor.user_feedback_id;
-
-  // Get the user's feedback using the ID
-  const userFeedback = showDeleteButton 
-    ? tutor.feedback?.find(fb => fb.id === tutor.user_feedback_id)
-    : null;
-
- 
   const handleFeedbackClick = async () => {
     if (!user) {
       setShowLoginModal(true);
@@ -200,7 +198,7 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFe
         <CardContent className="pt-0">
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1.5 -mx-0.5">
-              {tutor.subjects?.slice(0, 3).map((subject, index) => (
+              {(showAllSubjects ? tutor.subjects : tutor.subjects?.slice(0, 4))?.map((subject, index) => (
                 <span
                   key={index}
                   className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${styles.subjectBg} ${styles.textSecondary}`}
@@ -208,12 +206,13 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFe
                   {subject.course_name}
                 </span>
               ))}
-              {tutor.subjects?.length > 3 && (
-                <span
-                  className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${styles.subjectBg} ${styles.textSecondary}`}
+              {!showAllSubjects && tutor.subjects?.length > 4 && (
+                <button
+                  onClick={() => setShowAllSubjects(true)}
+                  className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${styles.subjectBg} ${styles.textSecondary} hover:opacity-80 cursor-pointer`}
                 >
-                  {tutor.subjects.length - 3}+
-                </span>
+                  {tutor.subjects.length - 4}+
+                </button>
               )}
             </div>
             {!tutor.feedback?.length && (
@@ -229,24 +228,39 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFe
             {tutor.feedback?.length > 0 && (
               <div>
              <div className="flex md:justify-between justify-center items-center gap-4 ">
-              <Button
-                className={styles.textSecondary}
-                onClick={() => setShowReviews(!showReviews)}
-              >
-                {showReviews
-                  ? 'הסתר תגובות'
-                  : `ראה תגובות (${reviewsWithComments.length})`}
-              </Button>
-              <div className="flex flex-col items-center">
-                <Link
-                  to={`/tutors/${courseType}/${tutor.id}`}
-                  //state={{ tutor }}
-                  className={`${styles.textSecondary} ${isDevMode ? "": "hidden"} text-center px-3 py-1 text-sm border-b border-current pr-0.5 pl-0.5`}
-                >
-                  צפייה בפרופיל
-                </Link>
-                <div className={`w-16 h-0.5 ${styles.textSecondary}`}></div>
-              </div>
+              {reviewsWithComments.length > 0 ? (
+                <>
+                  <Button
+                    className={styles.textSecondary}
+                    onClick={() => setShowReviews(!showReviews)}
+                  >
+                    {showReviews
+                      ? 'הסתר תגובות'
+                      : `ראה תגובות (${reviewsWithComments.length})`}
+                  </Button>
+                  <div className="flex flex-col items-center">
+                    <Link
+                      to={`/tutors/${courseType}/${tutor.id}`}
+                      className={`${styles.textSecondary} ${isDevMode ? "": "hidden"} text-center px-3 py-1 text-sm border-b border-current pr-0.5 pl-0.5`}
+                    >
+                      צפייה בפרופיל
+                    </Link>
+                    <div className={`w-16 h-0.5 ${styles.textSecondary}`}></div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-end w-full">
+                  <div className="flex flex-col items-center">
+                    <Link
+                      to={`/tutors/${courseType}/${tutor.id}`}
+                      className={`${styles.textSecondary} ${isDevMode ? "": "hidden"} text-center px-3 py-1 text-sm border-b border-current pr-0.5 pl-0.5`}
+                    >
+                      צפייה בפרופיל
+                    </Link>
+                    <div className={`w-16 h-0.5 ${styles.textSecondary}`}></div>
+                  </div>
+                </div>
+              )}
             </div>
                 {showDeleteButton && userFeedback && (
                   <div className="mt-2 space-y-2">
@@ -287,10 +301,10 @@ const TutorCard = ({ tutor, courseType, user, onSubmitFeedback, loadTutorsWithFe
                 {showReviews && reviewsWithComments.length > 0 && (
                   <div className="mt-2 space-y-2">
                     <div className="max-h-[220px] overflow-y-auto pr-2 space-y-2">
-                      {reviewsWithComments.map((fb, index) => {
-                        const isUserOwnFeedback = hasUserFeedback && index === 0;
+                      {sortedReviews.map((fb, index) => {
+                        const isUserOwnFeedback = fb.id === tutor.user_feedback_id;
                         return (
-                          <div key={index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
+                          <div key={fb.id || index} className={`${isUserOwnFeedback ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg p-3 relative`}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1">
                               

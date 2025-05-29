@@ -1,17 +1,10 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, Suspense } from "react"
 import { useParams } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { courseStyles } from "../config/courseStyles"
 import mockData from "../config/mockData.json"
 import { backgroundPath } from "../config/backgroundPath"
 import NotFoundPage from "../components/NotFoundPage"
-import ReviewSection from "../components/profile/ReviewsCard"
-import ProfileCard from "../components/profile/ProfileCard"
-import SimilarTutors from "../components/profile/SimilarTutors"
-import EducationCard from "../components/profile/EducationCard"
-import ContactCard from "../components/profile/ContactCard"
-import UpcomingEvents from "../components/profile/EventsCard"
-import CoursesCard from "../components/profile/CoursesCard"
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer";
 import { courseTypeOptions } from "../config/courseStyles";
@@ -24,6 +17,24 @@ import {
   ieYearOneCourses, ieYearTwoCourses, ieYearThreeCourses, ieYearFourCourses
 } from "../config/CoursesLinks";
 import Loader from "../components/Loader";
+
+// Lazy load components
+const ReviewSection = React.lazy(() => import("../components/profile/ReviewsCard"));
+const ProfileCard = React.lazy(() => import("../components/profile/ProfileCard"));
+const SimilarTutors = React.lazy(() => import("../components/profile/SimilarTutors"));
+const EducationCard = React.lazy(() => import("../components/profile/EducationCard"));
+const ContactCard = React.lazy(() => import("../components/profile/ContactCard"));
+const UpcomingEvents = React.lazy(() => import("../components/profile/EventsCard"));
+const CoursesCard = React.lazy(() => import("../components/profile/CoursesCard"));
+
+
+const ComponentLoader = () => (
+  <div className="w-full p-4 animate-pulse">
+    <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+  </div>
+);
 
 const ProfilePage = () => {
   const { id, courseType } = useParams()
@@ -284,7 +295,9 @@ const groupSubjectsByDegree = (subjects) => {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="mt-24"
       >
-        <ProfileCard styles={styles} tutorData={tutorData} />
+        <Suspense fallback={<ComponentLoader />}>
+          <ProfileCard styles={styles} tutorData={tutorData} />
+        </Suspense>
       </motion.div>
       
       <motion.div
@@ -378,7 +391,9 @@ const groupSubjectsByDegree = (subjects) => {
           )}
 
           {/* Courses Card */}
-          <CoursesCard styles={styles} tutorData={tutorData} />
+          <Suspense fallback={<ComponentLoader />}>
+            <CoursesCard styles={styles} tutorData={tutorData} />
+          </Suspense>
 
           {/* Education & Events Section */}
           <motion.div
@@ -390,12 +405,16 @@ const groupSubjectsByDegree = (subjects) => {
           >
             {tutorData.events?.length > 0 && (
               <div className="w-full md:w-1/2">
-                <UpcomingEvents styles={styles} events={tutorData.events} />
+                <Suspense fallback={<ComponentLoader />}>
+                  <UpcomingEvents styles={styles} events={tutorData.events} />
+                </Suspense>
               </div>
             )}
 
             <div className={`w-full ${tutorData.events?.length > 0 ? "md:w-1/2 -mt-16 md:mt-0" : ""}`}>
-              <EducationCard styles={styles} tutor={tutorData} />
+              <Suspense fallback={<ComponentLoader />}>
+                <EducationCard styles={styles} tutor={tutorData} />
+              </Suspense>
             </div>
           </motion.div>
         </motion.div>
@@ -414,14 +433,16 @@ const groupSubjectsByDegree = (subjects) => {
               viewport={{ once: true, amount: 0.005 }}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <ReviewSection 
-                reviews={tutorData.feedback || []} 
-                styles={styles} 
-                tutor={tutorData}
-                user={user}
-                loadTutorsWithFeedback={loadTutorsWithFeedback}
-                courseType={courseType}
-              />
+              <Suspense fallback={<ComponentLoader />}>
+                <ReviewSection 
+                  reviews={tutorData.feedback || []} 
+                  styles={styles} 
+                  tutor={tutorData}
+                  user={user}
+                  loadTutorsWithFeedback={loadTutorsWithFeedback}
+                  courseType={courseType}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -433,7 +454,9 @@ const groupSubjectsByDegree = (subjects) => {
               viewport={{ once: true, amount: 0.005 }}
               transition={{ duration: 0.4, delay: 0.4 }}
             >
-              <SimilarTutors tutors={similarTutors} styles={styles} courseType={courseType} />
+              <Suspense fallback={<ComponentLoader />}>
+                <SimilarTutors tutors={similarTutors} styles={styles} courseType={courseType} />
+              </Suspense>
             </motion.div>
           )}
 
@@ -452,7 +475,9 @@ const groupSubjectsByDegree = (subjects) => {
             viewport={{ once: true, amount: 0.005 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <ContactCard tutor={tutorData} styles={styles} />
+            <Suspense fallback={<ComponentLoader />}>
+              <ContactCard tutor={tutorData} styles={styles} />
+            </Suspense>
           </motion.div>
         </motion.div>
         <div className="mt-12">

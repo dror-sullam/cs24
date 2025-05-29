@@ -260,20 +260,24 @@ const Courses = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6">המשך צפייה</h2>
             <div className="relative mr-4">
               {/* Scroll Buttons */}
-              <button
-                onClick={() => scroll('left')}
-                className="hidden md:flex absolute -left-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => scroll('right')}
-                className="hidden md:flex absolute -right-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              {purchasedCourses.length >= 3 && (
+                <>
+                  <button
+                    onClick={() => scroll('left')}
+                    className="hidden md:flex absolute -left-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => scroll('right')}
+                    className="hidden md:flex absolute -right-8 top-0 h-full w-8 bg-white hover:bg-gray-100 transition-colors duration-200 z-10 items-center justify-center"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
               
               {/* Scrollable container */}
               <div className="group">

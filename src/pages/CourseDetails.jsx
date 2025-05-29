@@ -591,7 +591,7 @@ const CourseDetails = () => {
                                       {(title.episodes || []).map((episode) => {
                                     const isActive = activeEpisode?.id === episode.id;
                                     const durationStr = episode.episode_len 
-                                      ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                      ? `${Math.floor(episode.episode_len / 3600)}:${String(Math.floor((episode.episode_len % 3600) / 60)).padStart(2, "0")}`
                                       : "";
 
                                 return (
@@ -805,7 +805,7 @@ const CourseDetails = () => {
                                       {(title.episodes || []).map((episode) => {
                                         const isActive = activeEpisode?.id === episode.id;
                                         const durationStr = episode.episode_len 
-                                          ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                          ? `${Math.floor(episode.episode_len / 3600)}:${String(Math.floor((episode.episode_len % 3600) / 60)).padStart(2, "0")}`
                                           : "";
 
                                     return (
@@ -1160,7 +1160,7 @@ const CourseDetails = () => {
                               {(title.episodes || []).map((episode) => {
                                 const isActive = activeEpisode?.id === episode.id;
                                 const durationStr = episode.episode_len 
-                                  ? `${Math.floor(episode.episode_len / 60)}:${String(episode.episode_len % 60).padStart(2, "0")}`
+                                  ? `${Math.floor(episode.episode_len / 3600)}:${String(Math.floor((episode.episode_len % 3600) / 60)).padStart(2, "0")}`
                                   : "";
 
                                 return (

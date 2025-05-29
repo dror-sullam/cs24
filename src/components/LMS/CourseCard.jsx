@@ -82,7 +82,32 @@ const CourseCard = ({ course, courseType = 'cs', hidePriceInfo = false }) => {
       </svg>
     </div>
   );
-
+  const StarRating = ({ rating, max = 5, size = 12 }) => {
+    return (
+      <div className="flex gap-1">
+        {[...Array(max)].map((_, i) => {
+          const fillPercent = Math.min(Math.max(rating - i, 0), 1) * 100 // between 0% and 100%
+  
+          return (
+            <div key={i} className="relative" style={{ width: size , height: size }}>
+              {/* Gray base star */}
+              <Star className="absolute text-yellow-400 w-full h-full"  />
+  
+              {/* Filled overlay star */}
+              <Star
+                className="absolute text-yellow-400 w-full h-full" 
+                style={{
+                  clipPath: `inset(0 0 0 ${100 - fillPercent}% )`,
+                  stroke: "none",     // removes gray outline
+                  fill: "currentColor" // fills with yellow
+                }}
+              />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
   const handleHeartClick = (e) => {
     e.stopPropagation(); // Prevent card navigation
     setIsAnimating(true);
@@ -161,9 +186,7 @@ const CourseCard = ({ course, courseType = 'cs', hidePriceInfo = false }) => {
           {averageRating && (
             <div className="mb-3 flex items-baseline">
               <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                ))}
+                <StarRating rating={averageRating} />
               </div>
               <span className="text-yellow-500 mx-1 font-medium text-lg">{averageRating}</span>
               <span className="text-gray-600 text-base">({course.ratings?.length || 0})</span>
