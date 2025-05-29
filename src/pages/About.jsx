@@ -50,7 +50,7 @@ const About = () => {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <Loader />
-            <p className="mt-8 text-gray-600">טוען מידע...</p>
+            <p className="mt-8 text-gray-600">טוען</p>
           </div>
         </div>
       </Layout>

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showNotification } from './ui/notification';
 import { supabase } from '../lib/supabase';
+import Loader from './Loader';
 
 const AuthCallback = () => {
   const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
-  const [status, setStatus] = useState('מעבד את ההתחברות...');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -22,8 +22,6 @@ const AuthCallback = () => {
 
         // Check for direct token authentication (from Google OAuth implicit flow)
         if (idToken && accessToken) {
-          setStatus('מעבד את הטוקן מגוגל...');
-          
           try {
             // Try to sign in with the ID token directly
             const { data, error } = await supabase.auth.signInWithIdToken({
@@ -38,7 +36,7 @@ const AuthCallback = () => {
             }
             
             if (data.session) {
-              setStatus('התחברות הושלמה בהצלחה!');
+              // Session established successfully
               showNotification('התחברת בהצלחה!', 'success');
               sessionStorage.removeItem('redirectAfterLogin'); 
               navigate(redirectPath);
@@ -46,7 +44,6 @@ const AuthCallback = () => {
             }
           } catch (tokenError) {
             console.error('Error signing in with token:', tokenError);
-            setStatus('שגיאה בהתחברות באמצעות טוקן, מנסה דרך חלופית...');
           }
         }
 
@@ -64,17 +61,13 @@ const AuthCallback = () => {
         }
 
         // Check if we're already authenticated
-        setStatus('בודק אם המשתמש כבר מחובר...');
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          //showNotification('כבר מחובר למערכת!', 'success');
           sessionStorage.removeItem('redirectAfterLogin'); 
           navigate(redirectPath);
           return;
         }
 
-        setStatus('מחליף קוד אימות בהרשאות...');
-        
         try {
           // Exchange the code for a session
           const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -84,13 +77,14 @@ const AuthCallback = () => {
           }
           
           // Wait a moment for the session to be established
-          setStatus('מאמת הרשאות...');
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           // Verify that we're now authenticated
           const { data: { session: newSession } } = await supabase.auth.getSession();
           
           if (newSession) {
+            // Session established successfully
+            
             // Try to get the stored user info from the Google login
             const pendingUserInfo = sessionStorage.getItem('pendingUserInfo');
             if (pendingUserInfo) {
@@ -102,15 +96,12 @@ const AuthCallback = () => {
               }
             }
             
-            setStatus('התחברות הושלמה בהצלחה!');
             showNotification('התחברת בהצלחה!', 'success');
             
             // Navigate to home page
             sessionStorage.removeItem('redirectAfterLogin'); 
             navigate(redirectPath);
           } else {
-            setStatus('מנסה שוב לאמת את ההרשאות...');
-            
             // Try multiple times to get a session with increasing delays
             let attempts = 0;
             const maxAttempts = 3;
@@ -122,10 +113,8 @@ const AuthCallback = () => {
                 sessionStorage.removeItem('redirectAfterLogin'); 
                 navigate(redirectPath);
               } else if (attempts < maxAttempts) {
-                setStatus(`מנסה שוב לאמת את ההרשאות... (ניסיון ${attempts + 1}/${maxAttempts})`);
                 setTimeout(checkSession, 1000 * attempts); // Increasing delay
               } else {
-                setStatus('לא ניתן לאמת את ההרשאות. מנסה לרענן את הדף...');
                 setError('לא ניתן לאמת את ההרשאות לאחר מספר ניסיונות');
                 setTimeout(() => {
                   navigate(redirectPath);
@@ -156,13 +145,12 @@ const AuthCallback = () => {
           }
         }
         
-        setStatus(`שגיאה בהתחברות`);
         setError(errorDetails);
         showNotification(errorMessage, 'error');
         
         // Redirect to home page after a delay
         setTimeout(() => {
-          navigate('/');
+          navigate(redirectPath);
         }, 3000);
       }
     };
@@ -173,13 +161,12 @@ const AuthCallback = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="p-8 bg-white rounded-lg shadow-md text-center">
-        <h1 className="text-2xl font-bold mb-4">התחברות</h1>
-        <p className="text-gray-600 mb-2">{status}</p>
+        <h1 className="text-2xl font-bold mb-4">מתחבר</h1>
         {error && (
           <p className="text-red-500 text-sm mb-4">{error}</p>
         )}
-        <div className="mt-4 animate-pulse">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto animate-spin"></div>
+        <div className="flex justify-center">
+          <Loader />
         </div>
       </div>
     </div>

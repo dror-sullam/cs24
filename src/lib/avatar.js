@@ -1,6 +1,12 @@
 import { supabase } from './supabase';
 
 export const fetchAvatar = async () => {
+  // Check if we have a session first
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return null;
+  }
+
   const {
     data: { user },
     error,

@@ -860,7 +860,8 @@ export default function CourseEditorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white" dir="rtl">
-        {isSaving && (
+      {/* Loading overlay - only for saving */}
+      {isSaving && (
         <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
           <div className="flex flex-col items-center">
             <LoaderComponent />
@@ -1099,9 +1100,6 @@ export default function CourseEditorPage() {
                                           {isUploadingAny && currentUpload.chapterId === chapter.id && currentUpload.videoId === video.id ? (
                                             <div className="w-1/2">
                                               <div className="flex items-center">
-                                                <div className="mr-2">
-                                                  <LoaderComponent />
-                                                </div>
                                                 <div className="w-full bg-blue-100 rounded-full h-2.5">
                                                   <div 
                                                     className="bg-blue-600 h-2.5 rounded-full" 

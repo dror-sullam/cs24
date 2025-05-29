@@ -104,23 +104,38 @@ const JobPostingsCard = ({ courseType = 'cs' }) => {
     isMounted.current = true;
   
     const sequence = async () => {
-      await controls.start({
-        y: [-20, 0],
-        transition: { duration: 0.5, ease: "easeOut" }
-      });
-      // Only start the next animation if the component is still mounted
-      if (isMounted.current) {
-        controls.start({
-          rotate: [0, 15, -10, 5, -5, 0],
-          transition: { duration: 1.5, ease: "easeInOut", repeat: Infinity }
+      // Wait a bit to ensure component is fully mounted
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Check if still mounted before starting animations
+      if (!isMounted.current) return;
+      
+      try {
+        await controls.start({
+          y: [-20, 0],
+          transition: { duration: 0.5, ease: "easeOut" }
         });
+        
+        // Only start the next animation if the component is still mounted
+        if (isMounted.current) {
+          await controls.start({
+            rotate: [0, 15, -10, 5, -5, 0],
+            transition: { duration: 1.5, ease: "easeInOut", repeat: Infinity }
+          });
+        }
+      } catch (error) {
+        // Silently handle animation errors that occur during unmounting
       }
     };
   
-    sequence();
+    // Use setTimeout to ensure this runs after component mount
+    const timeoutId = setTimeout(sequence, 0);
   
     return () => {
       isMounted.current = false;
+      clearTimeout(timeoutId);
+      // Stop any ongoing animations
+      controls.stop();
     };
   }, [controls]);
   
