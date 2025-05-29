@@ -116,13 +116,16 @@ export function useTusUpload(auth) {
       const supabaseUrl = supabase.supabaseUrl;
       const quickWorkerEndpoint = `${supabaseUrl}/functions/v1/quick-worker`;
       
+      // Ensure allowedOrigins has a default value
+      const allowedOrigins = ['cs24.co.il', 'localhost:3000'];
+      
       const createResponse = await fetch(quickWorkerEndpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${auth.session.access_token}`,
           'Upload-Length': file.size.toString(),
           'Tus-Resumable': '1.0.0',
-          'Upload-Metadata': `name ${btoa(file.name)},type ${btoa(file.type)},requiresignedurls`,
+          'Upload-Metadata': `name ${btoa(file.name)},type ${btoa(file.type)},requiresignedurls, allowedorigins ${btoa(allowedOrigins.join(','))}`,
           'Upload-Creator': metadata.tutorId?.toString() || '0',
         }
       });

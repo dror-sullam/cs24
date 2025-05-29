@@ -54,10 +54,10 @@ const UserCouponsManagement = ({
           <CardDescription>צור וערוך קופונים עבור הקורסים שלך</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-6">
+          <div className="mb-6 text-white">
             <Button 
               onClick={() => setIsCouponModalOpen(true)}
-              className="bg-blue-600 mb-4"
+              className="bg-blue-600 mb-4 text-white"
             >
               <Plus size={16} className="mr-2" />
               צור קופון חדש

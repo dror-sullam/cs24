@@ -70,7 +70,7 @@ const UserDashboard = () => {
             return;
           }
           
-          console.log('Dashboard data:', data);
+       
           
           // Calculate total revenue from paid purchases
           const totalRevenue = data.my_courses?.reduce((total, course) => {

@@ -14,6 +14,7 @@ import { courseMappings, specializationsMappings, tutorMappings } from './config
 import Navbar from './components/Navbar';
 import AuthButton from './components/AuthButton';
 import Footer from './components/Footer';
+import { useAuth } from './hooks/useAuth';
 
 const NeuButton = ({ onClick, children, className, styles }) => {
   return (
@@ -30,6 +31,8 @@ const NeuButton = ({ onClick, children, className, styles }) => {
 
 
 const App = () => {
+  const { user } = useAuth();
+  
   const [courseType, setCourseType] = useState(() => {
     return localStorage.getItem('courseType') || 'cs';
   });
@@ -38,7 +41,6 @@ const App = () => {
   const [selectedTag, setSelectedTag] = useState('בחר');
   const [isVisible, setIsVisible] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [user, setUser] = useState(null);
   const [tutorsWithFeedback, setTutorsWithFeedback] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -69,23 +71,11 @@ const App = () => {
     setTutorSpecialization('');
   };
 
-  // Supabase authentication
+  // Supabase authentication - removed duplicate auth handling
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
-    });
-
-    // Load tutors with feedback
+    // Load tutors with feedback on mount and when courseType changes
     loadTutorsWithFeedback();
-
-    return () => subscription.unsubscribe();
-  }, []);
+  }, [courseType]); // Only depend on courseType, covers both initial load and changes
 
   // Intersection Observer for missing tests section
   useEffect(() => {
@@ -149,6 +139,11 @@ const App = () => {
 
   // Tutor data loading
   const loadTutorsWithFeedback = async () => {
+    // Prevent duplicate calls within 1 second
+    if (loadTutorsWithFeedback.isLoading) return;
+    loadTutorsWithFeedback.isLoading = true;
+    setTimeout(() => { loadTutorsWithFeedback.isLoading = false; }, 1000);
+
     setIsLoadingTutors(true);
     setTutorsError(null); // Clear any previous error
 
@@ -233,7 +228,19 @@ const App = () => {
           return;
         }
 
-        loadTutorsWithFeedback();
+        // Update local state instead of reloading
+        setTutorsWithFeedback(prevTutors => {
+          const updatedTutors = prevTutors.map(tutor => {
+            if (tutor.id === tutorId) {
+              // Remove the user's feedback
+              const updatedFeedback = tutor.feedback.filter(f => f.user_id !== user.id);
+              return { ...tutor, feedback: updatedFeedback };
+            }
+            return tutor;
+          });
+          return scoreAndSortTutors(updatedTutors);
+        });
+
         showNotification('הביקורת נמחקה בהצלחה', 'success');
         return;
       }
@@ -253,8 +260,33 @@ const App = () => {
         return;
       }
 
-      // Reload tutors with feedback
-      loadTutorsWithFeedback();
+      // Update local state instead of reloading
+      setTutorsWithFeedback(prevTutors => {
+        const updatedTutors = prevTutors.map(tutor => {
+          if (tutor.id === tutorId) {
+            const existingFeedbackIndex = tutor.feedback.findIndex(f => f.user_id === user.id);
+            const newFeedback = {
+              user_id: user.id,
+              rating: rating,
+              comment: comment,
+              created_at: new Date().toISOString()
+            };
+
+            const updatedFeedback = existingFeedbackIndex >= 0
+              ? [
+                  ...tutor.feedback.slice(0, existingFeedbackIndex),
+                  newFeedback,
+                  ...tutor.feedback.slice(existingFeedbackIndex + 1)
+                ]
+              : [...tutor.feedback, newFeedback];
+
+            return { ...tutor, feedback: updatedFeedback };
+          }
+          return tutor;
+        });
+        return scoreAndSortTutors(updatedTutors);
+      });
+
       showNotification('הביקורת נשלחה בהצלחה', 'success');
     } catch (error) {
       showNotification('שגיאה בשליחת הביקורת', 'error');

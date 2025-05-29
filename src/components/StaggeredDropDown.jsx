@@ -4,15 +4,16 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import { courseStyles } from '../config/courseStyles';
+import useAuth from '../hooks/useAuth';
 
 const StaggeredDropDown = ({ open, setOpen, courseType = 'cs' }) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const styles = courseStyles[courseType] || courseStyles.cs;
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     setOpen(false);
   };
 

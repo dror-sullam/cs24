@@ -14,6 +14,12 @@ const Avatar = ({ courseType = 'cs' }) => {
 
   useEffect(() => {
     const getAvatar = async () => {
+      // Check if we have a session first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return;
+      }
+
       const url = await fetchAvatar();
       setAvatarUrl(url);
       
