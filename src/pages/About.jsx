@@ -58,8 +58,8 @@ const About = () => {
   }
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gradient-to-r from-blue-50 to-white">
+        <Layout>
         <Navbar />
         <div className="container mx-auto px-2 sm:px-4 pt-20 pb-20 sm:pt-28 max-w-6xl">
           <div className="flex flex-col items-center justify-center mb-12">
@@ -317,8 +317,9 @@ const About = () => {
             <ContributorsSection isMobile={isMobile} isTablet={isTablet} loading={loading} contributors={contributors} />
           </div>
         </div>
+        </Layout>
+
       </div>
-    </Layout>
   );
 };
 

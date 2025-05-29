@@ -33,6 +33,7 @@ const UserDashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isTutor, setIsTutor] = useState(false);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   // Function to handle tab changes with URL parameters
   const handleTabChange = (tabName) => {
@@ -56,66 +57,69 @@ const UserDashboard = () => {
       return;
     }
 
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("get-dashboard");
-        
-        if (error) {
-          console.error('Error fetching dashboard data:', error);
-          showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
-          return;
-        }
-        
-        console.log('Dashboard data:', data);
-        
-        // Calculate total revenue from paid purchases
-        const totalRevenue = data.my_courses?.reduce((total, course) => {
-          const paidPurchases = course.purchasers?.filter(p => p.paid) || [];
-          return total + paidPurchases.reduce((sum, p) => sum + p.amount, 0);
-        }, 0) || 0;
+    // Only fetch data if we haven't loaded it yet
+    if (!hasLoadedData) {
+      const fetchDashboardData = async () => {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase.functions.invoke("get-dashboard");
+          
+          if (error) {
+            console.error('Error fetching dashboard data:', error);
+            showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
+            return;
+          }
+          
+          console.log('Dashboard data:', data);
+          
+          // Calculate total revenue from paid purchases
+          const totalRevenue = data.my_courses?.reduce((total, course) => {
+            const paidPurchases = course.purchasers?.filter(p => p.paid) || [];
+            return total + paidPurchases.reduce((sum, p) => sum + p.amount, 0);
+          }, 0) || 0;
 
-        // Calculate total students (unique purchasers)
-        const uniqueStudents = new Set();
-        data.my_courses?.forEach(course => {
-          course.purchasers?.forEach(p => {
-            if (p.customer_email) uniqueStudents.add(p.customer_email);
+          // Calculate total students (unique purchasers)
+          const uniqueStudents = new Set();
+          data.my_courses?.forEach(course => {
+            course.purchasers?.forEach(p => {
+              if (p.customer_email) uniqueStudents.add(p.customer_email);
+            });
           });
-        });
 
-        // Calculate total spent for students (from access data)
-        const totalSpent = data.access?.reduce((total, course) => {
-          // This would need actual purchase amount data - for now using 0
-          return total + 0;
-        }, 0) || 0;
+          // Calculate total spent for students (from access data)
+          const totalSpent = data.access?.reduce((total, course) => {
+            return total + 0;
+          }, 0) || 0;
 
-        // Calculate total watch time from analytics (only for tutors)
-        const totalWatchTime = data.is_tutor ? data.my_courses?.reduce((total, course) => {
-          const courseWatchTime = course.analytics?.reduce((sum, session) => sum + (session.minutes || 0), 0) || 0;
-          return total + courseWatchTime;
-        }, 0) || 0 : 0;
+          // Calculate total watch time from analytics (only for tutors)
+          const totalWatchTime = data.is_tutor ? data.my_courses?.reduce((total, course) => {
+            const courseWatchTime = course.analytics?.reduce((sum, session) => sum + (session.minutes || 0), 0) || 0;
+            return total + courseWatchTime;
+          }, 0) || 0 : 0;
 
-        // Set dashboard data with calculated fields
-        setDashboardData({
-          ...data,
-          total_revenue: totalRevenue,
-          total_students: uniqueStudents.size,
-          total_spent: totalSpent,
-          total_watch_time: totalWatchTime
-        });
-        
-        // Set tutor state
-        setIsTutor(data.is_tutor);
-      } catch (error) {
-        console.error('Error in dashboard data fetching:', error);
-        showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          // Set dashboard data with calculated fields
+          setDashboardData({
+            ...data,
+            total_revenue: totalRevenue,
+            total_students: uniqueStudents.size,
+            total_spent: totalSpent,
+            total_watch_time: totalWatchTime
+          });
+          
+          // Set tutor state
+          setIsTutor(data.is_tutor);
+          setHasLoadedData(true);
+        } catch (error) {
+          console.error('Error in dashboard data fetching:', error);
+          showNotification('שגיאה בטעינת נתוני לוח בקרה', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchDashboardData();
-  }, [user, loading, isAuthenticated, navigate]);
+      fetchDashboardData();
+    }
+  }, [user, loading, isAuthenticated, navigate, hasLoadedData]);
 
   if (loading || isLoading) {
     return (
@@ -147,45 +151,71 @@ const UserDashboard = () => {
                 <div className="space-y-2">
                   <h2 className="font-bold text-xl mb-4 text-center">{user?.email}</h2>
                   <Button 
-                    className={`w-full flex items-center justify-start gap-2 ${activeTab === 'main' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                    className={`w-full flex items-center justify-start gap-2 ${
+                      activeTab === 'main' 
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg' 
+                        : 'bg-white text-gray-700 hover:bg-purple-50 hover:text-purple-700 border border-gray-200 hover:border-purple-200'
+                    }`}
                     onClick={() => handleTabChange('main')}
                   >
                     <BarChart2 size={18} />
-                    <span>סקירה כללית</span>
+                    <span>{isTutor ? 'סקירה כללית' : 'הדשבורד שלי'}</span>
                   </Button>
 
-                  <Button 
-                    className={`w-full flex items-center justify-start gap-2 ${activeTab === 'courses' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                    onClick={() => handleTabChange('courses')}
-                  >
-                    <Book size={18} />
-                    <span>הקורסים שלי</span>
-                  </Button>
+                  {isTutor && (
+                    <Button 
+                      className={`w-full flex items-center justify-start gap-2 ${
+                        activeTab === 'courses' 
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg' 
+                          : 'bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border border-gray-200 hover:border-blue-200'
+                      }`}
+                      onClick={() => handleTabChange('courses')}
+                    >
+                      <Book size={18} />
+                      <span>הקורסים שלי</span>
+                    </Button>
+                  )}
                   {isTutor && (
                     <>
                       <Button 
-                        className={`w-full flex items-center justify-start gap-2 ${activeTab === 'tutorProfile' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                        className={`w-full flex items-center justify-start gap-2 ${
+                          activeTab === 'tutorProfile' 
+                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg' 
+                            : 'bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 border border-gray-200 hover:border-emerald-200'
+                        }`}
                         onClick={() => handleTabChange('tutorProfile')}
                       >
                         <User size={18} />
                         <span>פרופיל מרצה</span>
                       </Button>
                       <Button 
-                        className={`w-full flex items-center justify-start gap-2 ${activeTab === 'analytics' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                        className={`w-full flex items-center justify-start gap-2 ${
+                          activeTab === 'analytics' 
+                            ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg' 
+                            : 'bg-white text-gray-700 hover:bg-amber-50 hover:text-amber-700 border border-gray-200 hover:border-amber-200'
+                        }`}
                         onClick={() => handleTabChange('analytics')}
                       >
                         <BarChart2 size={18} />
                         <span>אנליטיקה</span>
                       </Button>
                       <Button 
-                        className={`w-full flex items-center justify-start gap-2 ${activeTab === 'tutorCourses' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                        className={`w-full flex items-center justify-start gap-2 ${
+                          activeTab === 'tutorCourses' 
+                            ? 'bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-lg' 
+                            : 'bg-white text-gray-700 hover:bg-rose-50 hover:text-rose-700 border border-gray-200 hover:border-rose-200'
+                        }`}
                         onClick={() => handleTabChange('tutorCourses')}
                       >
                         <Settings size={18} />
                         <span>ניהול קורסים</span>
                       </Button>
                       <Button 
-                        className={`w-full flex items-center justify-start gap-2 ${activeTab === 'coupons' ? 'bg-blue-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                        className={`w-full flex items-center justify-start gap-2 ${
+                          activeTab === 'coupons' 
+                            ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg' 
+                            : 'bg-white text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 border border-gray-200 hover:border-indigo-200'
+                        }`}
                         onClick={() => handleTabChange('coupons')}
                       >
                         <Tag size={18} />
@@ -229,7 +259,7 @@ const UserDashboard = () => {
                             <div className="flex items-center">
                               <Button
                                 onClick={() => navigate(`/courses/${course.video_course_id}`)}
-                                className="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors"
+                                className="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors text-white"
                               >
                                 <span>צפייה בקורס</span>
                                 <ChevronRight size={16} className="ml-1" />
@@ -304,7 +334,7 @@ const UserDashboard = () => {
                           <p className="text-2xl font-bold">
                             {isTutor ? 
                               (dashboardData.my_courses?.length || 0) : 
-                              (dashboardData.my_course?.length || 0)}
+                              (dashboardData.access?.length || 0)}
                           </p>
                           <p className="text-sm text-gray-600">
                             {isTutor ? 'קורסים שאתה מלמד' : 'קורסים שרכשת'}
@@ -327,18 +357,18 @@ const UserDashboard = () => {
                       ) : (
                         <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg flex items-center border">
                           <div className="rounded-full bg-purple-100 p-3 mr-4">
-                            <DollarSign size={24} className="text-purple-600" />
+                            <Calendar size={24} className="text-purple-600" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-medium">השקעה</h3>
-                            <p className="text-2xl font-bold">₪{dashboardData.total_spent ? dashboardData.total_spent.toLocaleString() : 0}</p>
-                            <p className="text-sm text-gray-600 mt-1">סה״כ השקעה בקורסים</p>
+                            <h3 className="text-lg font-medium">פעילות</h3>
+                            <p className="text-2xl font-bold">{dashboardData.access?.length || 0}</p>
+                            <p className="text-sm text-gray-600 mt-1">קורסים פעילים</p>
                           </div>
                         </div>
                       )}
 
                       {/* Students/Time */}
-                      {isTutor ? (
+                      {isTutor && (
                         <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-lg flex items-center border">
                           <div className="rounded-full bg-amber-100 p-3 mr-4">
                             <Users size={24} className="text-amber-600" />
@@ -347,17 +377,6 @@ const UserDashboard = () => {
                             <h3 className="text-lg font-medium">סטודנטים</h3>
                             <p className="text-2xl font-bold">{dashboardData.total_students || 0}</p>
                             <p className="text-sm text-gray-600 mt-1">סטודנטים פעילים</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg flex items-center border">
-                          <div className="rounded-full bg-red-100 p-3 mr-4">
-                            <Calendar size={24} className="text-red-600" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-medium">שעות למידה</h3>
-                            <p className="text-2xl font-bold">{dashboardData.total_watch_time || 0}</p>
-                            <p className="text-sm text-gray-600 mt-1">שעות למידה מצטברות</p>
                           </div>
                         </div>
                       )}
@@ -587,6 +606,61 @@ const UserDashboard = () => {
                           </div>
                         )}
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* My Courses Section for Students */}
+                {!isTutor && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>הקורסים שלי</CardTitle>
+                      <CardDescription>רשימת הקורסים שרכשת</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {dashboardData.access && dashboardData.access.length > 0 ? (
+                        <div className="space-y-4">
+                          {dashboardData.access.map((course, index) => (
+                            <div key={index} className="bg-white p-4 rounded-lg shadow border hover:shadow-md transition-shadow">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h3 className="font-bold text-lg">{course.title}</h3>
+                                  <p className="text-sm text-gray-600">מרצה: {course.tutor_name}</p>
+                                  <div className="mt-2 flex flex-col space-y-1">
+                                    <p className="text-xs text-gray-500 flex items-center">
+                                      <Calendar className="h-3 w-3 mr-1" />
+                                      נרכש בתאריך: {new Date(course.granted_at).toLocaleDateString('he-IL')}
+                                    </p>
+                                    <p className="text-xs text-gray-500 flex items-center">
+                                      <Tag className="h-3 w-3 mr-1" />
+                                      תוקף עד: {new Date(course.expires_at).toLocaleDateString('he-IL')}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center">
+                                  <Button
+                                    onClick={() => navigate(`/courses/${course.video_course_id}`)}
+                                    className="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+                                  >
+                                    <span>צפייה בקורס</span>
+                                    <ChevronRight size={16} className="ml-1" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500 mb-4">לא נמצאו קורסים שרכשת</p>
+                          <Button
+                            onClick={() => navigate('/courses')}
+                            className="bg-blue-600 hover:bg-blue-700 transition-colors"
+                          >
+                            עבור לחנות הקורסים
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}

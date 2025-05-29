@@ -42,6 +42,7 @@ const CourseDetails = () => {
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [isMobileEpisodesListExpanded, setIsMobileEpisodesListExpanded] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [editingFeedback, setEditingFeedback] = useState(false);
 
   // Refs for episode list containers
   const mobileEpisodesListRef = useRef(null);
@@ -51,30 +52,29 @@ const CourseDetails = () => {
     expanded: { opacity: 1, height: "auto", transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } },
     collapsed: { opacity: 0, height: 0, transition: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] } }
   };
-
   const questions = [
     {
       id: 1,
-      question: "האם אני צריך ניסיון קודם כדי להשתתף בקורס?",
-      answer: "לא, אין צורך בניסיון קודם. הקורס בנוי בצורה הדרגתית ומתחיל מהבסיס, כך שגם מי שמתחיל מאפס יוכל לעקוב ולהבין."
+      question: "איך מתבצעת הרכישה באתר?",
+      answer: "רכישה פשוט מאוד – בוחרים קורס, לוחצים על כפתור הרכישה וממלאים פרטי תשלום מאובטחים. תוך רגע תקבל גישה מלאה לקורס באזור האישי שלך באתר או בדף קורסים הכולל"
     },
     {
       id: 2,
-      question: "מה קורה אם אני מפספס שיעור או לא עומד בקצב?",
-      answer: "אין בעיה! הקורס זמין אונליין ואתה יכול לצפות בתכנים בזמן שנוח לך. המטרה היא ללמוד בקצב שלך."
-    },
-    {
-      id: 3,
-      question: "האם הקורס בחינם?",
-      answer: "רוב הקורסים זמינים לצפייה חינמית, אבל ייתכן שחלק מהתכנים המתקדמים או תעודת הסיום ידרשו תשלום."
+      question: "האם הרכישה באתר מאובטחת?",
+      answer: "בוודאי. אנחנו משתמשים בפרוטוקול אבטחה מתקדם (SSL) ובשירות סליקה מאובטח ברמה הגבוהה ביותר. המידע שלך לא נשמר אצלנו ולא נחשף לאף גורם אחר."
     },
     {
       id: 4,
-      question: "איך נראית ההערכה בקורס?",
-      answer: "ברוב הקורסים יש תרגולים, מבחנים קצרים (quiz), ומטלות הגשה. כל אלה נועדו לעזור לך להבין אם החומר יושב לך טוב בראש."
+      question: "מה עושים אם יש תקלה או בעיה בגישה?",
+      answer: "יש לנו צוות תמיכה שזמין עבורך! ניתן cs24.hit@gmail.com ואנחנו נחזור אליך מהר ככל האפשר כדי לפתור כל בעיה."
     },
-  ]
-
+    {
+      id: 5,
+      question: "אם אני מחליף מחשב או נכנס מהטלפון – הגישה עדיין נשמרת?",
+      answer: "כן. הקורסים זמינים מכל מכשיר – מחשב, טלפון או טאבלט. רק תיכנס עם המשתמש שלך ותקבל את כל הגישה שהייתה לך תמיד."
+    }
+  ];
+  
   useEffect(() => {
     const fetchCourseDetails = async () => {
       setLoading(true);
@@ -341,15 +341,32 @@ const CourseDetails = () => {
         throw error;
       }
 
-      setCourse(prev => ({
-        ...prev,
-        feedback: [...prev.feedback, data],
-        has_user_feedback: true
-      }));
+      // Handle both new feedback and editing existing feedback
+      if (editingFeedback) {
+        // Update existing feedback in local state
+        setCourse(prev => ({
+          ...prev,
+          feedback: prev.feedback.map(f => 
+            f.id === prev.user_feedback_id 
+              ? { ...f, rating: feedbackForm.rating, comment: feedbackForm.comment.trim() }
+              : f
+          )
+        }));
+        setEditingFeedback(false);
+        showNotification('המשוב עודכן בהצלחה', 'success');
+      } else {
+        // Add new feedback to local state
+        setCourse(prev => ({
+          ...prev,
+          feedback: [...prev.feedback, data],
+          has_user_feedback: true,
+          user_feedback_id: data.id
+        }));
+        showNotification('המשוב נשלח בהצלחה', 'success');
+      }
 
       setFeedbackForm({ rating: 5, comment: '' });
       setShowFeedbackForm(false);
-      showNotification('המשוב נשלח בהצלחה', 'success');
     } catch (err) {
       console.error('Error submitting feedback:', err);
       showNotification('שגיאה בשליחת המשוב', 'error');
@@ -372,16 +389,30 @@ const CourseDetails = () => {
         throw error;
       }
 
+      // Update local state to remove user's feedback
       setCourse(prev => ({
         ...prev,
-        feedback: prev.feedback.filter(f => !f.is_user_feedback),
-        has_user_feedback: false
+        feedback: prev.feedback.filter(f => f.id !== prev.user_feedback_id),
+        has_user_feedback: false,
+        user_feedback_id: null
       }));
 
       showNotification('המשוב נמחק בהצלחה', 'success');
     } catch (err) {
       console.error('Error deleting feedback:', err);
       showNotification('שגיאה במחיקת המשוב', 'error');
+    }
+  };
+
+  const handleEditFeedback = () => {
+    const userFeedback = course?.feedback?.find(f => f.id === course.user_feedback_id);
+    if (userFeedback) {
+      setFeedbackForm({
+        rating: userFeedback.rating,
+        comment: userFeedback.comment
+      });
+      setEditingFeedback(true);
+      setShowFeedbackForm(true);
     }
   };
 
@@ -900,10 +931,14 @@ const CourseDetails = () => {
                           disabled={submittingFeedback}
                           className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
                         >
-                          {submittingFeedback ? 'שולח...' : 'שלח משוב'}
+                          {submittingFeedback ? 'שולח...' : editingFeedback ? 'עדכן משוב' : 'שלח משוב'}
                         </button>
                         <button
-                          onClick={() => setShowFeedbackForm(false)}
+                          onClick={() => {
+                            setShowFeedbackForm(false);
+                            setEditingFeedback(false);
+                            setFeedbackForm({ rating: 5, comment: '' });
+                          }}
                           className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
                         >
                           ביטול
@@ -929,8 +964,35 @@ const CourseDetails = () => {
                                   </svg>
                                 ))}
                               </div>
+                              {course.has_user_feedback && feedback.id === course.user_feedback_id && (
+                                <span className="text-sm text-blue-600 mr-2">(המשוב שלך)</span>
+                              )}
                             </div>
-                            <span className="text-sm text-gray-500">{formatDate(feedback.created_at)}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">{formatDate(feedback.created_at)}</span>
+                              {course.has_user_feedback && feedback.id === course.user_feedback_id && (
+                                <>
+                                  <button
+                                    onClick={handleEditFeedback}
+                                    className="text-gray-400 hover:text-blue-500 transition-colors"
+                                    title="ערוך משוב"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={handleDeleteFeedback}
+                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                    title="מחק משוב"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                           <p className="text-gray-700">{feedback.comment}</p>
                         </div>
@@ -959,7 +1021,7 @@ const CourseDetails = () => {
             </div>
 
             {/* Q&A - Not Purchased */}
-            {!course.has_access && (
+            
               <div className="lg:col-span-1">
                 <div className="bg-white rounded-lg border-2 border-gray-200 sticky top-24 flex flex-col overflow-hidden">
                   <div className="flex justify-between items-center p-3">
@@ -1030,7 +1092,7 @@ const CourseDetails = () => {
                       </div>
                 </div>
               </div>
-            )}
+            
 
           </div>
 

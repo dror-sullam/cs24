@@ -37,8 +37,7 @@ const NavRightSection = ({ setIsOpen, styles }) => {
       </motion.button>
       <Logo styles={styles} animate={true} />
       <NavbarLink text="ראשי" styles={styles} to="/" />
-      <NavbarLink text="מחשבון ציונים" styles={styles} to="/gpa" />
-      <NavbarLink text="אודות" styles={styles} to="/about" />
+      {/*<NavbarLink text="מחשבון ציונים" styles={styles} to="/gpa" />*/}
       <NavbarLink text="קורסים" styles={styles} to="/courses" />
     </div>
   );
@@ -67,8 +66,8 @@ const NavDropdownMenu = ({ isOpen, styles }) => {
       className="absolute p-5 bg-white shadow-lg left-0 right-0 top-full origin-top flex flex-col gap-4 lg:hidden"
     >
     <DropdownMenuLink text="ראשי" styles={styles} to="/" />
-    <DropdownMenuLink text="מחשבון ציונים" styles={styles} to="/gpa" />
-    <DropdownMenuLink text="אודות" styles={styles} to="/about" />
+    {/*<DropdownMenuLink text="מחשבון ציונים" styles={styles} to="/gpa" />*/}
+    <DropdownMenuLink text="קורסים" styles={styles} to="/courses" />
     </motion.div>
   );
 };

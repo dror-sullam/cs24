@@ -42,14 +42,14 @@ const ProfileCard = ({ tutorData, styles }) => {
     return match ? `${match[1]}-${match[2]}-${match[3]}` : num;
   };
   return (
-    <div className={`block p-4 relative z-20 ${ isDevMode && 'pt-24' }`}>
+    <div className={`block p-4 relative z-20 `}>
       <div className=" mx-auto -mb-8 max-w-[73rem] md:p-0 pb-4 md:pb-4">
         <div className={`relative bg-white border ${styles.cardBorder} rounded-xl shadow-md overflow-hidden flex flex-col md:flex-row mx-auto`}>
           {/* Edit button - only visible to owner */}
           {tutorData.is_owner && (
             <button
               onClick={handleEditClick}
-              className={`absolute top-2 left-2 p-2 rounded-full bg-white hover:bg-gray-100 ${isDevMode ? 'hidden md:block' : 'hidden'}`}
+              className={`absolute top-2 left-4 p-2 rounded-full bg-white hover:bg-gray-100 hidden md:block`}
               aria-label="Edit profile"
             >
               <Edit className={`h-5 w-5 ${styles.linksIconColor}`} />
